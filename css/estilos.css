@@ -394,6 +394,22 @@ p { margin: 0 0 1em; }
   object-fit: cover;
 }
 
+.apoyos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.apoyo {
+  max-width: 280px;
+}
+
+.apoyo img {
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
 /* ---------------- Tarjetas ---------------- */
 .rejilla {
   display: grid;
