@@ -328,9 +328,11 @@
     var extra = (titulosAdicionales || []).filter(function (t) {
       return t && String(t.titulo || "").trim() !== "";
     });
+    var idNuevo = crypto.randomUUID();
+    var registro = Object.assign({}, datos, { id: idNuevo });
 
     if (!esSupabase) {
-      var nuevo = demoInsertar("censo_egresados", datos);
+      var nuevo = demoInsertar("censo_egresados", registro);
       var todos = demoLeer("titulos_adicionales");
       extra.forEach(function (t) {
         todos.push(Object.assign({}, t, { id: demoId(), censo_id: nuevo.id }));
@@ -339,11 +341,13 @@
       return nuevo;
     }
 
-    var creado = fallo(await sb().from("censo_egresados").insert(datos).select().single());
+    /* Sin .select(): el público solo inserta (privacidad), así que un
+       RETURNING no devolvería filas y el id se genera aquí mismo. */
+    fallo(await sb().from("censo_egresados").insert(registro));
     if (extra.length) {
       var filas = extra.map(function (t) {
         return {
-          censo_id: creado.id,
+          censo_id: idNuevo,
           titulo: t.titulo,
           universidad: t.universidad || null,
           anio_graduacion: t.anio_graduacion ? Number(t.anio_graduacion) : null,
@@ -353,7 +357,7 @@
       });
       fallo(await sb().from("titulos_adicionales").insert(filas));
     }
-    return creado;
+    return registro;
   }
 
   async function listarCenso() {
