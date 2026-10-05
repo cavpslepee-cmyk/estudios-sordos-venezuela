@@ -426,6 +426,14 @@ p { margin: 0 0 1em; }
   color: var(--texto-suave);
 }
 
+.tarjeta-foto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: calc(var(--radio) - 4px);
+  margin-bottom: 1rem;
+}
+
 .tarjeta-texto { color: var(--texto-suave); font-size: .96rem; margin: 0; flex: 1; }
 
 .tarjeta-acciones {
