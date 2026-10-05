@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Censo de profesionales sordos egresados — Estudios Sordos de Venezuela</title>
+  <meta name="description" content="Formulario de censo para personas sordas egresadas de la educación universitaria venezolana: universidad, año de graduación, título, experiencia y contacto.">
+  <meta name="author" content="Dr. Javier Ramírez González">
+  <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+  <header class="encabezado">
+    <div class="encabezado-interior">
+      <a class="marca" href="index.html">
+        <img class="marca-logo" src="img/logo-estudios-sordos.jpg" alt="">
+        <span class="marca-texto">
+          <span class="marca-nombre">Estudios Sordos de Venezuela</span>
+          <span class="marca-lema">Investigación · Lengua de Señas · Comunidad</span>
+        </span>
+      </a>
+      <button class="boton-texto" type="button" data-accion="texto">A+ Texto grande</button>
+      <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
+      <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
+        <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
+        <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
+        <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
+        <a href="enviar-trabajo.html" data-pagina="enviar-trabajo.html">Enviar mi trabajo</a>
+        <a href="admin.html" data-pagina="admin.html" class="navegacion-admin">Administrador</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor contenedor-estrecho" id="contenido">
+
+    <div class="aviso aviso-demo" data-aviso-demo hidden>
+      <p>
+        <strong>Modo demostración:</strong> este formulario guarda los datos solo en este navegador.
+        Conecta Supabase en <code>js/config.js</code> para que lleguen a la base de datos real.
+      </p>
+    </div>
+
+    <div class="encabezado-seccion">
+      <h1>Censo de profesionales sordos egresados</h1>
+      <p>
+        Este registro permite determinar cuántas personas sordas han egresado de la educación
+        universitaria venezolana y en qué áreas se desempeñan. Toma menos de cinco minutos.
+      </p>
+    </div>
+
+    <div id="aviso-formulario" class="aviso" hidden></div>
+
+    <form class="formulario" id="formulario-censo" novalidate>
+
+      <fieldset class="conjunto-opciones">
+        <legend>Datos personales</legend>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="nombres">Nombres <span class="obligatorio" aria-hidden="true">*</span></label>
+            <input type="text" id="nombres" name="nombres" required autocomplete="given-name" maxlength="80">
+            <span class="mensaje-error" data-error-para="nombres" hidden></span>
+          </div>
+          <div class="campo">
+            <label for="apellidos">Apellidos <span class="obligatorio" aria-hidden="true">*</span></label>
+            <input type="text" id="apellidos" name="apellidos" required autocomplete="family-name" maxlength="80">
+            <span class="mensaje-error" data-error-para="apellidos" hidden></span>
+          </div>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="cedula">Cédula de identidad <span class="texto-suave">(opcional)</span></label>
+            <input type="text" id="cedula" name="cedula" maxlength="20" inputmode="numeric" placeholder="V-00000000">
+          </div>
+          <div class="campo">
+            <label for="estado">Estado donde resides <span class="obligatorio" aria-hidden="true">*</span></label>
+            <select id="estado" name="estado" required>
+              <option value="">Selecciona tu estado…</option>
+            </select>
+            <span class="mensaje-error" data-error-para="estado" hidden></span>
+          </div>
+        </div>
+
+        <div class="campo">
+          <div class="opcion">
+            <input type="checkbox" id="autoriza_publicar_nombre" name="autoriza_publicar_nombre">
+            <label for="autoriza_publicar_nombre" style="font-weight:400;margin:0">
+              Autorizo que mi nombre y mi título aparezcan en el listado público de egresados.
+              <span class="ayuda">Si no marcas esta casilla, tu registro solo cuenta para las estadísticas: nadie verá tu nombre.</span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="conjunto-opciones">
+        <legend>Formación universitaria</legend>
+
+        <div class="campo">
+          <label for="universidad">Universidad donde te graduaste <span class="obligatorio" aria-hidden="true">*</span></label>
+          <input type="text" id="universidad" name="universidad" required maxlength="160"
+                 placeholder="Ejemplo: Universidad Central de Venezuela">
+          <span class="mensaje-error" data-error-para="universidad" hidden></span>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="carrera">Carrera <span class="texto-suave">(opcional)</span></label>
+            <input type="text" id="carrera" name="carrera" maxlength="160" placeholder="Ejemplo: Educación, Letras, Trabajo Social">
+          </div>
+          <div class="campo">
+            <label for="anio_graduacion">Año de graduación <span class="obligatorio" aria-hidden="true">*</span></label>
+            <input type="number" id="anio_graduacion" name="anio_graduacion" required min="1950" max="2100" step="1" placeholder="2020">
+            <span class="mensaje-error" data-error-para="anio_graduacion" hidden></span>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="titulo_egreso">Título de egreso <span class="obligatorio" aria-hidden="true">*</span></label>
+          <input type="text" id="titulo_egreso" name="titulo_egreso" required maxlength="180"
+                 placeholder="Ejemplo: Licenciada en Educación, mención Educación Especial">
+          <span class="mensaje-error" data-error-para="titulo_egreso" hidden></span>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="categoria_egreso">Categoría de egreso <span class="obligatorio" aria-hidden="true">*</span></label>
+            <select id="categoria_egreso" name="categoria_egreso" required>
+              <option value="">Selecciona la categoría…</option>
+            </select>
+            <span class="mensaje-error" data-error-para="categoria_egreso" hidden></span>
+          </div>
+          <div class="campo">
+            <label for="nivel">Nivel</label>
+            <input type="text" id="nivel" name="nivel" readonly value="Se determina automáticamente"
+                   aria-describedby="ayuda-nivel">
+            <span class="ayuda" id="ayuda-nivel">Pregrado o postgrado según la categoría que elijas.</span>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="anios_experiencia">Años de experiencia profesional <span class="obligatorio" aria-hidden="true">*</span></label>
+          <input type="number" id="anios_experiencia" name="anios_experiencia" required min="0" max="70" step="1" value="0">
+          <span class="mensaje-error" data-error-para="anios_experiencia" hidden></span>
+        </div>
+      </fieldset>
+
+      <fieldset class="conjunto-opciones">
+        <legend>Otros títulos adicionales <span class="texto-suave">(opcional)</span></legend>
+        <p class="texto-chico texto-suave">
+          Si además de tu título principal tienes otros (TSU, especialización, maestría, diplomado…),
+          agrégalos aquí. Puedes agregar tantos como necesites.
+        </p>
+
+        <div class="repetidor" id="lista-titulos-adicionales" aria-live="polite"></div>
+
+        <p style="margin-top:1rem">
+          <button class="boton boton-contorno boton-chico" type="button" id="agregar-titulo">
+            + Agregar otro título
+          </button>
+        </p>
+      </fieldset>
+
+      <fieldset class="conjunto-opciones">
+        <legend>Contacto e investigación</legend>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="telefono">Número de contacto <span class="texto-suave">(opcional)</span></label>
+            <input type="tel" id="telefono" name="telefono" maxlength="30" autocomplete="tel" placeholder="0414-0000000">
+          </div>
+          <div class="campo">
+            <label for="email">Correo electrónico <span class="obligatorio" aria-hidden="true">*</span></label>
+            <input type="email" id="email" name="email" required autocomplete="email" maxlength="120" placeholder="tucorreo@ejemplo.com">
+            <span class="mensaje-error" data-error-para="email" hidden></span>
+          </div>
+        </div>
+
+        <fieldset class="conjunto-opciones" style="border-style:solid;background:var(--crema)">
+          <legend>¿Has realizado trabajo de investigación? <span class="obligatorio" aria-hidden="true">*</span></legend>
+          <div class="opcion">
+            <input type="radio" id="inv_si" name="ha_realizado_investigacion" value="si" required>
+            <label for="inv_si" style="font-weight:400;margin:0"><span>Sí</span></label>
+          </div>
+          <div class="opcion">
+            <input type="radio" id="inv_no" name="ha_realizado_investigacion" value="no">
+            <label for="inv_no" style="font-weight:400;margin:0"><span>No</span></label>
+          </div>
+          <span class="mensaje-error" data-error-para="ha_realizado_investigacion" hidden></span>
+        </fieldset>
+
+        <div class="campo">
+          <label for="comentarios">Comentarios <span class="texto-suave">(opcional)</span></label>
+          <textarea id="comentarios" name="comentarios" maxlength="1000"
+                    placeholder="Cuéntanos tu área de trabajo, si tienes investigaciones por publicar o cualquier dato que quieras compartir."></textarea>
+        </div>
+      </fieldset>
+
+      <p class="texto-chico texto-suave">
+        Los campos marcados con <span class="obligatorio">*</span> son obligatorios.
+        Tus datos personales no se publican: se usan únicamente para las estadísticas del censo
+        y para contactarte si autorizas la publicación de tu trabajo.
+      </p>
+
+      <p>
+        <button class="boton" type="submit" id="boton-enviar-censo">Enviar mi registro al censo</button>
+      </p>
+    </form>
+
+    <hr class="separador">
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>¿Qué pasa después de enviarlo?</h2>
+      </div>
+      <ol class="pasos">
+        <li>Tu registro queda guardado en la base de datos y el contador público de egresados aumenta de inmediato.</li>
+        <li>Si marcaste la autorización, tu nombre y tu título aparecen en el listado público de la portada.</li>
+        <li>Si indicaste que tienes trabajos de investigación, podemos escribirte para invitarle a publicarlos.</li>
+      </ol>
+      <p>
+        <a class="boton boton-contorno" href="enviar-trabajo.html">Quiero enviar una investigación</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="pie-interior">
+      <div>
+        <h2>Estudios Sordos de Venezuela</h2>
+        <p>
+          Espacio abierto para visibilizar la producción académica de las personas sordas
+          venezolanas y para contar cuántas han egresado de la educación universitaria.
+        </p>
+        <p class="bandera-sorda">
+          <span class="bandera-sorda-mano" aria-hidden="true"></span>
+          Sitio abierto y de acceso libre
+        </p>
+      </div>
+      <div>
+        <h2>Secciones</h2>
+        <ul>
+          <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
+          <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
+          <li><a href="censo.html">Censo de profesionales sordos</a></li>
+          <li><a href="enviar-trabajo.html">Enviar un trabajo de investigación</a></li>
+          <li><a href="admin.html">Acceso del administrador</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <ul>
+          <li>
+            Recepción de trabajos en PDF:<br>
+            <a href="mailto:cavpslepee@gmail.com">cavpslepee@gmail.com</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-legal">
+      <p>
+        Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
+        © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sitio.js"></script>
+  <script src="js/censo.js"></script>
+</body>
+</html>

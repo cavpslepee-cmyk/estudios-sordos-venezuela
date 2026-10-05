@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel del administrador — Estudios Sordos de Venezuela</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Dr. Javier Ramírez González">
+  <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+  <header class="encabezado">
+    <div class="encabezado-interior">
+      <a class="marca" href="index.html">
+        <img class="marca-logo" src="img/logo-estudios-sordos.jpg" alt="">
+        <span class="marca-texto">
+          <span class="marca-nombre">Estudios Sordos de Venezuela</span>
+          <span class="marca-lema">Panel del administrador</span>
+        </span>
+      </a>
+      <button class="boton-texto" type="button" data-accion="texto">A+ Texto grande</button>
+      <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
+      <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
+        <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
+        <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
+        <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
+        <a href="enviar-trabajo.html" data-pagina="enviar-trabajo.html">Enviar mi trabajo</a>
+        <a href="admin.html" data-pagina="admin.html" class="navegacion-admin">Administrador</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="barra-superior-admin" id="barra-sesion" hidden>
+    <span>Sesión iniciada como <strong id="correo-sesion"></strong> ·
+      <span id="modo-conexion"></span></span>
+    <span>
+      <a href="index.html">Ver el sitio público</a>
+      ·
+      <button class="boton-texto" type="button" id="boton-cerrar-sesion"
+              style="color:#fff;border-color:rgba(255,255,255,.4)">Cerrar sesión</button>
+    </span>
+  </div>
+
+  <main class="contenedor" id="contenido">
+
+    <div class="aviso aviso-demo" data-aviso-demo hidden>
+      <p>
+        <strong>Modo demostración:</strong> puedes probar todo el panel, pero los cambios se guardan
+        solo en este navegador. Para publicar de verdad, conecta Supabase en <code>js/config.js</code>
+        y ejecuta <code>sql/supabase_schema.sql</code> en el editor SQL.
+      </p>
+    </div>
+
+    <!-- ================= ACCESO ================= -->
+    <section id="zona-acceso">
+      <div class="caja-acceso">
+        <div class="formulario">
+          <h1>Acceso del administrador</h1>
+          <p class="texto-suave">
+            Desde aquí se agregan las investigaciones, los videos de la portada, las señas del
+            diccionario y se consulta el censo de egresados.
+          </p>
+
+          <div id="aviso-acceso" class="aviso" hidden></div>
+
+          <form id="formulario-acceso" novalidate>
+            <div class="campo">
+              <label for="acceso-correo">Correo electrónico</label>
+              <input type="email" id="acceso-correo" name="correo" required autocomplete="username" maxlength="120">
+            </div>
+            <div class="campo">
+              <label for="acceso-contrasena">Contraseña</label>
+              <input type="password" id="acceso-contrasena" name="contrasena" required autocomplete="current-password">
+            </div>
+            <p>
+              <button class="boton" type="submit" id="boton-entrar">Entrar al panel</button>
+            </p>
+          </form>
+
+          <p class="texto-chico texto-suave" id="nota-demo-acceso"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PANEL ================= -->
+    <section id="zona-panel" hidden>
+      <h1>Panel de administración</h1>
+
+      <div class="pestanyas" role="tablist" aria-label="Secciones del panel">
+        <button class="pestanya" type="button" role="tab" id="pestanya-investigaciones"
+                aria-controls="panel-investigaciones" aria-selected="true" data-panel="panel-investigaciones">
+          Investigaciones
+        </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-videos"
+                aria-controls="panel-videos" aria-selected="false" tabindex="-1" data-panel="panel-videos">
+          Videos de portada
+        </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-diccionario"
+                aria-controls="panel-diccionario" aria-selected="false" tabindex="-1" data-panel="panel-diccionario">
+          Diccionario LSV
+        </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-censo"
+                aria-controls="panel-censo" aria-selected="false" tabindex="-1" data-panel="panel-censo">
+          Censo de egresados
+        </button>
+      </div>
+
+      <!-- ---------- INVESTIGACIONES ---------- -->
+      <div class="panel" id="panel-investigaciones" role="tabpanel" aria-labelledby="pestanya-investigaciones">
+        <div id="aviso-investigaciones" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2 id="titulo-formulario-investigacion">Agregar una investigación</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-nueva-investigacion">
+              Limpiar el formulario
+            </button>
+          </div>
+
+          <form id="formulario-investigacion" novalidate>
+            <input type="hidden" id="inv-id" name="id">
+
+            <div class="campo">
+              <label for="inv-titulo">Título del trabajo <span class="obligatorio">*</span></label>
+              <input type="text" id="inv-titulo" name="titulo" required maxlength="240">
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="inv-autor">Autor o autora <span class="obligatorio">*</span></label>
+                <input type="text" id="inv-autor" name="autor" required maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="inv-anio">Año</label>
+                <input type="number" id="inv-anio" name="anio" min="1900" max="2100" step="1" placeholder="2026">
+              </div>
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="inv-categoria">Categoría <span class="obligatorio">*</span></label>
+                <select id="inv-categoria" name="categoria" required></select>
+              </div>
+              <div class="campo">
+                <label for="inv-universidad">Universidad o institución</label>
+                <input type="text" id="inv-universidad" name="universidad" maxlength="160">
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="inv-resumen">Resumen</label>
+              <textarea id="inv-resumen" name="resumen" maxlength="4000"
+                        placeholder="Breve descripción del trabajo, sus hallazgos y su aporte a la comunidad sorda."></textarea>
+            </div>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Archivo y enlaces</legend>
+
+              <div class="campo">
+                <label for="inv-archivo">Subir el PDF del trabajo</label>
+                <input type="file" id="inv-archivo" name="archivo" accept="application/pdf,.pdf">
+                <span class="ayuda" id="ayuda-archivo">
+                  Se guarda en el bucket <code>investigaciones</code> de Supabase Storage y queda de lectura pública.
+                </span>
+              </div>
+
+              <div class="campo">
+                <label for="inv-url-pdf">O pega aquí el enlace del PDF</label>
+                <input type="url" id="inv-url-pdf" name="url_pdf" maxlength="600" placeholder="https://…/trabajo.pdf">
+              </div>
+
+              <div class="campo">
+                <label for="inv-url-externa">Enlace de la publicación original</label>
+                <input type="url" id="inv-url-externa" name="url_externa" maxlength="600"
+                       placeholder="https://revista…/article/view/00">
+                <span class="ayuda">Úsalo cuando el trabajo ya está publicado en una revista o en otro portal.</span>
+              </div>
+            </fieldset>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="inv-estado">Estado</label>
+                <select id="inv-estado" name="estado"></select>
+                <span class="ayuda">Solo lo que esté en «Publicado» aparece en el sitio.</span>
+              </div>
+              <div class="campo">
+                <label for="inv-orden">Orden de aparición</label>
+                <input type="number" id="inv-orden" name="orden" min="0" max="999" step="1" value="0">
+              </div>
+              <div class="campo">
+                <label for="inv-destacado">Destacado</label>
+                <div class="opcion" style="padding-top:.6rem">
+                  <input type="checkbox" id="inv-destacado" name="destacado">
+                  <span>Mostrar en la portada</span>
+                </div>
+              </div>
+            </div>
+
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-investigacion">Guardar la investigación</button>
+              <button class="boton boton-contorno" type="button" id="boton-cancelar-investigacion" hidden>Cancelar la edición</button>
+            </p>
+          </form>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Investigaciones registradas</h2>
+            <span class="texto-suave" id="total-investigaciones"></span>
+          </div>
+          <div id="lista-investigaciones"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- VIDEOS ---------- -->
+      <div class="panel" id="panel-videos" role="tabpanel" aria-labelledby="pestanya-videos" hidden>
+        <div id="aviso-videos" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2 id="titulo-formulario-video">Agregar un video a la portada</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-nuevo-video">Limpiar el formulario</button>
+          </div>
+
+          <form id="formulario-video" novalidate>
+            <input type="hidden" id="vid-id" name="id">
+
+            <div class="campo">
+              <label for="vid-titulo">Título del video <span class="obligatorio">*</span></label>
+              <input type="text" id="vid-titulo" name="titulo" required maxlength="180"
+                     placeholder="Ejemplo: Charla sobre educación de personas sordas">
+              <span class="ayuda">Este título aparece como botón para cambiar de video en la portada.</span>
+            </div>
+
+            <div class="campo">
+              <label for="vid-descripcion">Descripción</label>
+              <textarea id="vid-descripcion" name="descripcion" maxlength="800"></textarea>
+            </div>
+
+            <div class="campo">
+              <label for="vid-url">Enlace del video <span class="obligatorio">*</span></label>
+              <input type="url" id="vid-url" name="url" required maxlength="600"
+                     placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX">
+              <span class="ayuda">
+                Se aceptan enlaces de YouTube, Vimeo o un archivo de video directo (.mp4).
+                YouTube se convierte automáticamente al formato incrustable.
+              </span>
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="vid-orden">Orden</label>
+                <input type="number" id="vid-orden" name="orden" min="0" max="99" step="1" value="0">
+              </div>
+              <div class="campo">
+                <label for="vid-activo">Visible en la portada</label>
+                <div class="opcion" style="padding-top:.6rem">
+                  <input type="checkbox" id="vid-activo" name="activo" checked>
+                  <span>Activo</span>
+                </div>
+              </div>
+            </div>
+
+            <p>
+              <button class="boton" type="submit">Guardar el video</button>
+              <button class="boton boton-contorno" type="button" id="boton-cancelar-video" hidden>Cancelar la edición</button>
+            </p>
+          </form>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Videos registrados</h2>
+          </div>
+          <div id="lista-videos"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- DICCIONARIO ---------- -->
+      <div class="panel" id="panel-diccionario" role="tabpanel" aria-labelledby="pestanya-diccionario" hidden>
+        <div id="aviso-diccionario" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2 id="titulo-formulario-senia">Agregar una seña al diccionario</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-nueva-senia">Limpiar el formulario</button>
+          </div>
+
+          <form id="formulario-senia" novalidate>
+            <input type="hidden" id="sen-id" name="id">
+
+            <div class="fila">
+              <div class="campo">
+                <label for="sen-palabra">Palabra o expresión <span class="obligatorio">*</span></label>
+                <input type="text" id="sen-palabra" name="palabra" required maxlength="120">
+              </div>
+              <div class="campo">
+                <label for="sen-sinonimos">Sinónimos o formas alternativas</label>
+                <input type="text" id="sen-sinonimos" name="sinonimos" maxlength="240" placeholder="Separados por comas">
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="sen-categoria">Área temática</label>
+              <input type="text" id="sen-categoria" name="categoria" maxlength="80" list="lista-areas-senia"
+                     placeholder="Ejemplo: EDUCACION, LINGUISTICA, SALUD, PROFESIONES">
+              <datalist id="lista-areas-senia"></datalist>
+              <span class="ayuda">Escribe un área nueva o elige una de las que ya existen.</span>
+            </div>
+
+            <div class="campo">
+              <label for="sen-descripcion">Descripción del movimiento</label>
+              <textarea id="sen-descripcion" name="descripcion" maxlength="2000"
+                        placeholder="Explica cómo se hace la seña: configuración de la mano, lugar de articulación y movimiento."></textarea>
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="sen-url-video">Enlace al video de la seña</label>
+                <input type="url" id="sen-url-video" name="url_video" maxlength="600" placeholder="https://…">
+              </div>
+              <div class="campo">
+                <label for="sen-url-imagen">Enlace a una imagen de la seña</label>
+                <input type="url" id="sen-url-imagen" name="url_imagen" maxlength="600" placeholder="https://…">
+              </div>
+            </div>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Seña acuñada recientemente</legend>
+              <div class="fila">
+                <div class="campo">
+                  <div class="opcion">
+                    <input type="checkbox" id="sen-reciente" name="acuniada_recientemente">
+                    <label for="sen-reciente" style="font-weight:400;margin:0">
+                      <span>Marcar como acuñada recientemente</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="campo">
+                  <label for="sen-fecha">Fecha en que se acuñó</label>
+                  <input type="date" id="sen-fecha" name="fecha_acuniada">
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="campo">
+              <label for="sen-fuente">Fuente o persona que aportó la seña</label>
+              <input type="text" id="sen-fuente" name="fuente" maxlength="240">
+            </div>
+
+            <p>
+              <button class="boton" type="submit">Guardar la seña</button>
+              <button class="boton boton-contorno" type="button" id="boton-cancelar-senia" hidden>Cancelar la edición</button>
+            </p>
+          </form>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Señas registradas</h2>
+            <span class="texto-suave" id="total-senias"></span>
+          </div>
+          <div class="filtros">
+            <div class="campo-busqueda">
+              <label class="solo-lectores" for="buscador-admin-senia">Buscar una seña</label>
+              <input type="search" id="buscador-admin-senia" placeholder="Buscar una seña…">
+            </div>
+          </div>
+          <div id="lista-senias"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- CENSO ---------- -->
+      <div class="panel" id="panel-censo" role="tabpanel" aria-labelledby="pestanya-censo" hidden>
+        <div id="aviso-censo" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Resumen del censo</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-exportar-censo">
+              Descargar el censo en CSV
+            </button>
+          </div>
+          <div id="resumen-censo-admin"><p class="cargando">Consultando</p></div>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Personas registradas</h2>
+            <span class="texto-suave" id="total-censo"></span>
+          </div>
+          <div class="filtros">
+            <div class="campo-busqueda">
+              <label class="solo-lectores" for="buscador-censo">Buscar en el censo</label>
+              <input type="search" id="buscador-censo" placeholder="Buscar por nombre, universidad o estado…">
+            </div>
+          </div>
+          <div id="lista-censo"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="pie-interior">
+      <div>
+        <h2>Estudios Sordos de Venezuela</h2>
+        <p>Panel privado de administración de contenidos.</p>
+      </div>
+      <div>
+        <h2>Secciones</h2>
+        <ul>
+          <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
+          <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
+          <li><a href="censo.html">Censo de profesionales sordos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <ul>
+          <li><a href="mailto:cavpslepee@gmail.com">cavpslepee@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-legal">
+      <p>
+        Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
+        © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sitio.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estudios Sordos de Venezuela — Investigación y educación universitaria</title>
+  <meta name="description" content="Espacio abierto para visibilizar los trabajos de investigación realizados por personas sordas venezolanas en educación, lingüística, deporte, área social, cultural, comunitaria, política, arte y biografía.">
+  <meta name="author" content="Dr. Javier Ramírez González">
+  <meta property="og:title" content="Estudios Sordos de Venezuela">
+  <meta property="og:description" content="Investigaciones de personas sordas y censo de profesionales sordos egresados de la educación universitaria venezolana.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+  <header class="encabezado">
+    <div class="encabezado-interior">
+      <a class="marca" href="index.html">
+        <img class="marca-logo" src="img/logo-estudios-sordos.jpg" alt="">
+        <span class="marca-texto">
+          <span class="marca-nombre">Estudios Sordos de Venezuela</span>
+          <span class="marca-lema">Investigación · Lengua de Señas · Comunidad</span>
+        </span>
+      </a>
+      <button class="boton-texto" type="button" data-accion="texto">A+ Texto grande</button>
+      <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
+      <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
+        <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
+        <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
+        <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
+        <a href="enviar-trabajo.html" data-pagina="enviar-trabajo.html">Enviar mi trabajo</a>
+        <a href="admin.html" data-pagina="admin.html" class="navegacion-admin">Administrador</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-media" style="background-image:url('img/portada-universidad-lsv.jpg')" aria-hidden="true"></div>
+    <div class="hero-interior">
+      <h1>La investigación hecha por personas sordas también se publica</h1>
+      <p class="hero-subtitulo">
+        Repositorio abierto de trabajos de investigación en educación, lingüística, deporte,
+        área social, cultural, comunitaria, política, arte y biografías de personas sordas destacadas.
+        Información útil para personas sordas y oyentes.
+      </p>
+      <div class="hero-acciones">
+        <a class="boton boton-claro" href="investigaciones.html">Ver las investigaciones</a>
+        <a class="boton boton-contorno" style="color:#fff;border-color:#fff" href="censo.html">Registrarme en el censo</a>
+        <a class="boton boton-contorno" style="color:#fff;border-color:#fff" href="enviar-trabajo.html">Enviar mi trabajo en PDF</a>
+      </div>
+    </div>
+    <div class="hero-franja">
+      <div class="hero-franja-interior">
+        <div class="contador">
+          <span class="contador-numero" id="contador-egresados" aria-live="polite">—</span>
+          <span class="contador-etiqueta">personas sordas egresadas<br>registradas hasta hoy</span>
+        </div>
+        <div class="contador">
+          <span class="contador-numero" id="contador-investigaciones" aria-live="polite">—</span>
+          <span class="contador-etiqueta">trabajos de investigación<br>publicados</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="contenedor" id="contenido">
+
+    <div class="aviso aviso-demo" data-aviso-demo hidden>
+      <p>
+        <strong>Estás viendo el sitio en modo demostración.</strong>
+        Los datos se guardan solo en este navegador. Para activar la base de datos real,
+        pega tus credenciales de Supabase en el archivo <code>js/config.js</code>
+        (las instrucciones están en <code>README.md</code>).
+      </p>
+    </div>
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>Objetivo de Estudios Sordos de Venezuela</h2>
+      </div>
+      <p>
+        Visibilizar los trabajos realizados por personas sordas a nivel de educación universitaria
+        y determinar la cantidad de egresados en la actualidad.
+      </p>
+      <p>
+        Cada trabajo de investigación publicado aquí beneficia tanto a la comunidad sorda como a las
+        personas oyentes que necesitan información confiable sobre lengua de señas venezolana,
+        educación de personas sordas, accesibilidad y vida comunitaria. El censo permite que la cifra
+        real de profesionales sordos egresados deje de ser invisible: crece sola cada vez que alguien
+        completa el formulario.
+      </p>
+    </section>
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2 id="titulo-video-activo">Videos</h2>
+        <p id="descripcion-video-activo"></p>
+      </div>
+      <div id="zona-videos">
+        <p class="cargando">Cargando videos</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>Investigaciones destacadas</h2>
+        <p>Trabajos seleccionados por su aporte a la comunidad sorda venezolana.</p>
+      </div>
+      <div class="rejilla" id="zona-destacadas">
+        <p class="cargando">Cargando investigaciones</p>
+      </div>
+      <p style="margin-top:1.4rem">
+        <a class="boton boton-contorno" href="investigaciones.html">Ver el catálogo completo por categorías</a>
+      </p>
+    </section>
+
+    <hr class="separador">
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>Censo de profesionales sordos egresados</h2>
+        <p>Registro abierto y permanente. Los datos personales no se publican: solo se muestran los totales.</p>
+      </div>
+
+      <figure class="figura">
+        <img src="img/profesionales-sordos.jpg"
+             alt="Una mujer y un hombre conversan en lengua de señas venezolana frente a cámaras y luces durante una grabación en estudio"
+             loading="lazy">
+        <figcaption>
+          Grabación de contenidos en lengua de señas venezolana: así se documentan las señas del diccionario de este sitio.
+        </figcaption>
+      </figure>
+
+      <div id="zona-resumen-censo">
+        <p class="cargando">Consultando el registro</p>
+      </div>
+
+      <div class="rejilla" style="margin-top:1.6rem">
+        <div class="tarjeta">
+          <h3>¿Eres una persona sorda egresada de la universidad?</h3>
+          <p class="tarjeta-texto">
+            Regístrate en el censo. Toma menos de cinco minutos y ayuda a que la comunidad conozca
+            cuántos profesionales sordos hay en Venezuela y en qué áreas se desempeñan.
+          </p>
+          <div class="tarjeta-acciones">
+            <a class="boton" href="censo.html">Completar el formulario</a>
+          </div>
+        </div>
+        <div class="tarjeta">
+          <h3>¿Tienes un trabajo de investigación?</h3>
+          <p class="tarjeta-texto">
+            Envía tu investigación en PDF para su revisión y publicación. Se aceptan trabajos en
+            educación, lingüística, deporte, área social, cultural, comunitaria, política, arte y
+            biografías de personas sordas destacadas.
+          </p>
+          <div class="tarjeta-acciones">
+            <a class="boton boton-navy" href="enviar-trabajo.html">Cómo enviarlo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>Profesionales sordos que autorizaron aparecer aquí</h2>
+        <p>Solo se listan quienes marcaron la casilla de autorización en el censo.</p>
+      </div>
+      <div id="zona-egresados-publicos">
+        <p class="cargando">Cargando el listado</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>La comunidad en imágenes</h2>
+        <p>Defensas, seminarios, grabaciones y encuentros que sostienen este proyecto.</p>
+      </div>
+      <div class="galeria">
+        <figure class="figura">
+          <img src="img/javier-ramirez-defensa.jpg"
+               alt="El Dr. Javier Ramírez González, con gafas e implante coclear, revisa páginas impresas de un trabajo de grado sentado ante una mesa con computadoras"
+               loading="lazy">
+          <figcaption>El Dr. Javier Ramírez González, creador de este sitio, en una defensa de trabajo de grado.</figcaption>
+        </figure>
+        <figure class="figura">
+          <img src="img/primeros-doctores-sordos.jpg"
+               alt="Una mujer y un hombre se comunican en lengua de señas frente a frente bajo una luz de estudio"
+               loading="lazy">
+          <figcaption>Yuliana Carreño y Javier Ramírez, primeros doctores sordos de Venezuela.</figcaption>
+        </figure>
+        <figure class="figura">
+          <img src="img/myriam-anzola-tarima.jpg"
+               alt="Un hombre señea en tarima junto a una mujer de camisa blanca, bajo un arco de globos azules"
+               loading="lazy">
+          <figcaption>La Dra. Myriam Anzola en tarima durante una actividad con ponentes sordos.</figcaption>
+        </figure>
+        <figure class="figura">
+          <img src="img/seminario-nacional-grupo.jpg"
+               alt="Un grupo de quince personas posa sonriendo bajo un arco de globos azules y dorados"
+               loading="lazy">
+          <figcaption>Participantes de un seminario nacional de la comunidad sorda.</figcaption>
+        </figure>
+        <figure class="figura">
+          <img src="img/seminario-ponencia-senas.jpg"
+               alt="Un hombre señea de pie frente a una pantalla proyectada con diapositivas sobre inteligencia artificial"
+               loading="lazy">
+          <figcaption>Ponencia en lengua de señas en un seminario del IAET.</figcaption>
+        </figure>
+        <figure class="figura">
+          <img src="img/exposicion-privacion-linguistica.jpg"
+               alt="Un hombre señea en tarima junto a una diapositiva que compara sordos sin privación lingüística con sordos con privación lingüística"
+               loading="lazy">
+          <figcaption>Exposición de una investigación sobre privación lingüística en la persona sorda.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="separador">
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>Sobre este sitio</h2>
+      </div>
+      <div class="rejilla">
+        <div class="tarjeta">
+          <h3>Autoría</h3>
+          <p class="tarjeta-texto">
+            Estudios Sordos de Venezuela es una página creada por el
+            <strong>Dr. Javier Ramírez González</strong>, investigador en educación de personas sordas
+            y en lingüística de la Lengua de Señas Venezolana.
+          </p>
+        </div>
+        <div class="tarjeta">
+          <h3>Acceso libre</h3>
+          <p class="tarjeta-texto">
+            La web es abierta: todo el contenido es de lectura pública y no requiere registro ni pago
+            para consultar las investigaciones o el diccionario de señas.
+          </p>
+        </div>
+        <div class="tarjeta">
+          <h3>Fuente de referencia</h3>
+          <p class="tarjeta-texto">
+            Este proyecto toma como referencia el trabajo de difusión de
+            <a href="https://www.cultura-sorda.org/" target="_blank" rel="noopener noreferrer">cultura-sorda.org</a>,
+            portal internacional de estudios sordos.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="pie-interior">
+      <div>
+        <h2>Estudios Sordos de Venezuela</h2>
+        <p>
+          Espacio abierto para visibilizar la producción académica de las personas sordas
+          venezolanas y para contar cuántas han egresado de la educación universitaria.
+        </p>
+        <p class="bandera-sorda">
+          <span class="bandera-sorda-mano" aria-hidden="true"></span>
+          Sitio abierto y de acceso libre
+        </p>
+      </div>
+      <div>
+        <h2>Secciones</h2>
+        <ul>
+          <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
+          <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
+          <li><a href="censo.html">Censo de profesionales sordos</a></li>
+          <li><a href="enviar-trabajo.html">Enviar un trabajo de investigación</a></li>
+          <li><a href="admin.html">Acceso del administrador</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <ul>
+          <li>
+            Recepción de trabajos en PDF:<br>
+            <a href="mailto:cavpslepee@gmail.com">cavpslepee@gmail.com</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-legal">
+      <p>
+        Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
+        © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sitio.js"></script>
+  <script src="js/inicio.js"></script>
+</body>
+</html>

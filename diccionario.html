@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diccionario de Lengua de Señas Venezolana — Estudios Sordos de Venezuela</title>
+  <meta name="description" content="Buscador de señas de la Lengua de Señas Venezolana, incluyendo las señas acuñadas recientemente. Consulta libre y gratuita.">
+  <meta name="author" content="Dr. Javier Ramírez González">
+  <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+  <header class="encabezado">
+    <div class="encabezado-interior">
+      <a class="marca" href="index.html">
+        <img class="marca-logo" src="img/logo-estudios-sordos.jpg" alt="">
+        <span class="marca-texto">
+          <span class="marca-nombre">Estudios Sordos de Venezuela</span>
+          <span class="marca-lema">Investigación · Lengua de Señas · Comunidad</span>
+        </span>
+      </a>
+      <button class="boton-texto" type="button" data-accion="texto">A+ Texto grande</button>
+      <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
+      <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
+        <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
+        <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
+        <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
+        <a href="enviar-trabajo.html" data-pagina="enviar-trabajo.html">Enviar mi trabajo</a>
+        <a href="admin.html" data-pagina="admin.html" class="navegacion-admin">Administrador</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor" id="contenido">
+
+    <div class="aviso aviso-demo" data-aviso-demo hidden>
+      <p>
+        <strong>Modo demostración:</strong> las señas mostradas son datos de ejemplo.
+        El administrador carga las señas reales desde el panel.
+      </p>
+    </div>
+
+    <div class="encabezado-seccion">
+      <h1>Diccionario de Lengua de Señas Venezolana</h1>
+      <p>
+        Busca la seña que necesitas. Incluye las señas acuñadas recientemente para nombrar
+        conceptos académicos, técnicos y de la vida cotidiana.
+      </p>
+    </div>
+
+    <section class="seccion">
+      <div class="filtros">
+        <div class="campo-busqueda">
+          <label class="solo-lectores" for="buscador-senia">Buscar una seña</label>
+          <input type="search" id="buscador-senia" placeholder="Escribe la palabra que buscas…" autocomplete="off">
+        </div>
+
+        <div>
+          <label class="solo-lectores" for="filtro-categoria-senia">Filtrar por área temática</label>
+          <select id="filtro-categoria-senia">
+            <option value="">Todas las áreas</option>
+          </select>
+        </div>
+
+        <div class="opcion" style="padding:.4rem 0">
+          <input type="checkbox" id="solo-recientes">
+          <label for="solo-recientes" style="font-weight:600;margin:0">
+            <span>Solo señas acuñadas recientemente</span>
+          </label>
+        </div>
+      </div>
+
+      <p class="texto-suave" id="contador-senias" aria-live="polite"></p>
+
+      <div class="rejilla-senias" id="zona-senias">
+        <p class="cargando">Cargando el diccionario</p>
+      </div>
+    </section>
+
+    <hr class="separador">
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>¿Conoces una seña que debería estar aquí?</h2>
+      </div>
+      <p>
+        Si sabes de una seña acuñada recientemente, o notas que falta una palabra importante,
+        escríbenos a <span class="correo-destacado">cavpslepee@gmail.com</span> indicando la palabra,
+        la descripción del movimiento y, si es posible, un enlace a un video.
+        El administrador la revisa y la incorpora al diccionario.
+      </p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="pie-interior">
+      <div>
+        <h2>Estudios Sordos de Venezuela</h2>
+        <p>
+          Espacio abierto para visibilizar la producción académica de las personas sordas
+          venezolanas y para contar cuántas han egresado de la educación universitaria.
+        </p>
+        <p class="bandera-sorda">
+          <span class="bandera-sorda-mano" aria-hidden="true"></span>
+          Sitio abierto y de acceso libre
+        </p>
+      </div>
+      <div>
+        <h2>Secciones</h2>
+        <ul>
+          <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
+          <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
+          <li><a href="censo.html">Censo de profesionales sordos</a></li>
+          <li><a href="enviar-trabajo.html">Enviar un trabajo de investigación</a></li>
+          <li><a href="admin.html">Acceso del administrador</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <ul>
+          <li>
+            Recepción de trabajos en PDF:<br>
+            <a href="mailto:cavpslepee@gmail.com">cavpslepee@gmail.com</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-legal">
+      <p>
+        Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
+        © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sitio.js"></script>
+  <script src="js/diccionario.js"></script>
+</body>
+</html>

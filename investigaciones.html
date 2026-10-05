@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Investigaciones publicadas — Estudios Sordos de Venezuela</title>
+  <meta name="description" content="Catálogo de trabajos de investigación realizados por personas sordas venezolanas, organizados por educación, lingüística, deporte, social, cultural, comunitaria, política, arte y biografía.">
+  <meta name="author" content="Dr. Javier Ramírez González">
+  <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar-contenido" href="#contenido">Saltar al contenido principal</a>
+
+  <header class="encabezado">
+    <div class="encabezado-interior">
+      <a class="marca" href="index.html">
+        <img class="marca-logo" src="img/logo-estudios-sordos.jpg" alt="">
+        <span class="marca-texto">
+          <span class="marca-nombre">Estudios Sordos de Venezuela</span>
+          <span class="marca-lema">Investigación · Lengua de Señas · Comunidad</span>
+        </span>
+      </a>
+      <button class="boton-texto" type="button" data-accion="texto">A+ Texto grande</button>
+      <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
+      <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
+        <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
+        <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
+        <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
+        <a href="enviar-trabajo.html" data-pagina="enviar-trabajo.html">Enviar mi trabajo</a>
+        <a href="admin.html" data-pagina="admin.html" class="navegacion-admin">Administrador</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor" id="contenido">
+
+    <div class="aviso aviso-demo" data-aviso-demo hidden>
+      <p>
+        <strong>Modo demostración:</strong> los datos se guardan solo en este navegador.
+        Conecta Supabase en <code>js/config.js</code> para usar la base de datos real.
+      </p>
+    </div>
+
+    <div class="encabezado-seccion">
+      <h1>Investigaciones publicadas</h1>
+      <p>
+        Trabajos de investigación realizados por personas sordas, útiles para la comunidad sorda
+        y para las personas oyentes que requieren información.
+      </p>
+    </div>
+
+    <section class="seccion">
+      <div class="filtros">
+        <div class="campo-busqueda">
+          <label class="solo-lectores" for="buscador">Buscar por título, autor o tema</label>
+          <input type="search" id="buscador" placeholder="Buscar por título, autor o tema…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="filtros" id="filtros-categoria" role="group" aria-label="Filtrar por categoría">
+        <button class="filtro" type="button" data-categoria="" aria-pressed="true">Todas</button>
+      </div>
+
+      <p class="texto-suave" id="contador-resultados" aria-live="polite"></p>
+
+      <div class="rejilla" id="zona-resultados">
+        <p class="cargando">Cargando investigaciones</p>
+      </div>
+    </section>
+
+    <hr class="separador">
+
+    <section class="seccion">
+      <div class="encabezado-seccion">
+        <h2>¿Quieres publicar tu trabajo aquí?</h2>
+      </div>
+      <p>
+        Envía tu investigación en PDF al correo
+        <span class="correo-destacado">cavpslepee@gmail.com</span>.
+        El equipo la revisa y, una vez aprobada, se publica en la categoría correspondiente.
+      </p>
+      <p>
+        <a class="boton" href="enviar-trabajo.html">Ver los pasos para enviar mi trabajo</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="pie-interior">
+      <div>
+        <h2>Estudios Sordos de Venezuela</h2>
+        <p>
+          Espacio abierto para visibilizar la producción académica de las personas sordas
+          venezolanas y para contar cuántas han egresado de la educación universitaria.
+        </p>
+        <p class="bandera-sorda">
+          <span class="bandera-sorda-mano" aria-hidden="true"></span>
+          Sitio abierto y de acceso libre
+        </p>
+      </div>
+      <div>
+        <h2>Secciones</h2>
+        <ul>
+          <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
+          <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
+          <li><a href="censo.html">Censo de profesionales sordos</a></li>
+          <li><a href="enviar-trabajo.html">Enviar un trabajo de investigación</a></li>
+          <li><a href="admin.html">Acceso del administrador</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <ul>
+          <li>
+            Recepción de trabajos en PDF:<br>
+            <a href="mailto:cavpslepee@gmail.com">cavpslepee@gmail.com</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-legal">
+      <p>
+        Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
+        © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sitio.js"></script>
+  <script src="js/investigaciones.js"></script>
+</body>
+</html>
