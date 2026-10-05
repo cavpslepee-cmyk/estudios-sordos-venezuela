@@ -15,7 +15,7 @@
    ===================================================================== */
 
 window.CONFIG = {
-  SUPABASE_URL: "https://gscvmupzgfavgtpkmvxp.supabase.co/rest/v1/",
+  SUPABASE_URL: "https://gscvmupzgfavgtpkmvxp.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_tW-I396GngXVM7lUlYCu3Q_2-6vb12c",
 
   /* Correo oficial para recibir trabajos de investigación en PDF */

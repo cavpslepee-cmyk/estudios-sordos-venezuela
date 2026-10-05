@@ -88,8 +88,12 @@ Puedes volver a ejecutarlo sin miedo: no duplica nada.
 
 Menú lateral → **Project Settings** (ícono de engranaje) → **API** (en algunos proyectos se llama **Data API**):
 
-- **Project URL**: algo como `https://gscvmupzgfavgtpkmvxp.supabase.co/rest/v1/`
-- **sb_publishable_tW-I396GngXVM7lUlYCu3Q_2-6vb12c**: un texto largo que empieza por `eyJ…`
+- **Project URL**: `https://gscvmupzgfavgtpkmvxp.supabase.co` — cópiala **exacta, sin nada
+  al final**: si le agregas `/rest/v1/` u otra ruta, el inicio de sesión del panel fallará con
+  el error `Invalid path specified in request URL`.
+- **Clave `anon public`**: un texto largo que en proyectos nuevos empieza por `sb_publishable_…`
+  (en proyectos antiguos, por `eyJ…`). Es pública por diseño y puede viajar con el sitio;
+  la que **nunca** debes publicar es la clave `service_role`.
 
 ---
 
@@ -170,6 +174,12 @@ git branch -M main
 git remote add origin https://github.com/TUUSUARIO/estudios-sordos-venezuela.git
 git push -u origin main
 ```
+
+En la línea de `git remote add origin` sustituye `TUUSUARIO` por tu usuario u organización
+de GitHub. Si Git responde `error: remote origin already exists` es porque ese comando ya
+se ejecutó antes (por ejemplo, con la URL de ejemplo): no lo repitas, cambia la dirección con
+`git remote set-url origin https://github.com/TUUSUARIO/estudios-sordos-venezuela.git`
+y compruébalo con `git remote -v`.
 
 ### 5.3 Activar GitHub Pages
 
