@@ -29,11 +29,12 @@ Sitio creado por el **Dr. Javier Ramírez González**.
 | Página | Qué hace |
 |---|---|
 | `index.html` | Portada: objetivo del sitio, videos intercambiables, contador público de egresados, investigaciones destacadas y listado de quienes autorizaron aparecer. |
+| `noticias.html` | Noticias de la comunidad: texto escrito, imagen o flyer y video incrustado, publicadas por el administrador. |
 | `investigaciones.html` | Catálogo completo con buscador y filtro por las 9 categorías. |
 | `diccionario.html` | Buscador de la Lengua de Señas Venezolana, con filtro por área y por señas acuñadas recientemente. |
 | `censo.html` | Formulario del censo de profesionales sordos egresados, con opción de agregar títulos adicionales. |
 | `enviar-trabajo.html` | Pasos para enviar una investigación en PDF a `cavpslepee@gmail.com`. |
-| `admin.html` | Panel privado: investigaciones, videos de portada, diccionario y censo (con exportación a CSV). |
+| `admin.html` | Panel privado: noticias, investigaciones, videos de portada, diccionario y censo (con exportación a CSV). |
 
 **Funciona sin base de datos.** Mientras `js/config.js` no tenga credenciales, el sitio arranca en
 **modo demostración**: muestra datos de ejemplo y guarda los cambios solo en tu navegador. Así puedes
@@ -273,6 +274,8 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | A11 | Buscar `universidad` | Aparece la seña. |
 | A12 | Marcar **Solo señas acuñadas recientemente** | Quedan únicamente las que tienen la insignia naranja. |
 | A13 | Ir a **Censo de egresados** | El formulario se ve completo, con los estados de Venezuela en el desplegable. |
+| A14 | Ir a **Noticias** | Las noticias aparecen ordenadas de la más reciente a la más antigua; la que tiene imagen muestra su foto y la que tiene video muestra el reproductor. |
+| A15 | Mirar el pie de cualquier página | Dice «Este sitio ha recibido N visitas»: la primera vez que abres el sitio en un navegador, N suma 1 y no vuelve a subir por recargar. |
 
 ### B. Formulario del censo
 
@@ -311,6 +314,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C16 | Pulsar **Eliminar** en un registro | Pide confirmación y, al aceptar, baja el contador de la portada. |
 | C17 | Pulsar **Cerrar sesión** | Vuelve a la caja de acceso. |
 | C18 | Abrir `admin.html` en una ventana de incógnito | Pide acceso: no queda sesión abierta para otros. |
+| C19 | En la pestaña **Noticias**, publicar una con texto, imagen y enlace de YouTube | Aparece en el listado con «imagen y video», y se ve en `noticias.html` y en el bloque «Últimas noticias» de la portada. |
 
 ### D. En el teléfono
 
@@ -370,6 +374,9 @@ o en las seis páginas `.html` (el logo y el favicon).
 - **Los datos personales del censo no se publican.** El contador de la portada se calcula con una
   función especial en la base de datos que devuelve únicamente totales, nunca nombres ni correos.
   El listado público de egresados solo incluye a quienes marcaron la casilla de autorización.
+- **Contador de visitas.** Cada navegador se cuenta una sola vez, la primera vez que entra al sitio
+  (el panel privado no cuenta). El pie de página muestra únicamente el total, calculado por una
+  función de la base de datos; el detalle de páginas visitadas solo lo ve el administrador.
 - **Haz copias del censo.** Usa el botón **Descargar el censo en CSV** una vez al mes y guarda el
   archivo en tu computadora. También puedes activar copias automáticas en Supabase →
   **Database → Backups**.
@@ -388,6 +395,7 @@ o en las seis páginas `.html` (el logo y el favicon).
 ```
 W_ESTUDIOSSORDOSVENEZUELA/
 ├── index.html                  Portada
+├── noticias.html               Noticias de la comunidad (texto, imagen o flyer y video)
 ├── investigaciones.html        Catálogo público por categorías
 ├── diccionario.html            Buscador de la Lengua de Señas Venezolana
 ├── censo.html                  Formulario del censo de egresados
@@ -410,6 +418,7 @@ W_ESTUDIOSSORDOSVENEZUELA/
 │   ├── datos-demo.js           Datos de ejemplo del modo demostración
 │   ├── sitio.js                Utilidades, contador de egresados y videos
 │   ├── inicio.js               Lógica de la portada
+│   ├── noticias.js             Lógica de la página de noticias
 │   ├── investigaciones.js      Lógica del catálogo
 │   ├── censo.js                Lógica del formulario del censo
 │   ├── diccionario.js          Lógica del buscador de señas

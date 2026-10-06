@@ -36,6 +36,30 @@
     }
   }
 
+  async function cargarNoticiasBreves() {
+    var zona = document.getElementById("zona-noticias-breves");
+    if (!zona) return;
+    try {
+      var lista = await window.DB.listarNoticias();
+      var recientes = lista.slice(0, 3);
+      if (!recientes.length) {
+        zona.innerHTML = '<p class="texto-suave">Aún no hay noticias publicadas.</p>';
+        return;
+      }
+      zona.innerHTML = '<div class="rejilla">' + recientes.map(function (n) {
+        var anticipo = String(n.cuerpo || "").split(/\n+/)[0] || "";
+        if (anticipo.length > 180) anticipo = anticipo.slice(0, 177).trimEnd() + "…";
+        return '<div class="tarjeta noticia-breve">' +
+          '<p class="noticia-fecha">' + esc(window.Util.formatearFecha(n.fecha)) + "</p>" +
+          '<h3><a href="noticias.html">' + esc(n.titulo) + "</a></h3>" +
+          '<p class="tarjeta-texto">' + esc(anticipo) + "</p>" +
+          "</div>";
+      }).join("") + "</div>";
+    } catch (error) {
+      zona.innerHTML = window.Sitio.mensajeError(error);
+    }
+  }
+
   async function cargarEgresadosPublicos() {
     var zona = document.getElementById("zona-egresados-publicos");
     if (!zona) return;
@@ -80,6 +104,7 @@
     window.Sitio.pintarVideos(document.getElementById("zona-videos"));
     window.Sitio.pintarResumenCenso(document.getElementById("zona-resumen-censo"));
     cargarDestacadas();
+    cargarNoticiasBreves();
     cargarEgresadosPublicos();
   }
 

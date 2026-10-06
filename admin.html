@@ -25,6 +25,7 @@
       <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
       <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
         <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="noticias.html" data-pagina="noticias.html">Noticias</a>
         <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
         <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
         <a href="censo.html" data-pagina="censo.html">Censo de egresados</a>
@@ -94,6 +95,10 @@
         <button class="pestanya" type="button" role="tab" id="pestanya-investigaciones"
                 aria-controls="panel-investigaciones" aria-selected="true" data-panel="panel-investigaciones">
           Investigaciones
+        </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-noticias"
+                aria-controls="panel-noticias" aria-selected="false" tabindex="-1" data-panel="panel-noticias">
+          Noticias
         </button>
         <button class="pestanya" type="button" role="tab" id="pestanya-videos"
                 aria-controls="panel-videos" aria-selected="false" tabindex="-1" data-panel="panel-videos">
@@ -213,6 +218,98 @@
             <span class="texto-suave" id="total-investigaciones"></span>
           </div>
           <div id="lista-investigaciones"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- NOTICIAS ---------- -->
+      <div class="panel" id="panel-noticias" role="tabpanel" aria-labelledby="pestanya-noticias" hidden>
+        <div id="aviso-noticias" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2 id="titulo-formulario-noticia">Publicar una noticia</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-nueva-noticia">
+              Limpiar el formulario
+            </button>
+          </div>
+
+          <form id="formulario-noticia" novalidate>
+            <input type="hidden" id="not-id" name="id">
+
+            <div class="campo">
+              <label for="not-titulo">Título de la noticia <span class="obligatorio">*</span></label>
+              <input type="text" id="not-titulo" name="titulo" required maxlength="240">
+            </div>
+
+            <div class="campo">
+              <label for="not-fecha">Fecha de publicación</label>
+              <input type="date" id="not-fecha" name="fecha">
+              <span class="ayuda">Si la dejas vacía se usa la fecha de hoy.</span>
+            </div>
+
+            <div class="campo">
+              <label for="not-cuerpo">Texto de la noticia <span class="obligatorio">*</span></label>
+              <textarea id="not-cuerpo" name="cuerpo" required maxlength="8000"
+                        placeholder="Escribe la información con frases claras. Cada línea en blanco separa un párrafo."></textarea>
+              <span class="ayuda">
+                El texto escrito es obligatorio: es la vía principal de lectura para las personas sordas.
+              </span>
+            </div>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Imagen o flyer</legend>
+
+              <div class="campo">
+                <label for="not-archivo-imagen">Subir la imagen o el flyer</label>
+                <input type="file" id="not-archivo-imagen" name="archivo_imagen" accept="image/*">
+                <span class="ayuda" id="ayuda-imagen-noticia">
+                  Se guarda en el bucket <code>noticias</code> de Supabase Storage y queda de lectura pública.
+                </span>
+              </div>
+
+              <div class="campo">
+                <label for="not-texto-imagen">Descripción de la imagen (texto alternativo)</label>
+                <input type="text" id="not-texto-imagen" name="texto_imagen" maxlength="240"
+                       placeholder="Ejemplo: Flyer del seminario con la fecha y el lugar">
+              </div>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Video en Lengua de Señas Venezolana o subtitulado</legend>
+
+              <div class="campo">
+                <label for="not-archivo-video">Subir un archivo de video</label>
+                <input type="file" id="not-archivo-video" name="archivo_video" accept="video/*">
+                <span class="ayuda">
+                  Opcional. Si subes un archivo, el enlace de abajo se ignora. El plan gratuito de
+                  Supabase tiene 1 GB de almacenamiento: para videos largos conviene usar YouTube.
+                </span>
+              </div>
+
+              <div class="campo">
+                <label for="not-url-video">O pega aquí el enlace del video</label>
+                <input type="url" id="not-url-video" name="url_video" maxlength="600"
+                       placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX">
+                <span class="ayuda">
+                  Se aceptan enlaces de YouTube, Vimeo o un archivo de video directo (.mp4).
+                  YouTube se convierte automáticamente al formato incrustable.
+                </span>
+              </div>
+            </fieldset>
+
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-noticia">Publicar la noticia</button>
+              <button class="boton boton-contorno" type="button" id="boton-cancelar-noticia" hidden>Cancelar la edición</button>
+            </p>
+          </form>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Noticias publicadas</h2>
+            <span class="texto-suave" id="total-noticias"></span>
+          </div>
+          <div id="lista-noticias"><p class="cargando">Cargando</p></div>
         </div>
       </div>
 
@@ -414,6 +511,7 @@
       <div>
         <h2>Secciones</h2>
         <ul>
+          <li><a href="noticias.html">Noticias de la comunidad</a></li>
           <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
           <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>
           <li><a href="censo.html">Censo de profesionales sordos</a></li>
@@ -431,6 +529,7 @@
         Sitio creado por <strong>Dr. Javier Ramírez González</strong> ·
         © <span data-anio-actual>2026</span> Estudios Sordos de Venezuela
       </p>
+      <p>Este sitio ha recibido <strong data-contador-visitas>—</strong> visitas desde su apertura.</p>
     </div>
   </footer>
 

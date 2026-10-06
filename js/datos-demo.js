@@ -135,6 +135,36 @@ window.DATOS_DEMO = {
     }
   ],
 
+  noticias: [
+    {
+      id: "demo-not-1",
+      titulo: "Estrenamos la sección de noticias",
+      cuerpo: "Desde hoy este sitio publica novedades de interés para la comunidad sorda: avisos, actividades, logros y convocatorias.\nCada noticia puede acompañarse de una imagen o flyer y de un video en Lengua de Señas Venezolana o subtitulado.",
+      fecha: "2026-10-01",
+      url_imagen: "",
+      texto_imagen: "",
+      url_video: ""
+    },
+    {
+      id: "demo-not-2",
+      titulo: "Seminario nacional de educación de personas sordas",
+      cuerpo: "Se realizó el seminario nacional con participación de docentes sordos y oyentes de ocho estados.\nLas ponencias abordaron la privación lingüística y las buenas prácticas del aula bilingüe: Lengua de Señas Venezolana y español escrito.",
+      fecha: "2026-09-15",
+      url_imagen: "img/seminario-nacional-grupo.jpg",
+      texto_imagen: "Grupo de participantes del seminario nacional posa junto frente al salón de conferencias",
+      url_video: ""
+    },
+    {
+      id: "demo-not-3",
+      titulo: "Convocatoria abierta: envía tu trabajo de investigación",
+      cuerpo: "Queda abierta la recepción de trabajos de investigación en PDF para su revisión y publicación.\nSe aceptan nueve categorías, entre ellas educación, lingüística, deporte, arte y biografías de personas sordas destacadas.",
+      fecha: "2026-08-20",
+      url_imagen: "",
+      texto_imagen: "",
+      url_video: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    }
+  ],
+
   diccionario_senias: [
     {
       id: "demo-senia-1",

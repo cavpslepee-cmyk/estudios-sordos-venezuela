@@ -305,6 +305,167 @@
   }
 
   /* =====================================================================
+     NOTICIAS
+     ===================================================================== */
+  var urlImagenNoticiaActual = "";
+
+  function prepararFormularioNoticia() {
+    $("boton-nueva-noticia").addEventListener("click", limpiarFormularioNoticia);
+    $("boton-cancelar-noticia").addEventListener("click", limpiarFormularioNoticia);
+    $("formulario-noticia").addEventListener("submit", guardarNoticia);
+  }
+
+  function limpiarFormularioNoticia() {
+    $("formulario-noticia").reset();
+    $("not-id").value = "";
+    urlImagenNoticiaActual = "";
+    $("ayuda-imagen-noticia").innerHTML =
+      'Se guarda en el bucket <code>noticias</code> de Supabase Storage y queda de lectura pública.';
+    $("titulo-formulario-noticia").textContent = "Publicar una noticia";
+    $("boton-guardar-noticia").textContent = "Publicar la noticia";
+    $("boton-cancelar-noticia").hidden = true;
+  }
+
+  function editarNoticia(noticia) {
+    limpiarFormularioNoticia();
+    $("not-id").value = noticia.id;
+    $("not-titulo").value = noticia.titulo || "";
+    $("not-fecha").value = noticia.fecha || "";
+    $("not-cuerpo").value = noticia.cuerpo || "";
+    $("not-texto-imagen").value = noticia.texto_imagen || "";
+    $("not-url-video").value = noticia.url_video || "";
+    urlImagenNoticiaActual = noticia.url_imagen || "";
+    if (urlImagenNoticiaActual) {
+      $("ayuda-imagen-noticia").textContent =
+        "Esta noticia ya tiene imagen o flyer. Solo se reemplazará si subes un archivo nuevo.";
+    }
+    $("titulo-formulario-noticia").textContent = "Editando: " + noticia.titulo;
+    $("boton-guardar-noticia").textContent = "Actualizar la noticia";
+    $("boton-cancelar-noticia").hidden = false;
+    window.scrollTo({ top: $("formulario-noticia").offsetTop - 120, behavior: "smooth" });
+  }
+
+  async function guardarNoticia(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-noticias");
+    Util.limpiarAviso(aviso);
+
+    var formulario = $("formulario-noticia");
+    var titulo = textoDe("titulo", formulario);
+    var cuerpo = textoDe("cuerpo", formulario);
+    if (!titulo || !cuerpo) {
+      Util.aviso(aviso, "error", "El título y el texto de la noticia son obligatorios.");
+      return;
+    }
+
+    var boton = $("boton-guardar-noticia");
+    boton.disabled = true;
+    boton.textContent = "Guardando…";
+
+    try {
+      var urlImagen = urlImagenNoticiaActual || null;
+      var archivoImagen = $("not-archivo-imagen").files[0];
+      if (archivoImagen) {
+        Util.aviso(aviso, "", "Subiendo la imagen o el flyer…");
+        urlImagen = await window.DB.subirImagenNoticia(archivoImagen);
+      }
+
+      var urlVideo = textoDe("url_video", formulario) || null;
+      var archivoVideo = $("not-archivo-video").files[0];
+      if (archivoVideo) {
+        Util.aviso(aviso, "", "Subiendo el archivo de video…");
+        urlVideo = await window.DB.subirVideoNoticia(archivoVideo);
+      }
+
+      var registro = {
+        titulo: titulo,
+        cuerpo: cuerpo,
+        fecha: textoDe("fecha", formulario) || new Date().toISOString().slice(0, 10),
+        url_imagen: urlImagen,
+        texto_imagen: textoDe("texto_imagen", formulario) || null,
+        url_video: urlVideo
+      };
+
+      var id = $("not-id").value;
+      if (id) registro.id = id;
+
+      await window.DB.guardarNoticia(registro);
+      Util.aviso(aviso, "exito", id ? "Noticia actualizada." : "Noticia publicada.");
+      limpiarFormularioNoticia();
+      await cargarNoticias();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = $("not-id").value ? "Actualizar la noticia" : "Publicar la noticia";
+    }
+  }
+
+  async function eliminarNoticiaAdmin(noticia) {
+    if (!window.confirm("¿Eliminar definitivamente la noticia «" + noticia.titulo + "»?")) return;
+    var aviso = $("aviso-noticias");
+    try {
+      await window.DB.eliminarNoticia(noticia.id);
+      Util.aviso(aviso, "exito", "Noticia eliminada.");
+      await cargarNoticias();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    }
+  }
+
+  async function cargarNoticias() {
+    var zona = $("lista-noticias");
+    zona.innerHTML = '<p class="cargando">Cargando</p>';
+    try {
+      var lista = await window.DB.listarNoticias();
+      $("total-noticias").textContent = lista.length + " noticia" + (lista.length === 1 ? "" : "s");
+
+      if (!lista.length) {
+        zona.innerHTML = window.Sitio.mensajeVacio("No hay noticias publicadas todavía.");
+        return;
+      }
+
+      var filas = lista.map(function (n) {
+        var medios = [];
+        if (n.url_imagen) medios.push("imagen");
+        if (n.url_video) medios.push("video");
+        var acciones =
+          '<button class="boton boton-chico boton-contorno" type="button" data-accion="editar" data-id="' + esc(n.id) + '">Editar</button>' +
+          '<button class="boton boton-chico boton-peligro" type="button" data-accion="eliminar" data-id="' + esc(n.id) + '">Eliminar</button>';
+
+        return "<tr>" +
+          "<td>" + esc(Util.formatearFecha(n.fecha)) + "</td>" +
+          "<td><strong>" + esc(n.titulo) + "</strong></td>" +
+          "<td>" + (medios.length ? esc(medios.join(" y ")) : "Solo texto") + "</td>" +
+          '<td class="acciones">' + acciones + "</td>" +
+          "</tr>";
+      }).join("");
+
+      zona.innerHTML =
+        '<div class="tabla-envoltura"><table>' +
+          "<thead><tr>" +
+            '<th scope="col">Fecha</th><th scope="col">Título</th>' +
+            '<th scope="col">Medios</th><th scope="col">Acciones</th>' +
+          "</tr></thead><tbody>" + filas + "</tbody></table></div>";
+
+      var mapa = {};
+      lista.forEach(function (n) { mapa[n.id] = n; });
+
+      zona.querySelectorAll("button[data-accion]").forEach(function (boton) {
+        var noticia = mapa[boton.getAttribute("data-id")];
+        if (!noticia) return;
+        boton.addEventListener("click", function () {
+          var accion = boton.getAttribute("data-accion");
+          if (accion === "editar") editarNoticia(noticia);
+          if (accion === "eliminar") eliminarNoticiaAdmin(noticia);
+        });
+      });
+    } catch (error) {
+      zona.innerHTML = window.Sitio.mensajeError(error);
+    }
+  }
+
+  /* =====================================================================
      VIDEOS DE PORTADA
      ===================================================================== */
 
@@ -762,13 +923,14 @@
      ===================================================================== */
 
   async function cargarTodo() {
-    await Promise.all([cargarInvestigaciones(), cargarVideos(), cargarSenias(), llenarAreasSenia()]);
+    await Promise.all([cargarInvestigaciones(), cargarNoticias(), cargarVideos(), cargarSenias(), llenarAreasSenia()]);
     await cargarCenso();
   }
 
   function iniciar() {
     iniciarPestanyas();
     prepararFormularioInvestigacion();
+    prepararFormularioNoticia();
     prepararFormularioVideo();
     prepararFormularioSenia();
     iniciarAcceso();

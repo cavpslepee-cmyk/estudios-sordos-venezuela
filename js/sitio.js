@@ -322,12 +322,37 @@
 
   /* ------------------------- Arranque ------------------------- */
 
+  var CLAVE_VISITA_CONTADA = "esv_visita_contada";
+
+  async function iniciarContadorVisitas() {
+    var elementos = document.querySelectorAll("[data-contador-visitas]");
+    if (!elementos.length) return;
+
+    var pagina = window.location.pathname.split("/").pop() || "index.html";
+    if (pagina !== "admin.html" && !localStorage.getItem(CLAVE_VISITA_CONTADA)) {
+      localStorage.setItem(CLAVE_VISITA_CONTADA, "1");
+      try {
+        await window.DB.registrarVisita(pagina);
+      } catch (e) {
+        localStorage.removeItem(CLAVE_VISITA_CONTADA);
+      }
+    }
+
+    try {
+      var total = await window.DB.totalVisitas();
+      elementos.forEach(function (el) { el.textContent = String(total); });
+    } catch (e) {
+      elementos.forEach(function (el) { el.textContent = "—"; });
+    }
+  }
+
   function inicializar() {
     marcarPaginaActiva();
     menuMovil();
     controlTamanoTexto();
     avisoModoDemo();
     anioEnElPie();
+    iniciarContadorVisitas();
   }
 
   if (document.readyState === "loading") {

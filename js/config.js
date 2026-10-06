@@ -29,6 +29,9 @@ window.CONFIG = {
   /* Bucket de Supabase Storage donde se guardan los PDF */
   BUCKET_PDF: "investigaciones",
 
+  /* Bucket de Supabase Storage donde se guardan imágenes y videos de noticias */
+  BUCKET_NOTICIAS: "noticias",
+
   /* Categorías de las investigaciones (deben coincidir con el ENUM del SQL) */
   CATEGORIAS_INVESTIGACION: [
     { valor: "EDUCACION",   etiqueta: "Educación" },

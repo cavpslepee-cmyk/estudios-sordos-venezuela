@@ -143,6 +143,35 @@ create table if not exists public.configuracion_sitio (
 );
 
 -- ---------------------------------------------------------------------
+-- TABLA: noticias (texto, imagen o flyer y video; las gestiona el admin)
+-- ---------------------------------------------------------------------
+create table if not exists public.noticias (
+  id             uuid primary key default gen_random_uuid(),
+  titulo         text not null,
+  cuerpo         text not null,
+  fecha          date not null default current_date,
+  url_imagen     text,
+  texto_imagen   text,
+  url_video      text,
+  creado_el      timestamptz not null default now(),
+  actualizado_el timestamptz
+);
+
+create index if not exists idx_noticias_fecha on public.noticias (fecha);
+
+-- ---------------------------------------------------------------------
+-- TABLA: visitas (contador de visitas únicas del sitio)
+-- Cada fila es un navegador que entró al sitio por primera vez.
+-- ---------------------------------------------------------------------
+create table if not exists public.visitas (
+  id        uuid primary key default gen_random_uuid(),
+  pagina    text not null,
+  creado_el timestamptz not null default now()
+);
+
+create index if not exists idx_visitas_creado on public.visitas (creado_el);
+
+-- ---------------------------------------------------------------------
 -- ACTUALIZACIÓN AUTOMÁTICA DE actualizado_el
 -- ---------------------------------------------------------------------
 create or replace function public.touch_actualizado_el()
@@ -155,6 +184,11 @@ end $$;
 drop trigger if exists trg_investigaciones_touch on public.investigaciones;
 create trigger trg_investigaciones_touch
   before update on public.investigaciones
+  for each row execute function public.touch_actualizado_el();
+
+drop trigger if exists trg_noticias_touch on public.noticias;
+create trigger trg_noticias_touch
+  before update on public.noticias
   for each row execute function public.touch_actualizado_el();
 
 -- ---------------------------------------------------------------------
@@ -194,6 +228,16 @@ as $$
   );
 $$;
 
+create or replace function public.total_visitas()
+returns bigint
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select count(*) from visitas;
+$$;
+
 create or replace function public.nombres_publicos_egresados()
 returns table (nombres text, apellidos text, titulo_egreso text, universidad text, estado text, anio_graduacion integer)
 language sql
@@ -221,6 +265,8 @@ alter table public.titulos_adicionales   enable row level security;
 alter table public.videos_portada        enable row level security;
 alter table public.diccionario_senias    enable row level security;
 alter table public.configuracion_sitio   enable row level security;
+alter table public.noticias              enable row level security;
+alter table public.visitas               enable row level security;
 
 -- INVESTIGACIONES: el público solo ve lo PUBLICADO; el admin ve y edita todo.
 drop policy if exists "investigaciones_lectura_publica" on public.investigaciones;
@@ -290,6 +336,28 @@ create policy "config_admin_total"
   on public.configuracion_sitio for all to authenticated
   using (true) with check (true);
 
+-- NOTICIAS: lectura pública; solo el administrador las crea y edita.
+drop policy if exists "noticias_lectura_publica" on public.noticias;
+create policy "noticias_lectura_publica"
+  on public.noticias for select to anon, authenticated
+  using (true);
+
+drop policy if exists "noticias_admin_total" on public.noticias;
+create policy "noticias_admin_total"
+  on public.noticias for all to authenticated
+  using (true) with check (true);
+
+-- VISITAS: cualquier navegador registra su primera visita; solo el admin lee el detalle.
+drop policy if exists "visitas_insert_publico" on public.visitas;
+create policy "visitas_insert_publico"
+  on public.visitas for insert to anon, authenticated
+  with check (true);
+
+drop policy if exists "visitas_lectura_admin" on public.visitas;
+create policy "visitas_lectura_admin"
+  on public.visitas for select to authenticated
+  using (true);
+
 -- ---------------------------------------------------------------------
 -- BUCKET DE ARCHIVOS PDF
 -- (También puedes crearlo en Dashboard -> Storage -> New bucket)
@@ -312,6 +380,29 @@ drop policy if exists "pdf_borrado_admin" on storage.objects;
 create policy "pdf_borrado_admin"
   on storage.objects for delete to authenticated
   using (bucket_id = 'investigaciones');
+
+-- ---------------------------------------------------------------------
+-- BUCKET DE IMÁGENES Y VIDEOS DE NOTICIAS
+-- (También puedes crearlo en Dashboard -> Storage -> New bucket)
+-- ---------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('noticias', 'noticias', true)
+on conflict (id) do nothing;
+
+drop policy if exists "medio_noticia_lectura_publica" on storage.objects;
+create policy "medio_noticia_lectura_publica"
+  on storage.objects for select to anon, authenticated
+  using (bucket_id = 'noticias');
+
+drop policy if exists "medio_noticia_subida_admin" on storage.objects;
+create policy "medio_noticia_subida_admin"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'noticias');
+
+drop policy if exists "medio_noticia_borrado_admin" on storage.objects;
+create policy "medio_noticia_borrado_admin"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'noticias');
 
 -- ---------------------------------------------------------------------
 -- DATOS INICIALES
@@ -447,8 +538,17 @@ select * from (values
 ) as v(palabra, sinonimos, categoria, descripcion, acuniada_recientemente, fuente)
 where not exists (select 1 from public.diccionario_senias);
 
+-- Noticia de estreno de la sección, para que la página no nazca vacía.
+insert into public.noticias (titulo, cuerpo, fecha)
+select
+  'Estrenamos la sección de noticias',
+  'Desde hoy este sitio publica novedades de interés para la comunidad sorda: avisos, actividades, logros y convocatorias. Cada noticia puede acompañarse de una imagen o flyer y de un video en Lengua de Señas Venezolana o subtitulado. Todo el contenido lo publica el administrador desde el panel.',
+  current_date
+where not exists (select 1 from public.noticias);
+
 -- ---------------------------------------------------------------------
 -- FIN. Verifica en el Dashboard -> Table Editor que aparezcan:
 --   investigaciones, censo_egresados, titulos_adicionales,
---   videos_portada, diccionario_senias, configuracion_sitio
+--   videos_portada, diccionario_senias, configuracion_sitio, noticias,
+--   visitas
 -- ---------------------------------------------------------------------

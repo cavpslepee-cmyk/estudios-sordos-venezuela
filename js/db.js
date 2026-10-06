@@ -267,6 +267,61 @@
   }
 
   /* -------------------------------------------------------------------
+     NOTICIAS
+     ------------------------------------------------------------------- */
+  async function listarNoticias() {
+    if (!esSupabase) {
+      return demoLeer("noticias").slice().sort(function (a, b) {
+        return String(b.fecha || "").localeCompare(String(a.fecha || ""));
+      });
+    }
+    return fallo(await sb().from("noticias").select("*")
+      .order("fecha", { ascending: false })
+      .order("creado_el", { ascending: false }));
+  }
+
+  async function guardarNoticia(registro) {
+    if (!esSupabase) {
+      if (registro.id) return demoActualizar("noticias", registro.id, registro);
+      return demoInsertar("noticias", registro);
+    }
+    var limpio = Object.assign({}, registro);
+    delete limpio.id;
+    delete limpio.creado_el;
+    delete limpio.actualizado_el;
+    if (registro.id) {
+      return fallo(await sb().from("noticias").update(limpio).eq("id", registro.id).select().single());
+    }
+    return fallo(await sb().from("noticias").insert(limpio).select().single());
+  }
+
+  async function eliminarNoticia(id) {
+    if (!esSupabase) return demoEliminar("noticias", id);
+    fallo(await sb().from("noticias").delete().eq("id", id));
+    return true;
+  }
+
+  /* -------------------------------------------------------------------
+     CONTADOR DE VISITAS ÚNICAS
+     ------------------------------------------------------------------- */
+  async function registrarVisita(pagina) {
+    if (!esSupabase) {
+      var total = Number(localStorage.getItem(PRE + "visitas_total") || 0) + 1;
+      localStorage.setItem(PRE + "visitas_total", String(total));
+      return true;
+    }
+    fallo(await sb().from("visitas").insert({ pagina: pagina }));
+    return true;
+  }
+
+  async function totalVisitas() {
+    if (!esSupabase) {
+      return Number(localStorage.getItem(PRE + "visitas_total") || 0);
+    }
+    return fallo(await sb().rpc("total_visitas"));
+  }
+
+  /* -------------------------------------------------------------------
      DICCIONARIO DE SEÑAS
      ------------------------------------------------------------------- */
   async function listarSenias(opciones) {
@@ -435,26 +490,38 @@
   }
 
   /* -------------------------------------------------------------------
-     ARCHIVOS PDF
+     ARCHIVOS EN SUPABASE STORAGE
      ------------------------------------------------------------------- */
-  async function subirPdf(archivo) {
+  async function subirAlBucket(bucket, archivo, tipoPorDefecto) {
     if (!archivo) return null;
     if (!esSupabase) {
       throw new Error(
         "En modo demostración no se pueden subir archivos. " +
-        "Conecta Supabase en js/config.js para habilitar la subida de PDF."
+        "Conecta Supabase en js/config.js para habilitar las subidas."
       );
     }
     var nombre = archivo.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     var ruta = Date.now() + "-" + nombre;
-    var res = await sb().storage.from(cfg.BUCKET_PDF).upload(ruta, archivo, {
+    var res = await sb().storage.from(bucket).upload(ruta, archivo, {
       cacheControl: "3600",
       upsert: false,
-      contentType: archivo.type || "application/pdf"
+      contentType: archivo.type || tipoPorDefecto
     });
     if (res.error) throw new Error(res.error.message);
-    var publica = sb().storage.from(cfg.BUCKET_PDF).getPublicUrl(res.data.path);
+    var publica = sb().storage.from(bucket).getPublicUrl(res.data.path);
     return publica.data.publicUrl;
+  }
+
+  async function subirPdf(archivo) {
+    return subirAlBucket(cfg.BUCKET_PDF, archivo, "application/pdf");
+  }
+
+  async function subirImagenNoticia(archivo) {
+    return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "image/jpeg");
+  }
+
+  async function subirVideoNoticia(archivo) {
+    return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "video/mp4");
   }
 
   /* -------------------------------------------------------------------
@@ -492,6 +559,13 @@
     guardarVideo: guardarVideo,
     eliminarVideo: eliminarVideo,
 
+    listarNoticias: listarNoticias,
+    guardarNoticia: guardarNoticia,
+    eliminarNoticia: eliminarNoticia,
+
+    registrarVisita: registrarVisita,
+    totalVisitas: totalVisitas,
+
     listarSenias: listarSenias,
     listarCategoriasSenias: listarCategoriasSenias,
     guardarSenia: guardarSenia,
@@ -505,6 +579,8 @@
     nombresPublicosEgresados: nombresPublicosEgresados,
 
     subirPdf: subirPdf,
+    subirImagenNoticia: subirImagenNoticia,
+    subirVideoNoticia: subirVideoNoticia,
     obtenerConfiguracion: obtenerConfiguracion
   };
 })();

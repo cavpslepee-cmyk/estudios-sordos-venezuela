@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Investigaciones publicadas — Estudios Sordos de Venezuela</title>
-  <meta name="description" content="Catálogo de trabajos de investigación realizados por personas sordas venezolanas, organizados por educación, lingüística, deporte, social, cultural, comunitaria, política, arte y biografía.">
+  <title>Noticias — Estudios Sordos de Venezuela</title>
+  <meta name="description"
+        content="Novedades para la comunidad sorda de Venezuela: avisos, actividades y logros, en texto escrito y con videos e imágenes o flyers.">
   <meta name="author" content="Dr. Javier Ramírez González">
   <link rel="icon" type="image/jpeg" href="img/logo-estudios-sordos.jpg">
   <link rel="stylesheet" href="css/estilos.css">
@@ -45,46 +46,18 @@
     </div>
 
     <div class="encabezado-seccion">
-      <h1>Investigaciones publicadas</h1>
+      <h1>Noticias de la comunidad sorda</h1>
       <p>
-        Trabajos de investigación realizados por personas sordas, útiles para la comunidad sorda
-        y para las personas oyentes que requieren información.
+        Avisos, actividades, logros y convocatorias, siempre en texto escrito y, cuando el
+        administrador lo agrega, con video en Lengua de Señas Venezolana o subtitulado y con
+        imagen o flyer.
       </p>
     </div>
 
     <section class="seccion">
-      <div class="filtros">
-        <div class="campo-busqueda">
-          <label class="solo-lectores" for="buscador">Buscar por título, autor o tema</label>
-          <input type="search" id="buscador" placeholder="Buscar por título, autor o tema…" autocomplete="off">
-        </div>
+      <div id="zona-noticias">
+        <p class="cargando">Cargando las noticias</p>
       </div>
-
-      <div class="filtros" id="filtros-categoria" role="group" aria-label="Filtrar por categoría">
-        <button class="filtro" type="button" data-categoria="" aria-pressed="true">Todas</button>
-      </div>
-
-      <p class="texto-suave" id="contador-resultados" aria-live="polite"></p>
-
-      <div class="rejilla" id="zona-resultados">
-        <p class="cargando">Cargando investigaciones</p>
-      </div>
-    </section>
-
-    <hr class="separador">
-
-    <section class="seccion">
-      <div class="encabezado-seccion">
-        <h2>¿Quieres publicar tu trabajo aquí?</h2>
-      </div>
-      <p>
-        Envía tu investigación en PDF al correo
-        <span class="correo-destacado">cavpslepee@gmail.com</span>.
-        El equipo la revisa y, una vez aprobada, se publica en la categoría correspondiente.
-      </p>
-      <p>
-        <a class="boton" href="enviar-trabajo.html">Ver los pasos para enviar mi trabajo</a>
-      </p>
     </section>
   </main>
 
@@ -136,6 +109,6 @@
   <script src="js/datos-demo.js"></script>
   <script src="js/db.js"></script>
   <script src="js/sitio.js"></script>
-  <script src="js/investigaciones.js"></script>
+  <script src="js/noticias.js"></script>
 </body>
 </html>
