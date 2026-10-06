@@ -358,6 +358,17 @@ p { margin: 0 0 1em; }
   letter-spacing: .5px;
 }
 
+/* Desglose de títulos del censo por nivel (pregrado / postgrado) */
+.desglose-titulos {
+  margin-top: 1.4rem;
+}
+
+.desglose-titulos h3 {
+  margin: 0 0 .7rem;
+  font-size: 1.05rem;
+  color: var(--navy);
+}
+
 /* ---------------- Figuras ---------------- */
 .figura {
   margin: 0 0 1.8rem;

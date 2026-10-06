@@ -73,9 +73,12 @@
         return;
       }
       var filas = personas.map(function (p) {
+        var otros = p.otros_titulos
+          ? '<br><span class="texto-suave texto-chico">También: ' + esc(p.otros_titulos) + "</span>"
+          : "";
         return "<tr>" +
           "<td>" + esc(p.apellidos) + ", " + esc(p.nombres) + "</td>" +
-          "<td>" + esc(p.titulo_egreso) + "</td>" +
+          "<td>" + esc(p.titulo_egreso) + otros + "</td>" +
           "<td>" + esc(p.universidad) + "</td>" +
           "<td>" + esc(p.estado) + "</td>" +
           "<td>" + esc(p.anio_graduacion || "") + "</td>" +

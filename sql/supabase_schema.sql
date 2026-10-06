@@ -203,16 +203,33 @@ security definer
 set search_path = public
 stable
 as $$
+  /* Cuenta TODOS los títulos: el principal del censo más los adicionales.
+     Las cifras por persona (total, investigación, estado) siguen siendo
+     de personas, no de títulos. */
+  with todos_titulos as (
+    select c.id as censo_id, c.nivel, c.categoria_egreso, c.universidad
+    from censo_egresados c
+    union all
+    select t.censo_id, t.nivel, t.categoria_egreso, t.universidad
+    from titulos_adicionales t
+  )
   select jsonb_build_object(
     'total_egresados', (select count(*) from censo_egresados),
+    'total_titulos', (select count(*) from todos_titulos),
     'con_investigacion', (select count(*) from censo_egresados where ha_realizado_investigacion),
     'por_nivel', (
       select coalesce(jsonb_object_agg(nivel, c), '{}'::jsonb)
-      from (select nivel, count(*) c from censo_egresados group by nivel) s
+      from (
+        select nivel, count(*) c from todos_titulos
+        where nivel is not null group by nivel
+      ) s
     ),
     'por_categoria', (
       select coalesce(jsonb_object_agg(categoria_egreso, c), '{}'::jsonb)
-      from (select categoria_egreso, count(*) c from censo_egresados group by categoria_egreso) s
+      from (
+        select categoria_egreso, count(*) c from todos_titulos
+        where categoria_egreso is not null group by categoria_egreso
+      ) s
     ),
     'por_estado', (
       select coalesce(jsonb_object_agg(estado, c), '{}'::jsonb)
@@ -221,7 +238,8 @@ as $$
     'por_universidad', (
       select coalesce(jsonb_object_agg(universidad, c), '{}'::jsonb)
       from (
-        select universidad, count(*) c from censo_egresados
+        select universidad, count(*) c from todos_titulos
+        where universidad is not null
         group by universidad order by count(*) desc limit 10
       ) s
     )
@@ -238,16 +256,23 @@ as $$
   select count(*) from visitas;
 $$;
 
-create or replace function public.nombres_publicos_egresados()
-returns table (nombres text, apellidos text, titulo_egreso text, universidad text, estado text, anio_graduacion integer)
+/* Se recrea con drop porque create or replace no permite cambiar la firma
+   de salida (se agrega la columna titulos). */
+drop function if exists public.nombres_publicos_egresados();
+create function public.nombres_publicos_egresados()
+returns table (nombres text, apellidos text, titulo_egreso text, otros_titulos text, universidad text, estado text, anio_graduacion integer)
 language sql
 security definer
 set search_path = public
 stable
 as $$
-  select nombres, apellidos, titulo_egreso, universidad, estado, anio_graduacion
-  from censo_egresados
-  where autoriza_publicar_nombre = true
+  select c.nombres, c.apellidos, c.titulo_egreso,
+    (select string_agg(t.titulo, ' · ')
+       from titulos_adicionales t
+      where t.censo_id = c.id) as otros_titulos,
+    c.universidad, c.estado, c.anio_graduacion
+  from censo_egresados c
+  where c.autoriza_publicar_nombre = true
   order by apellidos, nombres;
 $$;
 

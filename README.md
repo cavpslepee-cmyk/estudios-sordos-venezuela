@@ -291,6 +291,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | B8 | Volver a la portada | El contador de egresados subió en uno. |
 | B9 | Registrar a alguien **sin** marcar la casilla de autorización | Su nombre **no** aparece en el listado público de la portada, pero sí cuenta en las estadísticas. |
 | B10 | Registrar a alguien **marcando** la casilla | Su nombre y título sí aparecen en la tabla de la portada. |
+| B11 | Registrar a alguien con **2 títulos adicionales** y volver a la portada | «Títulos universitarios en total» sube en 3 (1 persona, 3 títulos); el desglose por categoría cuenta cada título (TSU, Licenciado, Especialización, Maestría, Doctorado) y en la tabla pública su fila muestra «También: …» con los títulos extra. |
 
 ### C. Panel de administración
 

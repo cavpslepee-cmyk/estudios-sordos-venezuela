@@ -447,18 +447,28 @@
   async function resumenCenso() {
     if (!esSupabase) {
       var filas = demoLeer("censo_egresados");
+      /* Igual que la función SQL: cuenta el título principal de cada
+         persona más todos sus títulos adicionales. */
+      var titulos = filas.map(function (f) {
+        return { nivel: f.nivel, categoria: f.categoria_egreso, universidad: f.universidad };
+      }).concat(demoLeer("titulos_adicionales").map(function (t) {
+        return { nivel: t.nivel, categoria: t.categoria_egreso, universidad: t.universidad };
+      }));
       var resumen = {
         total_egresados: filas.length,
+        total_titulos: titulos.length,
         con_investigacion: 0,
         por_nivel: {}, por_categoria: {}, por_estado: {}, por_universidad: {}
       };
-      var universidades = {};
       filas.forEach(function (f) {
         if (f.ha_realizado_investigacion) resumen.con_investigacion++;
-        if (f.nivel) resumen.por_nivel[f.nivel] = (resumen.por_nivel[f.nivel] || 0) + 1;
-        if (f.categoria_egreso) resumen.por_categoria[f.categoria_egreso] = (resumen.por_categoria[f.categoria_egreso] || 0) + 1;
         if (f.estado) resumen.por_estado[f.estado] = (resumen.por_estado[f.estado] || 0) + 1;
-        if (f.universidad) universidades[f.universidad] = (universidades[f.universidad] || 0) + 1;
+      });
+      var universidades = {};
+      titulos.forEach(function (t) {
+        if (t.nivel) resumen.por_nivel[t.nivel] = (resumen.por_nivel[t.nivel] || 0) + 1;
+        if (t.categoria) resumen.por_categoria[t.categoria] = (resumen.por_categoria[t.categoria] || 0) + 1;
+        if (t.universidad) universidades[t.universidad] = (universidades[t.universidad] || 0) + 1;
       });
       Object.keys(universidades).sort(function (a, b) {
         return universidades[b] - universidades[a];
@@ -474,11 +484,16 @@
 
   async function nombresPublicosEgresados() {
     if (!esSupabase) {
+      var adicionales = demoLeer("titulos_adicionales");
       return demoLeer("censo_egresados")
         .filter(function (f) { return f.autoriza_publicar_nombre; })
         .map(function (f) {
+          var otros = adicionales
+            .filter(function (t) { return t.censo_id === f.id; })
+            .map(function (t) { return t.titulo; });
           return {
             nombres: f.nombres, apellidos: f.apellidos, titulo_egreso: f.titulo_egreso,
+            otros_titulos: otros.length ? otros.join(" · ") : null,
             universidad: f.universidad, estado: f.estado, anio_graduacion: f.anio_graduacion
           };
         })

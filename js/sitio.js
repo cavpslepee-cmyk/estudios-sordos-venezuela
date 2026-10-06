@@ -152,26 +152,41 @@
     try {
       var r = await window.DB.resumenCenso();
       var total = Number(r.total_egresados || 0);
+      var totalTitulos = Number(r.total_titulos || 0);
       var conInv = Number(r.con_investigacion || 0);
-      var pregrado = Number((r.por_nivel || {}).PREGRADO || 0);
-      var postgrado = Number((r.por_nivel || {}).POSTGRADO || 0);
+      var porCategoria = r.por_categoria || {};
+      var porNivel = r.por_nivel || {};
 
       contenedor.innerHTML =
         '<div class="tarjetas-contador">' +
           tarjeta(total, "Egresados registrados") +
+          tarjeta(totalTitulos, "Títulos universitarios en total") +
           tarjeta(conInv, "Con trabajo de investigación") +
-          tarjeta(pregrado, "Pregrado") +
-          tarjeta(postgrado, "Postgrado") +
         "</div>" +
+        bloqueNivel("Pregrado", "PREGRADO", porCategoria, porNivel) +
+        bloqueNivel("Postgrado", "POSTGRADO", porCategoria, porNivel) +
         '<p class="texto-suave texto-chico" style="margin-top:1rem">' +
-          "Esta cantidad se actualiza automáticamente cada vez que una persona sorda " +
-          "egresada completa el formulario del censo." +
+          "Se cuentan todos los títulos de cada persona: el principal y los adicionales " +
+          "que registre en el formulario del censo." +
         "</p>";
     } catch (e) {
       contenedor.innerHTML =
         '<div class="aviso aviso-alerta"><p>No se pudo consultar el registro en este momento. ' +
         esc(e.message) + "</p></div>";
     }
+  }
+
+  /* Desglose de los títulos de un nivel (pregrado o postgrado) por categoría. */
+  function bloqueNivel(nombreNivel, nivel, porCategoria, porNivel) {
+    var categorias = cfg.CATEGORIAS_EGRESO.filter(function (c) { return c.nivel === nivel; });
+    var totalNivel = Number(porNivel[nivel] || 0);
+    var tarjetas = categorias.map(function (c) {
+      return tarjeta(Number(porCategoria[c.valor] || 0), etiquetaDe(cfg.CATEGORIAS_EGRESO, c.valor, c.valor));
+    }).join("");
+    return '<div class="desglose-titulos">' +
+        "<h3>" + esc(nombreNivel) + " · " + esc(totalNivel) + " títulos</h3>" +
+        '<div class="tarjetas-contador">' + tarjetas + "</div>" +
+      "</div>";
   }
 
   function tarjeta(numero, etiqueta) {
