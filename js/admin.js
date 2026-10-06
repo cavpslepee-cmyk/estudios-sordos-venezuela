@@ -773,18 +773,32 @@
       zona.innerHTML =
           '<div class="tarjetas-contador" style="margin-bottom:1.4rem">' +
             window.Sitio.tarjeta(r.total_egresados || 0, "Total de egresados") +
+            window.Sitio.tarjeta(r.total_titulos || 0, "Títulos en total") +
             window.Sitio.tarjeta(r.con_investigacion || 0, "Con investigación") +
-            window.Sitio.tarjeta((r.por_nivel || {}).PREGRADO || 0, "Pregrado") +
-            window.Sitio.tarjeta((r.por_nivel || {}).POSTGRADO || 0, "Postgrado") +
           "</div>" +
         '<div class="fila">' +
-          bloqueResumen("Por categoría de egreso", r.por_categoria) +
+          bloqueNivelAdmin("Pregrado", "PREGRADO", r) +
+          bloqueNivelAdmin("Postgrado", "POSTGRADO", r) +
+        "</div>" +
+        '<div class="fila">' +
           bloqueResumen("Por estado", r.por_estado) +
-          bloqueResumen("Universidades con más egresados", r.por_universidad) +
+          bloqueResumen("Universidades con más títulos", r.por_universidad) +
         "</div>";
     } catch (error) {
       zona.innerHTML = window.Sitio.mensajeError(error);
     }
+  }
+
+  /* Desglose de los títulos de un nivel por categoría, con etiquetas legibles. */
+  function bloqueNivelAdmin(nombreNivel, nivel, r) {
+    var porCategoria = r.por_categoria || {};
+    var categorias = cfg.CATEGORIAS_EGRESO.filter(function (c) { return c.nivel === nivel; });
+    var items = categorias.map(function (c) {
+      return "<li>" + esc(c.etiqueta) + ": <strong>" + esc(Number(porCategoria[c.valor] || 0)) + "</strong></li>";
+    }).join("");
+    return '<div style="margin-bottom:1.2rem"><h3>' + esc(nombreNivel) + " · " +
+      esc(Number((r.por_nivel || {})[nivel] || 0)) + " títulos</h3>" +
+      '<ul style="margin:0;padding-left:1.2rem">' + items + "</ul></div>";
   }
 
   function pintarListaCenso(filtroTexto) {
