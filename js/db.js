@@ -457,11 +457,9 @@
       var resumen = {
         total_egresados: filas.length,
         total_titulos: titulos.length,
-        con_investigacion: 0,
         por_nivel: {}, por_categoria: {}, por_estado: {}, por_universidad: {}
       };
       filas.forEach(function (f) {
-        if (f.ha_realizado_investigacion) resumen.con_investigacion++;
         if (f.estado) resumen.por_estado[f.estado] = (resumen.por_estado[f.estado] || 0) + 1;
       });
       var universidades = {};

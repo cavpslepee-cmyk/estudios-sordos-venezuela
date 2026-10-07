@@ -216,7 +216,8 @@ as $$
   select jsonb_build_object(
     'total_egresados', (select count(*) from censo_egresados),
     'total_titulos', (select count(*) from todos_titulos),
-    'con_investigacion', (select count(*) from censo_egresados where ha_realizado_investigacion),
+    /* 'con_investigacion' NO se publica: cuántas personas hicieron
+       investigación solo se ve en el panel (datos de cada fila). */
     'por_nivel', (
       select coalesce(jsonb_object_agg(nivel, c), '{}'::jsonb)
       from (

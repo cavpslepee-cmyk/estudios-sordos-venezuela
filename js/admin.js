@@ -770,11 +770,14 @@
     zona.innerHTML = '<p class="cargando">Consultando</p>';
     try {
       var r = await window.DB.resumenCenso();
+      /* Este dato ya no viene en el resumen público (es privado): se
+         cuenta aquí a partir de las filas del censo que solo ve el admin. */
+      var conInv = censoEnMemoria.filter(function (p) { return p.ha_realizado_investigacion; }).length;
       zona.innerHTML =
           '<div class="tarjetas-contador" style="margin-bottom:1.4rem">' +
             window.Sitio.tarjeta(r.total_egresados || 0, "Total de egresados") +
             window.Sitio.tarjeta(r.total_titulos || 0, "Títulos en total") +
-            window.Sitio.tarjeta(r.con_investigacion || 0, "Con investigación") +
+            window.Sitio.tarjeta(conInv, "Con investigación (solo tú ves este dato)") +
           "</div>" +
         '<div class="fila">' +
           bloqueNivelAdmin("Pregrado", "PREGRADO", r) +

@@ -153,7 +153,6 @@
       var r = await window.DB.resumenCenso();
       var total = Number(r.total_egresados || 0);
       var totalTitulos = Number(r.total_titulos || 0);
-      var conInv = Number(r.con_investigacion || 0);
       var porCategoria = r.por_categoria || {};
       var porNivel = r.por_nivel || {};
 
@@ -161,7 +160,6 @@
         '<div class="tarjetas-contador">' +
           tarjeta(total, "Egresados registrados") +
           tarjeta(totalTitulos, "Títulos universitarios en total") +
-          tarjeta(conInv, "Con trabajo de investigación") +
         "</div>" +
         bloqueNivel("Pregrado", "PREGRADO", porCategoria, porNivel) +
         bloqueNivel("Postgrado", "POSTGRADO", porCategoria, porNivel) +

@@ -374,6 +374,7 @@ o en las seis páginas `.html` (el logo y el favicon).
   contacto del censo, y solo él puede crear, editar o borrar contenido.
 - **Los datos personales del censo no se publican.** El contador de la portada se calcula con una
   función especial en la base de datos que devuelve únicamente totales, nunca nombres ni correos.
+  La cantidad de personas «con trabajo de investigación» no es pública: solo se ve en el panel.
   El listado público de egresados solo incluye a quienes marcaron la casilla de autorización.
 - **Contador de visitas.** Cada navegador se cuenta una sola vez, la primera vez que entra al sitio
   (el panel privado no cuenta). El pie de página muestra únicamente el total, calculado por una
