@@ -255,37 +255,40 @@ que creaste en el Paso 3.
 ### Correos masivos (novedades a los censados)
 La pestaña **Correos masivos** envía un mensaje a todas las personas censadas con correo válido.
 Cada persona recibe un **correo individual** dirigido solo a ella (nadie ve las direcciones de los
-demás). El envío lo hace la propia base de datos llamando a la API gratuita de **Resend**
-(100 correos/día y 3.000/mes en el plan gratis), así que la clave nunca está en el navegador.
+demás). El envío sale **desde tu propio Gmail** (`cavpslepee@gmail.com`, límite 500 correos/día)
+por medio de una *Edge Function* de Supabase llamada `enviar-novedades`: no se depende de ningún
+proveedor externo y la contraseña nunca llega al navegador.
 
 Configuración, una sola vez:
 
-1. Crea una cuenta gratis en <https://resend.com> con tu correo `cavpslepee@gmail.com`.
-2. En **Domains → Add Domain**, escribe `estudios.sordos.uno` y región `us-east-1`. Resend te dará
-   3-4 registros DNS (TXT de verificación, TXT/MX de SPF, DKIM y MX de retorno). Agrégalos donde
-   administras el dominio `sordos.uno` (el mismo lugar donde pusiste el CNAME de GitHub Pages) y
-   pulsa **Verify**. Cuando quede `Verified`, ya puedes usar remitentes como
-   `novedades@estudios.sordos.uno` (no hace falta crear el buzón: Resend solo envía, y las
-   respuestas llegarán a la dirección que configures como reply-to).
-3. En **API Keys**, crea una clave (empieza por `re_...`) con permiso **Sending access** y cópiala.
-4. En Supabase → **SQL Editor**, ejecuta (reemplaza `PEGA_AQUI_TU_CLAVE`):
+1. **Activa la verificación en 2 pasos** en tu Gmail: <https://myaccount.google.com/security> →
+   «Verificación en dos pasos» (con tu teléfono).
+2. **Crea una contraseña de aplicación**: en la misma página de Seguridad →
+   «Contraseñas de aplicaciones» → ponle de nombre `Estudios Sordos` → **Crear**. Google te muestra
+   una clave de 16 letras (ejemplo: `abcd efgh ijkl mnop`). Cópiala. Esa clave NO es tu contraseña
+   de Gmail: solo sirve para que la función envíe correos, y la puedes revocar cuando quieras.
+3. **Despliega la Edge Function** en Supabase: menú **Edge Functions → Create a new function** →
+   nombre: `enviar-novedades` → borra el código de ejemplo y pega el contenido completo del
+   archivo `supabase/functions/enviar-novedades/index.ts` de este repo → **Deploy**. No hace falta
+   configurar secretos del panel: la función lee la configuración de la tabla `secretos_sitio`.
+4. En Supabase → **SQL Editor**, guarda los datos de Gmail (reemplaza la clave del paso 2, sin
+   espacios):
    ```sql
    insert into public.secretos_sitio (clave, valor) values
-     ('resend_api_key',   'PEGA_AQUI_TU_CLAVE'),
-     ('correo_remitente', 'novedades@estudios.sordos.uno'),
-     ('correo_respuestas','cavpslepee@gmail.com'),
+     ('gmail_usuario',    'cavpslepee@gmail.com'),
+     ('gmail_clave_app',  'PEGA_AQUI_LA_CLAVE_DE_16_LETRAS'),
      ('nombre_remitente', 'Estudios Sordos de Venezuela')
    on conflict (clave) do update set valor = excluded.valor;
    ```
-   El remitente sale del dominio verificado (buzón que no existe), y las respuestas de los
-   censados llegan a `correo_respuestas` (tu Gmail).
 5. En el panel, pestaña **Correos masivos**: escribe primero un mensaje de prueba poniendo tu
-   propio correo en «Correo de prueba» y envíalo. Si te llega, ya puedes enviar a todos.
+   propio correo en «Correo de prueba» y envíalo. Si te llega (revisa también la carpeta Enviados
+   de tu Gmail), ya puedes enviar a todos.
 
-Notas: el mensaje se escribe en texto plano (los saltos de línea se respetan); los envíos salen en
-lotes de 100 correos por petición HTTP; si algún día superas los 100 destinatarios en un día, Resend
-rechazará el excedente y podrás reenviar al día siguiente. Si el remitente no está en el dominio
-verificado, la función lo dirá con un mensaje claro.
+Notas: el mensaje se escribe en texto plano (los saltos de línea se respetan); los correos salen
+uno por uno desde tu Gmail, así que un envío a todos los censados puede tardar un minuto en
+completarse; si algún día superas los 500 destinatarios en un día, Gmail rechazará el excedente y
+podrás reenviar al día siguiente. Si la función no está desplegada o faltan los secretos, el panel
+lo dice con un mensaje claro.
 
 ---
 
@@ -356,7 +359,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C18 | Abrir `admin.html` en una ventana de incógnito | Pide acceso: no queda sesión abierta para otros. |
 | C19 | En la pestaña **Noticias**, publicar una con texto, imagen y enlace de YouTube | Aparece en el listado con «imagen y video», y se ve en `noticias.html` y en el bloque «Últimas noticias» de la portada. |
 | C20 | En **Correos masivos**, enviar un mensaje con tu correo en «Correo de prueba» | Pide confirmación, avisa éxito y el mensaje te llega a tu bandeja (remitente el sitio). |
-| C21 | Enviar sin correo de prueba | Pide confirmación con el número de destinatarios y Resend entrega un correo individual a cada persona censada. |
+| C21 | Enviar sin correo de prueba | Pide confirmación con el número de destinatarios y desde tu Gmail sale un correo individual a cada persona censada (tardan hasta un minuto en repartirse). |
 
 ### D. En el teléfono
 
@@ -499,7 +502,7 @@ W_ESTUDIOSSORDOSVENEZUELA/
 | `configuracion_sitio` | Textos editables (correo, autoría, objetivo). |
 | `noticias` | Novedades con texto, imagen/flyer y video. |
 | `visitas` | Una fila por navegador que entra al sitio (solo totales públicos). |
-| `secretos_sitio` | Clave de la API de Resend y remitente de los correos masivos (solo el admin). |
+| `secretos_sitio` | Usuario y contraseña de aplicación de Gmail para los correos masivos (solo el admin). |
 
 ---
 

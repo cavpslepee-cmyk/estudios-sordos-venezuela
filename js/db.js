@@ -322,9 +322,9 @@
   }
 
   /* Envío masivo de novedades a los censados. El envío real lo hace la
-     base de datos (función enviar_novedades) para que la clave de la API
-     de correo nunca llegue al navegador. Con pPruebaA se envía solo a esa
-     dirección, para probar sin molestar a nadie. */
+     Edge Function "enviar-novedades" desde el Gmail del sitio, para que
+     la contraseña de aplicación nunca llegue al navegador. Con pPruebaA
+     se envía solo a esa dirección, para probar sin molestar a nadie. */
   async function enviarNovedades(asunto, cuerpo, pPruebaA) {
     if (!esSupabase) {
       var unicos = {};
@@ -338,11 +338,15 @@
         simulado: true
       };
     }
-    return fallo(await sb().rpc("enviar_novedades", {
-      p_asunto: asunto,
-      p_cuerpo: cuerpo,
-      p_prueba_a: pPruebaA || null
-    }));
+    var res = await sb().functions.invoke("enviar-novedades", {
+      body: { asunto: asunto, cuerpo: cuerpo, prueba_a: pPruebaA || null }
+    });
+    if (res.error) {
+      throw new Error(res.error.message || "No se pudo contactar la función de envío de correos.");
+    }
+    var datos = res.data || {};
+    if (datos.error) throw new Error(datos.error);
+    return datos;
   }
 
   /* -------------------------------------------------------------------

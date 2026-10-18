@@ -463,25 +463,14 @@ create policy "medio_noticia_borrado_admin"
   using (bucket_id = 'noticias');
 
 -- ---------------------------------------------------------------------
--- CORREOS MASIVOS A LOS CENSADOS (proveedor Resend, plan gratuito)
--- La clave de la API vive en la base (tabla secretos_sitio), nunca en el
--- navegador. El envío lo hace la propia base con pg_net: un correo individual
--- por persona en lotes de 100 (POST /emails/batch), así nadie ve las
--- direcciones de los demás y cada censado recibe el mensaje dirigido a sí mismo.
+-- CORREOS MASIVOS A LOS CENSADOS (Gmail propio vía Edge Function)
+-- El envío NO lo hace la base: lo hace la Edge Function "enviar-novedades"
+-- (código en supabase/functions/enviar-novedades/index.ts) usando el Gmail
+-- del sitio con una contraseña de aplicación. Aquí solo vive la tabla de
+-- secretos donde la función lee su configuración (gmail_usuario,
+-- gmail_clave_app, nombre_remitente), protegida para que solo una sesión
+-- de administrador pueda verla.
 -- ---------------------------------------------------------------------
--- pg_net crea su propio esquema "net" al instalarse. Si quedó un esquema
--- "net" vacío de un intento anterior, hay que quitarlo primero o la
--- instalación falla con "schema net is not a member of extension pg_net".
--- Si este bloque llegara a fallar, activa pg_net desde el panel de Supabase:
--- Database → Extensions → buscar "pg_net" → activar, y vuelve a ejecutar
--- este archivo.
-do $$
-begin
-  if not exists (select 1 from pg_extension where extname = 'pg_net') then
-    drop schema if exists net;
-    create extension pg_net;
-  end if;
-end $$;
 
 create table if not exists public.secretos_sitio (
   clave         text primary key,
@@ -496,106 +485,10 @@ create policy "secretos_solo_admin"
   on public.secretos_sitio for all to authenticated
   using (true) with check (true);
 
-create or replace function public.enviar_novedades(p_asunto text, p_cuerpo text, p_prueba_a text default null)
-returns jsonb
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_clave      text;
-  v_remitente  text;
-  v_respuestas text;
-  v_nombre     text;
-  v_de         text;
-  v_correos   text[];
-  v_html      text;
-  v_lote      jsonb;
-  v_ids       jsonb := '[]'::jsonb;
-  v_total     integer;
-  v_lotes     integer;
-  i           integer;
-  v_id        bigint;
-begin
-  if auth.role() is distinct from 'authenticated' then
-    raise exception 'Solo una sesión de administrador puede enviar correos';
-  end if;
-  if coalesce(btrim(p_asunto), '') = '' or coalesce(btrim(p_cuerpo), '') = '' then
-    raise exception 'El asunto y el cuerpo del correo no pueden quedar vacíos';
-  end if;
-
-  select valor into v_clave      from secretos_sitio where clave = 'resend_api_key';
-  select valor into v_remitente  from secretos_sitio where clave = 'correo_remitente';
-  select valor into v_respuestas from secretos_sitio where clave = 'correo_respuestas';
-  select valor into v_nombre     from secretos_sitio where clave = 'nombre_remitente';
-  if coalesce(btrim(v_clave), '') = '' then
-    raise exception 'Falta la clave de Resend: guárdala en secretos_sitio (clave resend_api_key)';
-  end if;
-  v_remitente := nullif(btrim(coalesce(v_remitente, '')), '');
-  if v_remitente is null then
-    raise exception 'Falta el correo remitente: guárdalo en secretos_sitio (clave correo_remitente), del dominio verificado en Resend';
-  end if;
-  v_nombre := coalesce(nullif(btrim(v_nombre), ''), 'Estudios Sordos de Venezuela');
-  /* El remitente es del dominio verificado en Resend (buzón que no existe); las
-     respuestas de los censados deben llegar a una bandeja real. */
-  v_respuestas := coalesce(nullif(btrim(v_respuestas), ''), 'cavpslepee@gmail.com');
-  v_de := v_nombre || ' <' || v_remitente || '>';
-
-  if coalesce(btrim(p_prueba_a), '') <> '' then
-    v_correos := array[lower(btrim(p_prueba_a))];
-  else
-    select coalesce(array_agg(distinct lower(btrim(email))), '{}')
-      into v_correos
-      from censo_egresados
-     where email ~* '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$';
-  end if;
-  v_total := cardinality(v_correos);
-  if v_total = 0 then
-    raise exception 'No hay correos válidos a quienes enviar';
-  end if;
-
-  /* Texto plano escapado y con saltos de línea como <br>. */
-  v_html := replace(replace(replace(p_cuerpo, '&', '&amp;'), '<', '&lt;'), '>', '&gt;');
-  v_html := '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55">'
-         || replace(v_html, chr(10), '<br>')
-         || '<br><br><span style="color:#666;font-size:13px">'
-         || replace(replace(replace(v_nombre, '&', '&amp;'), '<', '&lt;'), '>', '&gt;')
-         || ' · Respondiendo a este correo contactas directamente al equipo del sitio.</span></div>';
-
-  v_lotes := ceil(v_total::numeric / 100)::integer;
-  for i in 0 .. v_lotes - 1 loop
-    /* Un correo por persona dentro del lote: nadie ve las direcciones de los demás. */
-    v_lote := (
-      select jsonb_agg(jsonb_build_object(
-        'from',     v_de,
-        'to',       jsonb_build_array(c),
-        'reply_to', v_respuestas,
-        'subject',  p_asunto,
-        'html',     v_html
-      ))
-      from unnest(v_correos[i * 100 + 1 : (i + 1) * 100]) c
-    );
-    select net.http_post(
-      url     := 'https://api.resend.com/emails/batch',
-      body    := v_lote,
-      headers := jsonb_build_object(
-        'Content-Type',  'application/json',
-        'Authorization', 'Bearer ' || v_clave
-      )
-    ) into v_id;
-    v_ids := v_ids || to_jsonb(v_id);
-  end loop;
-
-  return jsonb_build_object(
-    'destinatarios', v_total,
-    'lotes', v_lotes,
-    'solicitudes', v_ids,
-    'prueba', p_prueba_a is not null
-  );
-end $$;
-
-revoke all on function public.enviar_novedades(text, text, text) from public;
-grant execute on function public.enviar_novedades(text, text, text) to authenticated;
+/* El envío masivo ya no vive en la base (antes: función enviar_novedades
+   con pg_net llamando a un proveedor externo). La elimina si quedó de
+   ejecuciones anteriores del schema. */
+drop function if exists public.enviar_novedades(text, text, text);
 
 -- ---------------------------------------------------------------------
 -- DATOS INICIALES

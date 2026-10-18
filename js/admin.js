@@ -937,7 +937,7 @@
   }
 
   /* =====================================================================
-     CORREOS MASIVOS (Resend desde la base de datos)
+     CORREOS MASIVOS (Gmail del sitio vía Edge Function de Supabase)
      ===================================================================== */
 
   function correosUnicos() {
@@ -997,10 +997,11 @@
       var r = await window.DB.enviarNovedades(asunto, cuerpo, prueba || null);
       var detalle = r.simulado
         ? " (simulado: en modo demostración no sale correo real)"
-        : " en " + (r.lotes || 1) + " lote(s), un correo individual por persona";
+        : " (" + (r.enviados != null ? r.enviados : destinos) + " enviado(s)" +
+          (r.fallos && r.fallos.length ? ", " + r.fallos.length + " con fallo" : "") + ")";
       Util.aviso(aviso, "exito",
-        "Mensaje entregado a Resend para " + (r.destinatarios || destinos) + " destinatario(s)" + detalle +
-        ". Si algo no llega, revisa los Logs en el panel de Resend.");
+        "Mensaje repartido a " + (r.destinatarios || destinos) + " destinatario(s)" + detalle +
+        ". Salieron desde tu Gmail; si algo no llega, revisa la carpeta Enviados.");
       if (!prueba) {
         $("correo-asunto").value = "";
         $("correo-cuerpo").value = "";
