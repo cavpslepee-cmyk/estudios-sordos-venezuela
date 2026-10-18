@@ -409,8 +409,21 @@
     });
     var idNuevo = crypto.randomUUID();
     var registro = Object.assign({}, datos, { id: idNuevo });
+    /* Misma normalización que el índice único de la base: mayúsculas y
+       sin puntos ni espacios. */
+    if (registro.cedula) {
+      registro.cedula = String(registro.cedula).toUpperCase().replace(/[\s.]/g, "");
+    }
 
     if (!esSupabase) {
+      if (registro.cedula) {
+        var repetido = demoLeer("censo_egresados").some(function (f) {
+          return String(f.cedula || "").toUpperCase().replace(/[\s.]/g, "") === registro.cedula;
+        });
+        if (repetido) {
+          throw new Error('duplicate key value violates unique constraint "ux_censo_cedula"');
+        }
+      }
       var nuevo = demoInsertar("censo_egresados", registro);
       var todos = demoLeer("titulos_adicionales");
       extra.forEach(function (t) {

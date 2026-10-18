@@ -74,8 +74,10 @@
 
         <div class="fila">
           <div class="campo">
-            <label for="cedula">Cédula de identidad <span class="texto-suave">(opcional)</span></label>
-            <input type="text" id="cedula" name="cedula" maxlength="20" inputmode="numeric" placeholder="V-00000000">
+            <label for="cedula">Cédula de identidad <span class="obligatorio" aria-hidden="true">*</span></label>
+            <input type="text" id="cedula" name="cedula" maxlength="20" inputmode="numeric"
+                   placeholder="V-00000000" required>
+            <span class="mensaje-error" data-error-para="cedula" hidden></span>
           </div>
           <div class="campo">
             <label for="estado">Estado donde resides <span class="obligatorio" aria-hidden="true">*</span></label>

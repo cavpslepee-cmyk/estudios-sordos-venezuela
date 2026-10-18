@@ -101,6 +101,15 @@ create table if not exists public.titulos_adicionales (
 
 create index if not exists idx_titulos_censo on public.titulos_adicionales (censo_id);
 
+-- Cédula única: impide que una misma persona se cuente dos veces.
+-- Se compara normalizada (mayúsculas, sin puntos ni espacios). Los registros
+-- antiguos sin cédula quedan fuera del índice.
+-- OJO: si ya existen duplicados con la misma cédula, depúralos antes de
+-- ejecutar este archivo (ver README, "Registro duplicado en el censo").
+create unique index if not exists ux_censo_cedula
+  on public.censo_egresados (upper(btrim(replace(replace(cedula, '.', ''), ' ', ''))))
+  where cedula is not null and btrim(cedula) <> '';
+
 -- ---------------------------------------------------------------------
 -- TABLA: videos_portada
 -- ---------------------------------------------------------------------

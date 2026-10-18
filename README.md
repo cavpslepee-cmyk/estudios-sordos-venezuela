@@ -318,6 +318,8 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | B9 | Registrar a alguien **sin** marcar la casilla de autorización | Su nombre **no** aparece en el listado público de la portada, pero sí cuenta en las estadísticas. |
 | B10 | Registrar a alguien **marcando** la casilla | Su nombre y título sí aparecen en la tabla de la portada. |
 | B11 | Registrar a alguien con **2 títulos adicionales** y volver a la portada | «Títulos universitarios en total» sube en 3 (1 persona, 3 títulos); el desglose por categoría cuenta cada título (TSU, Licenciado, Especialización, Maestría, Doctorado) y en la tabla pública su fila muestra «También: …» con los títulos extra. |
+| B12 | Llenar todo con una **cédula ya registrada** y enviar | Aviso en rojo: «Ya existe un registro con esa cédula…». No se crea un duplicado. |
+| B13 | Enviar un registro nuevo y válido | Aviso verde «¡Tu censo fue exitoso!…» y el formulario queda limpio. |
 
 ### C. Panel de administración
 
@@ -410,6 +412,21 @@ o en las seis páginas `.html` (el logo y el favicon).
 - **Haz copias del censo.** Usa el botón **Descargar el censo en CSV** una vez al mes y guarda el
   archivo en tu computadora. También puedes activar copias automáticas en Supabase →
   **Database → Backups**.
+- **Registro duplicado en el censo.** La cédula es obligatoria y **única**: la base rechaza un
+  segundo registro con la misma cédula (aunque se escriba con puntos o minúsculas) y el formulario
+  avisa «Ya existe un registro con esa cédula…». Los duplicados antiguos (anteriores a esta regla)
+  se depuran desde el panel: en **Censo**, compara los dos registros (revisa el botón
+  **Títulos adicionales** de cada uno) y pulsa **Eliminar** en el que sobre, conservando el que
+  tenga más información. Para verlos todos de una vez, en Supabase → SQL Editor:
+  ```sql
+  select upper(btrim(replace(replace(cedula, '.', ''), ' ', ''))) as cedula,
+         count(*) as veces, max(nombres || ' ' || apellidos) as persona
+    from censo_egresados
+   where cedula is not null and btrim(cedula) <> ''
+   group by 1 having count(*) > 1;
+  ```
+  Mientras exista algún duplicado, re-ejecutar `sql/supabase_schema.sql` fallará al crear el
+  índice único `ux_censo_cedula`: depura primero y vuelve a ejecutarlo.
 - **Respalda el proyecto.** Supabase permite descargar toda la base de datos desde
   **Database → Backups → Download**. Los PDF están en **Storage → investigaciones**.
 - **Plan gratuito de Supabase.** Pausa el proyecto si está inactivo durante una semana seguida.

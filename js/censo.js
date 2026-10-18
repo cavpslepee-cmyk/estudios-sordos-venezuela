@@ -119,6 +119,13 @@
 
   /* ------------------------- Validación ------------------------- */
 
+  /* Mayúsculas y sin puntos ni espacios: "v-12.345.678" y "V-12345678"
+     deben contar como la misma cédula al aplicar la unicidad. */
+  function normalizarCedula(valor) {
+    var s = String(valor || "").toUpperCase().replace(/[\s.]/g, "");
+    return s || null;
+  }
+
   function marcarError(nombre, mensaje) {
     var campo = formulario.querySelector('[name="' + nombre + '"]');
     var destino = formulario.querySelector('[data-error-para="' + nombre + '"]');
@@ -163,10 +170,18 @@
 
     exigir("nombres", "Escribe tus nombres.");
     exigir("apellidos", "Escribe tus apellidos.");
+    exigir("cedula", "Escribe tu cédula de identidad (ejemplo: V-12345678).");
     exigir("estado", "Selecciona el estado donde resides.");
     exigir("universidad", "Indica la universidad donde te graduaste.");
     exigir("titulo_egreso", "Escribe el título que obtuviste.");
     exigir("categoria_egreso", "Selecciona tu categoría de egreso.");
+
+    var cedula = normalizarCedula(formulario.querySelector('[name="cedula"]').value);
+    if (cedula && !/^[VE]-?\d{6,9}$/.test(cedula)) {
+      primerInvalido = primerInvalido || marcarError(
+        "cedula", "Escribe la cédula como aparece en tu documento (ejemplo: V-12345678)."
+      );
+    }
 
     var anio = formulario.querySelector('[name="anio_graduacion"]');
     var valorAnio = Number(anio.value);
@@ -210,7 +225,7 @@
     return {
       nombres: Util.texto(formulario.querySelector('[name="nombres"]').value),
       apellidos: Util.texto(formulario.querySelector('[name="apellidos"]').value),
-      cedula: Util.texto(formulario.querySelector('[name="cedula"]').value) || null,
+      cedula: normalizarCedula(formulario.querySelector('[name="cedula"]').value),
       universidad: Util.texto(formulario.querySelector('[name="universidad"]').value),
       carrera: Util.texto(formulario.querySelector('[name="carrera"]').value) || null,
       titulo_egreso: Util.texto(formulario.querySelector('[name="titulo_egreso"]').value),
@@ -251,11 +266,16 @@
 
       Util.aviso(
         aviso, "exito",
-        "¡Gracias! Tu registro quedó guardado y ya forma parte del conteo de profesionales sordos egresados."
+        "¡Tu censo fue exitoso! Tu registro quedó guardado y ya forma parte del conteo de " +
+        "profesionales sordos egresados. Gracias por visibilizarte."
       );
       window.scrollTo({ top: aviso.offsetTop - 120, behavior: "smooth" });
     } catch (error) {
-      Util.aviso(aviso, "error", "No se pudo guardar tu registro: " + error.message);
+      var esDuplicado = /duplicate key|ux_censo_cedula|c[ée]dula ya/i.test(error.message || "");
+      Util.aviso(aviso, "error", esDuplicado
+        ? "Ya existe un registro con esa cédula, así que no hace falta censarte de nuevo. " +
+          "Si necesitas corregir o agregar títulos a tu registro, escribe a cavpslepee@gmail.com."
+        : "No se pudo guardar tu registro: " + error.message);
     } finally {
       botonEnviar.disabled = false;
       botonEnviar.textContent = "Enviar mi registro al censo";
