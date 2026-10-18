@@ -112,6 +112,10 @@
                 aria-controls="panel-censo" aria-selected="false" tabindex="-1" data-panel="panel-censo">
           Censo de egresados
         </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-correos"
+                aria-controls="panel-correos" aria-selected="false" tabindex="-1" data-panel="panel-correos">
+          Correos masivos
+        </button>
       </div>
 
       <!-- ---------- INVESTIGACIONES ---------- -->
@@ -497,6 +501,47 @@
             </div>
           </div>
           <div id="lista-censo"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- CORREOS MASIVOS ---------- -->
+      <div class="panel" id="panel-correos" role="tabpanel" aria-labelledby="pestanya-correos" hidden>
+        <div id="aviso-correos" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Enviar novedades a las personas censadas</h2>
+            <span class="texto-suave" id="total-destinatarios"></span>
+          </div>
+          <p class="texto-suave texto-chico">
+            El correo sale a nombre del sitio y con las direcciones ocultas (CCO): nadie verá los
+            correos de los demás. El envío lo hace la base de datos con tu cuenta gratuita de Brevo
+            (hasta 300 correos al día). Escribe el mensaje en texto plano; los saltos de línea se
+            respetan.
+          </p>
+          <form id="formulario-correo" novalidate>
+            <div class="campo">
+              <label for="correo-asunto">Asunto <span class="obligatorio" aria-hidden="true">*</span></label>
+              <input type="text" id="correo-asunto" name="correo-asunto" required
+                     placeholder="Ejemplo: Nueva investigación publicada en el sitio">
+              <span class="mensaje-error" data-error-para="correo-asunto" hidden></span>
+            </div>
+            <div class="campo">
+              <label for="correo-cuerpo">Mensaje <span class="obligatorio" aria-hidden="true">*</span></label>
+              <textarea id="correo-cuerpo" name="correo-cuerpo" rows="10" required
+                        placeholder="Escribe aquí la novedad: publicaciones, noticias, inscripciones…"></textarea>
+              <span class="mensaje-error" data-error-para="correo-cuerpo" hidden></span>
+            </div>
+            <div class="campo">
+              <label for="correo-prueba">Correo de prueba (opcional)</label>
+              <input type="email" id="correo-prueba" name="correo-prueba"
+                     placeholder="Si lo escribes, el mensaje solo se envía a esta dirección">
+              <span class="mensaje-error" data-error-para="correo-prueba" hidden></span>
+            </div>
+            <div class="botonera">
+              <button class="boton" type="submit" id="boton-enviar-correo">Enviar</button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

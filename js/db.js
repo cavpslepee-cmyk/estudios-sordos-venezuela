@@ -321,6 +321,30 @@
     return fallo(await sb().rpc("total_visitas"));
   }
 
+  /* Envío masivo de novedades a los censados. El envío real lo hace la
+     base de datos (función enviar_novedades) para que la clave de la API
+     de correo nunca llegue al navegador. Con pPruebaA se envía solo a esa
+     dirección, para probar sin molestar a nadie. */
+  async function enviarNovedades(asunto, cuerpo, pPruebaA) {
+    if (!esSupabase) {
+      var unicos = {};
+      demoLeer("censo_egresados").forEach(function (f) {
+        if (f.email) unicos[String(f.email).toLowerCase()] = true;
+      });
+      return {
+        destinatarios: pPruebaA ? 1 : Object.keys(unicos).length,
+        lotes: 1,
+        prueba: !!pPruebaA,
+        simulado: true
+      };
+    }
+    return fallo(await sb().rpc("enviar_novedades", {
+      p_asunto: asunto,
+      p_cuerpo: cuerpo,
+      p_prueba_a: pPruebaA || null
+    }));
+  }
+
   /* -------------------------------------------------------------------
      DICCIONARIO DE SEÑAS
      ------------------------------------------------------------------- */
@@ -578,6 +602,8 @@
 
     registrarVisita: registrarVisita,
     totalVisitas: totalVisitas,
+
+    enviarNovedades: enviarNovedades,
 
     listarSenias: listarSenias,
     listarCategoriasSenias: listarCategoriasSenias,

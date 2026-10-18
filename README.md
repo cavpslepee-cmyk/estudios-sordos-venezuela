@@ -246,10 +246,36 @@ que creaste en el Paso 3.
   y pueden filtrarse por separado.
 
 ### Censo de egresados
-- Ves el total, el desglose por nivel, por categoría, por estado y las universidades con más egresados.
+- Ves el total, el desglose por nivel, por categoría, por estado y las universidades con más títulos.
 - La tabla muestra cada registro con sus datos de contacto.
 - **Descargar el censo en CSV** genera un archivo que abre directamente en Excel, con todos los campos.
 - El contador público de la portada se alimenta solo de esta tabla.
+- La tarjeta «Con investigación» solo existe aquí: el público no ve ese dato.
+
+### Correos masivos (novedades a los censados)
+La pestaña **Correos masivos** envía un mensaje a todas las personas censadas con correo válido,
+con direcciones ocultas (CCO). El envío lo hace la propia base de datos llamando a la API gratuita
+de **Brevo** (300 correos/día en el plan gratis), así que la clave nunca está en el navegador.
+
+Configuración, una sola vez:
+
+1. Crea una cuenta gratis en <https://www.brevo.com> con tu correo `cavpslepee@gmail.com`.
+2. En **Senders & IP → Senders**, agrega el remitente `cavpslepee@gmail.com` con el nombre
+   «Estudios Sordos de Venezuela» y confirma pulsando el enlace que te llega a ese correo.
+3. En **Developers → API keys**, crea una clave y cópiala.
+4. En Supabase → **SQL Editor**, ejecuta (reemplaza `PEGA_AQUI_TU_CLAVE`):
+   ```sql
+   insert into public.secretos_sitio (clave, valor) values
+     ('brevo_api_key',    'PEGA_AQUI_TU_CLAVE'),
+     ('correo_remitente', 'cavpslepee@gmail.com'),
+     ('nombre_remitente', 'Estudios Sordos de Venezuela')
+   on conflict (clave) do update set valor = excluded.valor;
+   ```
+5. En el panel, pestaña **Correos masivos**: escribe primero un mensaje de prueba poniendo tu
+   propio correo en «Correo de prueba» y envíalo. Si te llega, ya puedes enviar a todos.
+
+Notas: el mensaje se escribe en texto plano (los saltos de línea se respetan); si algún día superas
+los 300 destinatarios en un día, Brevo rechazará el excedente y podrás reenviar al día siguiente.
 
 ---
 
@@ -316,6 +342,8 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C17 | Pulsar **Cerrar sesión** | Vuelve a la caja de acceso. |
 | C18 | Abrir `admin.html` en una ventana de incógnito | Pide acceso: no queda sesión abierta para otros. |
 | C19 | En la pestaña **Noticias**, publicar una con texto, imagen y enlace de YouTube | Aparece en el listado con «imagen y video», y se ve en `noticias.html` y en el bloque «Últimas noticias» de la portada. |
+| C20 | En **Correos masivos**, enviar un mensaje con tu correo en «Correo de prueba» | Pide confirmación, avisa éxito y el mensaje te llega a tu bandeja (remitente el sitio). |
+| C21 | Enviar sin correo de prueba | Pide confirmación con el número de destinatarios y Brevo lo reparte con direcciones ocultas. |
 
 ### D. En el teléfono
 
@@ -441,6 +469,9 @@ W_ESTUDIOSSORDOSVENEZUELA/
 | `videos_portada` | Videos intercambiables de la página principal. |
 | `diccionario_senias` | Señas de la LSV, incluidas las acuñadas recientemente. |
 | `configuracion_sitio` | Textos editables (correo, autoría, objetivo). |
+| `noticias` | Novedades con texto, imagen/flyer y video. |
+| `visitas` | Una fila por navegador que entra al sitio (solo totales públicos). |
+| `secretos_sitio` | Clave de la API de Brevo y remitente de los correos masivos (solo el admin). |
 
 ---
 

@@ -431,6 +431,114 @@ create policy "medio_noticia_borrado_admin"
   using (bucket_id = 'noticias');
 
 -- ---------------------------------------------------------------------
+-- CORREOS MASIVOS A LOS CENSADOS (proveedor Brevo, plan gratuito)
+-- La clave de la API vive en la base (tabla secretos_sitio), nunca en el
+-- navegador. El envío lo hace la propia base con pg_net, en lotes con CCO
+-- para que ningún destinatario vea los correos de los demás.
+-- ---------------------------------------------------------------------
+create extension if not exists pg_net with schema net;
+
+create table if not exists public.secretos_sitio (
+  clave         text primary key,
+  valor         text not null,
+  actualizado_el timestamptz not null default now()
+);
+
+alter table public.secretos_sitio enable row level security;
+
+drop policy if exists "secretos_solo_admin" on public.secretos_sitio;
+create policy "secretos_solo_admin"
+  on public.secretos_sitio for all to authenticated
+  using (true) with check (true);
+
+create or replace function public.enviar_novedades(p_asunto text, p_cuerpo text, p_prueba_a text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_clave     text;
+  v_remitente text;
+  v_nombre    text;
+  v_correos   text[];
+  v_html      text;
+  v_lote      jsonb;
+  v_ids       jsonb := '[]'::jsonb;
+  v_total     integer;
+  v_lotes     integer;
+  i           integer;
+  v_id        bigint;
+begin
+  if auth.role() is distinct from 'authenticated' then
+    raise exception 'Solo una sesión de administrador puede enviar correos';
+  end if;
+  if coalesce(btrim(p_asunto), '') = '' or coalesce(btrim(p_cuerpo), '') = '' then
+    raise exception 'El asunto y el cuerpo del correo no pueden quedar vacíos';
+  end if;
+
+  select valor into v_clave     from secretos_sitio where clave = 'brevo_api_key';
+  select valor into v_remitente from secretos_sitio where clave = 'correo_remitente';
+  select valor into v_nombre    from secretos_sitio where clave = 'nombre_remitente';
+  if coalesce(btrim(v_clave), '') = '' then
+    raise exception 'Falta la clave de Brevo: guárdala en secretos_sitio (clave brevo_api_key)';
+  end if;
+  v_remitente := coalesce(nullif(btrim(v_remitente), ''), 'cavpslepee@gmail.com');
+  v_nombre    := coalesce(nullif(btrim(v_nombre), ''), 'Estudios Sordos de Venezuela');
+
+  if coalesce(btrim(p_prueba_a), '') <> '' then
+    v_correos := array[lower(btrim(p_prueba_a))];
+  else
+    select coalesce(array_agg(distinct lower(btrim(email))), '{}')
+      into v_correos
+      from censo_egresados
+     where email ~* '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$';
+  end if;
+  v_total := cardinality(v_correos);
+  if v_total = 0 then
+    raise exception 'No hay correos válidos a quienes enviar';
+  end if;
+
+  /* Texto plano escapado y con saltos de línea como <br>. */
+  v_html := replace(replace(replace(p_cuerpo, '&', '&amp;'), '<', '&lt;'), '>', '&gt;');
+  v_html := '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55">'
+         || replace(v_html, chr(10), '<br>')
+         || '<br><br><span style="color:#666;font-size:13px">'
+         || replace(replace(replace(v_nombre, '&', '&amp;'), '<', '&lt;'), '>', '&gt;')
+         || ' · Respondiendo a este correo contactas directamente al equipo del sitio.</span></div>';
+
+  v_lotes := ceil(v_total::numeric / 90)::integer;
+  for i in 0 .. v_lotes - 1 loop
+    v_lote := jsonb_build_object(
+      'sender',  jsonb_build_object('email', v_remitente, 'name', v_nombre),
+      'replyTo', jsonb_build_object('email', v_remitente, 'name', v_nombre),
+      'subject', p_asunto,
+      'htmlContent', v_html,
+      'bcc', (
+        select coalesce(jsonb_agg(jsonb_build_object('email', c)), '[]'::jsonb)
+        from unnest(v_correos[i * 90 + 1 : (i + 1) * 90]) c
+      )
+    );
+    select net.http_post(
+      url     := 'https://api.brevo.com/v3/smtp/email',
+      body    := v_lote,
+      headers := jsonb_build_object('Content-Type', 'application/json', 'api-key', v_clave)
+    ) into v_id;
+    v_ids := v_ids || to_jsonb(v_id);
+  end loop;
+
+  return jsonb_build_object(
+    'destinatarios', v_total,
+    'lotes', v_lotes,
+    'solicitudes', v_ids,
+    'prueba', p_prueba_a is not null
+  );
+end $$;
+
+revoke all on function public.enviar_novedades(text, text, text) from public;
+grant execute on function public.enviar_novedades(text, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------
 -- DATOS INICIALES
 -- ---------------------------------------------------------------------
 
@@ -576,5 +684,5 @@ where not exists (select 1 from public.noticias);
 -- FIN. Verifica en el Dashboard -> Table Editor que aparezcan:
 --   investigaciones, censo_egresados, titulos_adicionales,
 --   videos_portada, diccionario_senias, configuracion_sitio, noticias,
---   visitas
+--   visitas, secretos_sitio
 -- ---------------------------------------------------------------------

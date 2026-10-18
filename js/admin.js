@@ -889,6 +889,7 @@
     try {
       censoEnMemoria = await window.DB.listarCenso();
       pintarListaCenso($("buscador-censo").value.trim());
+      pintarTotalDestinatarios();
       await cargarResumenCensoAdmin();
     } catch (error) {
       $("lista-censo").innerHTML = window.Sitio.mensajeError(error);
@@ -936,6 +937,83 @@
   }
 
   /* =====================================================================
+     CORREOS MASIVOS (Brevo desde la base de datos)
+     ===================================================================== */
+
+  function correosUnicos() {
+    var vistos = {};
+    censoEnMemoria.forEach(function (p) {
+      var c = String(p.email || "").trim().toLowerCase();
+      if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c)) vistos[c] = true;
+    });
+    return Object.keys(vistos);
+  }
+
+  function pintarTotalDestinatarios() {
+    var el = $("total-destinatarios");
+    if (!el) return;
+    var n = correosUnicos().length;
+    el.textContent = n
+      ? n + " destinatarios con correo válido"
+      : "Sin correos válidos todavía";
+  }
+
+  function prepararFormularioCorreo() {
+    $("formulario-correo").addEventListener("submit", enviarCorreoMasivo);
+  }
+
+  async function enviarCorreoMasivo(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-correos");
+    Util.limpiarAviso(aviso);
+
+    var asunto = textoDe("correo-asunto", $("formulario-correo"));
+    var cuerpo = textoDe("correo-cuerpo", $("formulario-correo"));
+    var prueba = textoDe("correo-prueba", $("formulario-correo"));
+    if (!asunto || !cuerpo) {
+      Util.aviso(aviso, "error", "El asunto y el mensaje son obligatorios.");
+      return;
+    }
+    if (prueba && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(prueba)) {
+      Util.aviso(aviso, "error", "El correo de prueba no parece una dirección válida.");
+      return;
+    }
+
+    var destinos = prueba ? 1 : correosUnicos().length;
+    if (!destinos) {
+      Util.aviso(aviso, "error", "No hay ninguna dirección válida a la cual enviar.");
+      return;
+    }
+    if (!window.confirm(
+      prueba
+        ? "Se enviará SOLO a " + prueba + " como prueba. ¿Continuar?"
+        : "Se enviará el mensaje a " + destinos + " direcciones (ocultas entre sí). ¿Continuar?"
+    )) return;
+
+    var boton = $("boton-enviar-correo");
+    boton.disabled = true;
+    boton.textContent = "Enviando…";
+    try {
+      var r = await window.DB.enviarNovedades(asunto, cuerpo, prueba || null);
+      var detalle = r.simulado
+        ? " (simulado: en modo demostración no sale correo real)"
+        : " en " + (r.lotes || 1) + " lote(s) con direcciones ocultas";
+      Util.aviso(aviso, "exito",
+        "Mensaje entregado a Brevo para " + (r.destinatarios || destinos) + " destinatario(s)" + detalle +
+        ". Revisa tu bandeja de Brevo si algo no llega.");
+      if (!prueba) {
+        $("correo-asunto").value = "";
+        $("correo-cuerpo").value = "";
+      }
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "Enviar";
+    }
+  }
+
+  /* =====================================================================
      ARRANQUE
      ===================================================================== */
 
@@ -950,6 +1028,7 @@
     prepararFormularioNoticia();
     prepararFormularioVideo();
     prepararFormularioSenia();
+    prepararFormularioCorreo();
     iniciarAcceso();
 
     $("buscador-censo").addEventListener("input", function () {
