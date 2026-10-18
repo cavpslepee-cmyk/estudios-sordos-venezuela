@@ -366,6 +366,31 @@
     avisoModoDemo();
     anioEnElPie();
     iniciarContadorVisitas();
+    aplicarVisibilidadSeminario();
+  }
+
+  /* La pestaña del seminario se enciende desde el panel (clave
+     seminario_habilitado en configuracion_sitio). Mientras esté apagada,
+     los enlaces y bloques del seminario solo los ve quien tiene sesión
+     de administrador, para poder probar sin que el público los vea. */
+  function aplicarVisibilidadSeminario() {
+    Promise.all([
+      window.DB.obtenerConfiguracion().catch(function () { return {}; }),
+      window.DB.sesionActual().catch(function () { return null; })
+    ]).then(function (resultados) {
+      var config = resultados[0] || {};
+      var haySesion = !!resultados[1];
+      var visible = config.seminario_habilitado === "si" || haySesion;
+      document.querySelectorAll("[data-seminario]").forEach(function (el) {
+        el.hidden = !visible;
+      });
+      var contenido = document.getElementById("contenido-seminario");
+      if (contenido) {
+        contenido.hidden = !visible;
+        var avisoNo = document.getElementById("seminario-no-disponible");
+        if (avisoNo) avisoNo.hidden = visible;
+      }
+    });
   }
 
   if (document.readyState === "loading") {

@@ -25,6 +25,7 @@
       <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
       <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
         <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="seminario.html" data-pagina="seminario.html" data-seminario hidden>Seminario</a>
         <a href="noticias.html" data-pagina="noticias.html">Noticias</a>
         <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
         <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
@@ -115,6 +116,10 @@
         <button class="pestanya" type="button" role="tab" id="pestanya-correos"
                 aria-controls="panel-correos" aria-selected="false" tabindex="-1" data-panel="panel-correos">
           Correos masivos
+        </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-sitio"
+                aria-controls="panel-sitio" aria-selected="false" tabindex="-1" data-panel="panel-sitio">
+          Sitio
         </button>
       </div>
 
@@ -544,6 +549,29 @@
           </form>
         </div>
       </div>
+
+      <!-- ---------- SITIO ---------- -->
+      <div class="panel" id="panel-sitio" role="tabpanel" aria-labelledby="pestanya-sitio" hidden>
+        <div id="aviso-sitio" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Pestaña del seminario</h2>
+          </div>
+          <p class="texto-suave texto-chico">
+            Mientras esté desactivada, la pestaña «Seminario», el afiche de la portada y la
+            planilla de inscripción quedan ocultos para el público; tú los sigues viendo con
+            tu sesión iniciada, para las pruebas. Actívala cuando el seminario sea definitivo.
+          </p>
+          <label class="opcion">
+            <input type="checkbox" id="seminario-habilitado">
+            <span>Mostrar la pestaña del seminario a todo el público</span>
+          </label>
+          <div class="botonera">
+            <button class="boton" type="button" id="boton-guardar-seminario">Guardar</button>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -556,6 +584,7 @@
       <div>
         <h2>Secciones</h2>
         <ul>
+          <li data-seminario hidden><a href="seminario.html">Seminario nacional de LSV</a></li>
           <li><a href="noticias.html">Noticias de la comunidad</a></li>
           <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
           <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>

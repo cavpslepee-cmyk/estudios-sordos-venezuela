@@ -1023,6 +1023,30 @@
     await cargarCenso();
   }
 
+  function prepararPanelSitio() {
+    var checkbox = $("seminario-habilitado");
+    var boton = $("boton-guardar-seminario");
+    var avisoSitio = $("aviso-sitio");
+
+    window.DB.obtenerConfiguracion().then(function (config) {
+      checkbox.checked = config.seminario_habilitado === "si";
+    }).catch(function () { /* sin configuración: queda apagada */ });
+
+    boton.addEventListener("click", function () {
+      boton.disabled = true;
+      window.DB.guardarConfiguracion("seminario_habilitado", checkbox.checked ? "si" : "no")
+        .then(function () {
+          Util.aviso(avisoSitio, "exito", checkbox.checked
+            ? "Pestaña del seminario activada: ya la ve todo el público."
+            : "Pestaña del seminario oculta para el público; con tu sesión iniciada la sigues viendo.");
+        })
+        .catch(function (error) {
+          Util.aviso(avisoSitio, "error", "No se pudo guardar el cambio: " + error.message);
+        })
+        .finally(function () { boton.disabled = false; });
+    });
+  }
+
   function iniciar() {
     iniciarPestanyas();
     prepararFormularioInvestigacion();
@@ -1030,6 +1054,7 @@
     prepararFormularioVideo();
     prepararFormularioSenia();
     prepararFormularioCorreo();
+    prepararPanelSitio();
     iniciarAcceso();
 
     $("buscador-censo").addEventListener("input", function () {

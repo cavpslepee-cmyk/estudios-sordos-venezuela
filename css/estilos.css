@@ -1087,6 +1087,44 @@ td.acciones { white-space: nowrap; display: flex; gap: .4rem; flex-wrap: wrap; }
   place-items: center;
 }
 
+/* ---------------- Seminario ---------------- */
+.apertura-seminario { text-align: center; }
+
+.apertura-seminario h1 { color: var(--navy); }
+
+.seminario-lema {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--turquesa-oscuro);
+  margin-bottom: 1rem;
+}
+
+.insignia-pronto {
+  background: #e85c2b;
+  color: #fff;
+  border-color: #e85c2b;
+  font-size: .85rem;
+  padding: .35rem 1rem;
+}
+
+.flyer {
+  margin: 1.6rem auto;
+  max-width: 560px;
+}
+
+.flyer img {
+  width: 100%;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-alzada);
+}
+
+.seccion h3 {
+  color: var(--navy);
+  margin: 1.6rem 0 .8rem;
+}
+
+.conjunto-opciones-invalido { border-color: var(--error); }
+
 /* ---------------- Diseño adaptable ---------------- */
 @media (max-width: 860px) {
   .boton-menu { display: inline-block; order: 3; }

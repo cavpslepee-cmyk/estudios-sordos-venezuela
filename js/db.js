@@ -560,6 +560,50 @@
   }
 
   /* -------------------------------------------------------------------
+     SEMINARIO: INSCRIPCIONES Y DIAPOSITIVAS DE PONENTES
+     ------------------------------------------------------------------- */
+  /* El bucket es privado: se guarda la ruta interna, no una URL pública. */
+  async function subirDiapositivaSeminario(archivo) {
+    if (!archivo) return null;
+    if (!esSupabase) return "demo-" + archivo.name;
+    var nombre = archivo.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    var ruta = "ponencias/" + Date.now() + "-" + nombre;
+    var res = await sb().storage.from(cfg.BUCKET_SEMINARIO).upload(ruta, archivo, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: archivo.type || "application/pdf"
+    });
+    if (res.error) throw new Error(res.error.message);
+    return res.data.path;
+  }
+
+  async function registrarInscripcionSeminario(datos, archivoDiapositivas) {
+    var registro = Object.assign({}, datos);
+    /* Misma normalización que el índice único de la base. */
+    if (registro.documento) {
+      registro.documento = String(registro.documento).toUpperCase().replace(/[\s.]/g, "");
+    }
+    registro.ruta_diapositivas = await subirDiapositivaSeminario(archivoDiapositivas);
+
+    if (!esSupabase) {
+      if (registro.documento) {
+        var repetido = demoLeer("seminario_inscripciones").some(function (f) {
+          return String(f.documento || "").toUpperCase().replace(/[\s.]/g, "") === registro.documento;
+        });
+        if (repetido) {
+          throw new Error('duplicate key value violates unique constraint "ux_seminario_documento"');
+        }
+      }
+      return demoInsertar("seminario_inscripciones", registro);
+    }
+
+    /* Sin .select(): el público solo inserta (privacidad), así que un
+       RETURNING no devolvería filas. */
+    fallo(await sb().from("seminario_inscripciones").insert(registro));
+    return registro;
+  }
+
+  /* -------------------------------------------------------------------
      ARCHIVOS EN SUPABASE STORAGE
      ------------------------------------------------------------------- */
   async function subirAlBucket(bucket, archivo, tipoPorDefecto) {
@@ -608,6 +652,20 @@
     return mapa;
   }
 
+  async function guardarConfiguracion(clave, valor) {
+    if (!esSupabase) {
+      var filas = demoLeer("configuracion_sitio");
+      var hallada = null;
+      filas.forEach(function (f) { if (f.clave === clave) hallada = f; });
+      if (hallada) hallada.valor = valor;
+      else filas.push({ clave: clave, valor: valor });
+      demoGuardar("configuracion_sitio", filas);
+      return valor;
+    }
+    fallo(await sb().from("configuracion_sitio").upsert({ clave: clave, valor: valor }));
+    return valor;
+  }
+
   /* -------------------------------------------------------------------
      API PÚBLICA
      ------------------------------------------------------------------- */
@@ -651,9 +709,12 @@
     nombresPublicosEgresados: nombresPublicosEgresados,
     opcionesUniversidades: opcionesUniversidades,
 
+    registrarInscripcionSeminario: registrarInscripcionSeminario,
+
     subirPdf: subirPdf,
     subirImagenNoticia: subirImagenNoticia,
     subirVideoNoticia: subirVideoNoticia,
-    obtenerConfiguracion: obtenerConfiguracion
+    obtenerConfiguracion: obtenerConfiguracion,
+    guardarConfiguracion: guardarConfiguracion
   };
 })();

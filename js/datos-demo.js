@@ -311,6 +311,7 @@ window.DATOS_DEMO = {
   configuracion_sitio: [
     { clave: "correo_recepcion", valor: "cavpslepee@gmail.com" },
     { clave: "autor_sitio", valor: "Dr. Javier Ramírez González" },
+    { clave: "seminario_habilitado", valor: "no" },
     { clave: "texto_objetivo", valor: "Visibilizar los trabajos realizados por personas sordas a nivel de educación universitaria y determinar la cantidad de egresados en la actualidad." }
   ]
 };

@@ -28,6 +28,7 @@
       <button class="boton-menu" type="button" aria-expanded="false" aria-controls="navegacion-principal">☰ Menú</button>
       <nav class="navegacion" id="navegacion-principal" aria-label="Navegación principal">
         <a href="index.html" data-pagina="index.html">Inicio</a>
+        <a href="seminario.html" data-pagina="seminario.html" data-seminario hidden>Seminario</a>
         <a href="noticias.html" data-pagina="noticias.html">Noticias</a>
         <a href="investigaciones.html" data-pagina="investigaciones.html">Investigaciones</a>
         <a href="diccionario.html" data-pagina="diccionario.html">Diccionario LSV</a>
@@ -77,6 +78,28 @@
         (las instrucciones están en <code>README.md</code>).
       </p>
     </div>
+
+    <section class="seccion apertura-seminario" data-seminario hidden>
+      <p><span class="insignia insignia-pronto">¡Muy pronto!</span></p>
+      <div class="encabezado-seccion">
+        <h2>I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana</h2>
+        <p>
+          «Sordedad, Ganancia Sorda e Innovación Didáctica» · Modalidad híbrida:
+          presencial en Caracas y en vivo por YouTube, con accesibilidad en
+          Sistema de Señas Internacional (SSI).
+        </p>
+      </div>
+      <figure class="flyer">
+        <img src="img/flyer-seminario-lsv.png"
+             alt="Afiche del I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana con sus cinco ejes temáticos, la modalidad híbrida y el portal web oficial"
+             loading="lazy">
+      </figure>
+      <p>
+        <a class="boton" href="seminario.html">Ver el programa e inscribirme</a>
+      </p>
+    </section>
+
+    <hr class="separador" data-seminario hidden>
 
     <section class="seccion">
       <div class="encabezado-seccion">
@@ -277,6 +300,15 @@
       </div>
       <div class="apoyos">
         <figure class="figura apoyo">
+          <img src="img/iaet-logo.png"
+               alt="Logotipo del IAET: las letras IAET en turquesa junto a un círculo formado por cuadros turquesas y verdes"
+               loading="lazy">
+          <figcaption>
+            <strong>IAET.</strong> Organización que apoya esta página web y el
+            I Seminario Nacional de Actualización Pedagógica en LSV.
+          </figcaption>
+        </figure>
+        <figure class="figura apoyo">
           <img src="img/instructores-lsv-venezuela.jpg"
                alt="Logotipo de Instructores LSV Venezuela: dos manos señando dentro de un círculo con los colores de la bandera venezolana"
                loading="lazy">
@@ -305,6 +337,7 @@
       <div>
         <h2>Secciones</h2>
         <ul>
+          <li data-seminario hidden><a href="seminario.html">Seminario nacional de LSV</a></li>
           <li><a href="noticias.html">Noticias de la comunidad</a></li>
           <li><a href="investigaciones.html">Investigaciones publicadas</a></li>
           <li><a href="diccionario.html">Diccionario de Lengua de Señas</a></li>

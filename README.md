@@ -360,6 +360,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C19 | En la pestaña **Noticias**, publicar una con texto, imagen y enlace de YouTube | Aparece en el listado con «imagen y video», y se ve en `noticias.html` y en el bloque «Últimas noticias» de la portada. |
 | C20 | En **Correos masivos**, enviar un mensaje con tu correo en «Correo de prueba» | Pide confirmación, avisa éxito y el mensaje te llega a tu bandeja (remitente el sitio). |
 | C21 | Enviar sin correo de prueba | Pide confirmación con el número de destinatarios y desde tu Gmail sale un correo individual a cada persona censada (tardan hasta un minuto en repartirse). |
+| C22 | En la pestaña **Sitio**, activar o desactivar la pestaña del seminario y guardar | Desactivada, el público no ve la pestaña «Seminario», ni el afiche de la portada, ni la planilla (solo un aviso de «en preparación»); con tu sesión iniciada tú los sigues viendo para probar. |
 
 ### D. En el teléfono
 

@@ -32,6 +32,9 @@ window.CONFIG = {
   /* Bucket de Supabase Storage donde se guardan imágenes y videos de noticias */
   BUCKET_NOTICIAS: "noticias",
 
+  /* Bucket PRIVADO de Supabase Storage para las diapositivas de los ponentes */
+  BUCKET_SEMINARIO: "seminario-ponencias",
+
   /* Categorías de las investigaciones (deben coincidir con el ENUM del SQL) */
   CATEGORIAS_INVESTIGACION: [
     { valor: "EDUCACION",   etiqueta: "Educación" },
