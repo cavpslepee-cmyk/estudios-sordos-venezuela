@@ -445,6 +445,7 @@ create policy "medio_noticia_borrado_admin"
 -- navegador. El envío lo hace la propia base con pg_net, en lotes con CCO
 -- para que ningún destinatario vea los correos de los demás.
 -- ---------------------------------------------------------------------
+create schema if not exists net;
 create extension if not exists pg_net with schema net;
 
 create table if not exists public.secretos_sitio (
