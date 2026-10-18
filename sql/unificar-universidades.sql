@@ -62,7 +62,18 @@ insert into mapa_universidades (variante, canonica) values
   -- IUPFAN
   ('instituto universitario politécnico de las fuerzas armadas nacionales ( iupfan)', 'Instituto Universitario Politécnico de las Fuerzas Armadas Nacionales (IUPFAN)'),
   -- Simón Bolívar
-  ('universidad nacional experimental simón bolivar', 'Universidad Nacional Experimental Simón Bolívar');
+  ('universidad nacional experimental simón bolivar', 'Universidad Nacional Experimental Simón Bolívar'),
+  -- Sedes de la UPEL con nombre propio (decisión del 2026-10-18)
+  ('upel maracay', 'UNIVERSIDAD PEDAGÓGICA EXPERIMENTAL LIBERTADOR (UPEL-IP MARACAY)'),
+  ('upel-ipb luis beltrán prieto figueroa', 'UNIVERSIDAD PEDAGÓGICA EXPERIMENTAL LIBERTADOR (UPEL-IPB LUIS BELTRÁN PRIETO FIGUEROA)'),
+  -- Expansión de siglas (nombres verificados con fuentes oficiales, 2026-10-18)
+  ('unefa', 'UNIVERSIDAD NACIONAL EXPERIMENTAL POLITÉCNICA DE LA FUERZA ARMADA NACIONAL BOLIVARIANA (UNEFA)'),
+  ('uptaeb', 'UNIVERSIDAD POLITÉCNICA TERRITORIAL DE LARA "ANDRÉS ELOY BLANCO" (UPTAEB)'),
+  ('unexca', 'UNIVERSIDAD NACIONAL EXPERIMENTAL DE LA GRAN CARACAS (UNEXCA)'),
+  ('iujo', 'Instituto Universitario Jesús Obrero (IUJO)'),
+  ('inces', 'Instituto Nacional de Capacitación y Educación Socialista (INCES)'),
+  ('cuam', 'Colegio Universitario de Administración y Mercadeo (CUAM)'),
+  ('avepane', 'Asociación Venezolana de Padres y Amigos de Niños Excepcionales (AVEPANE)');
 
 update public.censo_egresados c
    set universidad = m.canonica
