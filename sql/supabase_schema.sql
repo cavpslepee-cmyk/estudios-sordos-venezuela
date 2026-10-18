@@ -440,10 +440,11 @@ create policy "medio_noticia_borrado_admin"
   using (bucket_id = 'noticias');
 
 -- ---------------------------------------------------------------------
--- CORREOS MASIVOS A LOS CENSADOS (proveedor Brevo, plan gratuito)
+-- CORREOS MASIVOS A LOS CENSADOS (proveedor Resend, plan gratuito)
 -- La clave de la API vive en la base (tabla secretos_sitio), nunca en el
--- navegador. El envío lo hace la propia base con pg_net, en lotes con CCO
--- para que ningún destinatario vea los correos de los demás.
+-- navegador. El envío lo hace la propia base con pg_net: un correo individual
+-- por persona en lotes de 100 (POST /emails/batch), así nadie ve las
+-- direcciones de los demás y cada censado recibe el mensaje dirigido a sí mismo.
 -- ---------------------------------------------------------------------
 -- pg_net crea su propio esquema "net" al instalarse. Si quedó un esquema
 -- "net" vacío de un intento anterior, hay que quitarlo primero o la
@@ -479,9 +480,11 @@ security definer
 set search_path = public
 as $$
 declare
-  v_clave     text;
-  v_remitente text;
-  v_nombre    text;
+  v_clave      text;
+  v_remitente  text;
+  v_respuestas text;
+  v_nombre     text;
+  v_de         text;
   v_correos   text[];
   v_html      text;
   v_lote      jsonb;
@@ -498,14 +501,22 @@ begin
     raise exception 'El asunto y el cuerpo del correo no pueden quedar vacíos';
   end if;
 
-  select valor into v_clave     from secretos_sitio where clave = 'brevo_api_key';
-  select valor into v_remitente from secretos_sitio where clave = 'correo_remitente';
-  select valor into v_nombre    from secretos_sitio where clave = 'nombre_remitente';
+  select valor into v_clave      from secretos_sitio where clave = 'resend_api_key';
+  select valor into v_remitente  from secretos_sitio where clave = 'correo_remitente';
+  select valor into v_respuestas from secretos_sitio where clave = 'correo_respuestas';
+  select valor into v_nombre     from secretos_sitio where clave = 'nombre_remitente';
   if coalesce(btrim(v_clave), '') = '' then
-    raise exception 'Falta la clave de Brevo: guárdala en secretos_sitio (clave brevo_api_key)';
+    raise exception 'Falta la clave de Resend: guárdala en secretos_sitio (clave resend_api_key)';
   end if;
-  v_remitente := coalesce(nullif(btrim(v_remitente), ''), 'cavpslepee@gmail.com');
-  v_nombre    := coalesce(nullif(btrim(v_nombre), ''), 'Estudios Sordos de Venezuela');
+  v_remitente := nullif(btrim(coalesce(v_remitente, '')), '');
+  if v_remitente is null then
+    raise exception 'Falta el correo remitente: guárdalo en secretos_sitio (clave correo_remitente), del dominio verificado en Resend';
+  end if;
+  v_nombre := coalesce(nullif(btrim(v_nombre), ''), 'Estudios Sordos de Venezuela');
+  /* El remitente es del dominio verificado en Resend (buzón que no existe); las
+     respuestas de los censados deben llegar a una bandeja real. */
+  v_respuestas := coalesce(nullif(btrim(v_respuestas), ''), 'cavpslepee@gmail.com');
+  v_de := v_nombre || ' <' || v_remitente || '>';
 
   if coalesce(btrim(p_prueba_a), '') <> '' then
     v_correos := array[lower(btrim(p_prueba_a))];
@@ -528,22 +539,26 @@ begin
          || replace(replace(replace(v_nombre, '&', '&amp;'), '<', '&lt;'), '>', '&gt;')
          || ' · Respondiendo a este correo contactas directamente al equipo del sitio.</span></div>';
 
-  v_lotes := ceil(v_total::numeric / 90)::integer;
+  v_lotes := ceil(v_total::numeric / 100)::integer;
   for i in 0 .. v_lotes - 1 loop
-    v_lote := jsonb_build_object(
-      'sender',  jsonb_build_object('email', v_remitente, 'name', v_nombre),
-      'replyTo', jsonb_build_object('email', v_remitente, 'name', v_nombre),
-      'subject', p_asunto,
-      'htmlContent', v_html,
-      'bcc', (
-        select coalesce(jsonb_agg(jsonb_build_object('email', c)), '[]'::jsonb)
-        from unnest(v_correos[i * 90 + 1 : (i + 1) * 90]) c
-      )
+    /* Un correo por persona dentro del lote: nadie ve las direcciones de los demás. */
+    v_lote := (
+      select jsonb_agg(jsonb_build_object(
+        'from',     v_de,
+        'to',       jsonb_build_array(c),
+        'reply_to', v_respuestas,
+        'subject',  p_asunto,
+        'html',     v_html
+      ))
+      from unnest(v_correos[i * 100 + 1 : (i + 1) * 100]) c
     );
     select net.http_post(
-      url     := 'https://api.brevo.com/v3/smtp/email',
+      url     := 'https://api.resend.com/emails/batch',
       body    := v_lote,
-      headers := jsonb_build_object('Content-Type', 'application/json', 'api-key', v_clave)
+      headers := jsonb_build_object(
+        'Content-Type',  'application/json',
+        'Authorization', 'Bearer ' || v_clave
+      )
     ) into v_id;
     v_ids := v_ids || to_jsonb(v_id);
   end loop;

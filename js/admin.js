@@ -937,7 +937,7 @@
   }
 
   /* =====================================================================
-     CORREOS MASIVOS (Brevo desde la base de datos)
+     CORREOS MASIVOS (Resend desde la base de datos)
      ===================================================================== */
 
   function correosUnicos() {
@@ -987,7 +987,7 @@
     if (!window.confirm(
       prueba
         ? "Se enviará SOLO a " + prueba + " como prueba. ¿Continuar?"
-        : "Se enviará el mensaje a " + destinos + " direcciones (ocultas entre sí). ¿Continuar?"
+        : "Se enviará un correo individual a cada una de las " + destinos + " direcciones censadas. ¿Continuar?"
     )) return;
 
     var boton = $("boton-enviar-correo");
@@ -997,10 +997,10 @@
       var r = await window.DB.enviarNovedades(asunto, cuerpo, prueba || null);
       var detalle = r.simulado
         ? " (simulado: en modo demostración no sale correo real)"
-        : " en " + (r.lotes || 1) + " lote(s) con direcciones ocultas";
+        : " en " + (r.lotes || 1) + " lote(s), un correo individual por persona";
       Util.aviso(aviso, "exito",
-        "Mensaje entregado a Brevo para " + (r.destinatarios || destinos) + " destinatario(s)" + detalle +
-        ". Revisa tu bandeja de Brevo si algo no llega.");
+        "Mensaje entregado a Resend para " + (r.destinatarios || destinos) + " destinatario(s)" + detalle +
+        ". Si algo no llega, revisa los Logs en el panel de Resend.");
       if (!prueba) {
         $("correo-asunto").value = "";
         $("correo-cuerpo").value = "";
