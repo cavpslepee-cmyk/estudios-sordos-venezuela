@@ -445,8 +445,19 @@ create policy "medio_noticia_borrado_admin"
 -- navegador. El envío lo hace la propia base con pg_net, en lotes con CCO
 -- para que ningún destinatario vea los correos de los demás.
 -- ---------------------------------------------------------------------
-create schema if not exists net;
-create extension if not exists pg_net with schema net;
+-- pg_net crea su propio esquema "net" al instalarse. Si quedó un esquema
+-- "net" vacío de un intento anterior, hay que quitarlo primero o la
+-- instalación falla con "schema net is not a member of extension pg_net".
+-- Si este bloque llegara a fallar, activa pg_net desde el panel de Supabase:
+-- Database → Extensions → buscar "pg_net" → activar, y vuelve a ejecutar
+-- este archivo.
+do $$
+begin
+  if not exists (select 1 from pg_extension where extname = 'pg_net') then
+    drop schema if exists net;
+    create extension pg_net;
+  end if;
+end $$;
 
 create table if not exists public.secretos_sitio (
   clave         text primary key,
