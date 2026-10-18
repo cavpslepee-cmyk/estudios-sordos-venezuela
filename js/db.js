@@ -539,6 +539,22 @@
     return res.data;
   }
 
+  async function opcionesUniversidades() {
+    if (!esSupabase) {
+      var vistos = {};
+      demoLeer("censo_egresados").concat(demoLeer("titulos_adicionales")).forEach(function (f) {
+        var nombre = String(f.universidad || "").trim();
+        if (nombre) vistos[nombre.toLowerCase()] = nombre;
+      });
+      return Object.keys(vistos)
+        .map(function (k) { return vistos[k]; })
+        .sort(function (a, b) { return a.localeCompare(b, "es"); });
+    }
+    var res = await sb().rpc("opciones_universidades");
+    if (res.error) throw new Error(res.error.message);
+    return res.data.map(function (f) { return f.nombre; });
+  }
+
   /* -------------------------------------------------------------------
      ARCHIVOS EN SUPABASE STORAGE
      ------------------------------------------------------------------- */
@@ -629,6 +645,7 @@
     eliminarCenso: eliminarCenso,
     resumenCenso: resumenCenso,
     nombresPublicosEgresados: nombresPublicosEgresados,
+    opcionesUniversidades: opcionesUniversidades,
 
     subirPdf: subirPdf,
     subirImagenNoticia: subirImagenNoticia,

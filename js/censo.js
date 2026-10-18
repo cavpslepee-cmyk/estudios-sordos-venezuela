@@ -58,7 +58,7 @@
       '<div class="fila">' +
         '<div class="campo">' +
           '<label for="universidad-extra-' + n + '">Universidad</label>' +
-          '<input type="text" id="universidad-extra-' + n + '" data-campo="universidad" maxlength="160">' +
+          '<input type="text" id="universidad-extra-' + n + '" data-campo="universidad" maxlength="160" list="opciones-universidad" autocomplete="organization">' +
         "</div>" +
         '<div class="campo">' +
           '<label for="anio-extra-' + n + '">Año</label>' +
@@ -284,6 +284,22 @@
 
   /* ------------------------- Arranque ------------------------- */
 
+  async function cargarOpcionesUniversidad() {
+    var lista = document.getElementById("opciones-universidad");
+    if (!lista) return;
+    try {
+      var nombres = await window.DB.opcionesUniversidades();
+      lista.innerHTML = "";
+      nombres.forEach(function (nombre) {
+        var opcion = document.createElement("option");
+        opcion.value = nombre;
+        lista.appendChild(opcion);
+      });
+    } catch (error) {
+      /* Sin sugerencias el campo sigue funcionando como texto libre. */
+    }
+  }
+
   function iniciar() {
     formulario = document.getElementById("formulario-censo");
     aviso = document.getElementById("aviso-formulario");
@@ -292,6 +308,7 @@
 
     llenarEstados();
     llenarCategorias();
+    cargarOpcionesUniversidad();
 
     document.getElementById("agregar-titulo").addEventListener("click", function () {
       listaTitulos.appendChild(crearBloqueTitulo());

@@ -105,8 +105,15 @@
         <div class="campo">
           <label for="universidad">Universidad donde te graduaste <span class="obligatorio" aria-hidden="true">*</span></label>
           <input type="text" id="universidad" name="universidad" required maxlength="160"
-                 placeholder="Ejemplo: Universidad Central de Venezuela">
+                 list="opciones-universidad" autocomplete="organization"
+                 placeholder="Elige una de la lista o escribe el nombre completo">
+          <datalist id="opciones-universidad"></datalist>
           <span class="mensaje-error" data-error-para="universidad" hidden></span>
+          <p class="texto-suave texto-chico">
+            Si tu universidad ya aparece en la lista, elígela tal cual: así todas las personas
+            quedan agrupadas en la misma universidad. Si no aparece, escríbela y quedará
+            como opción para quienes se censen después.
+          </p>
         </div>
 
         <div class="fila">

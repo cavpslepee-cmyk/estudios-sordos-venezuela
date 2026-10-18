@@ -330,6 +330,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | B11 | Registrar a alguien con **2 títulos adicionales** y volver a la portada | «Títulos universitarios en total» sube en 3 (1 persona, 3 títulos); el desglose por categoría cuenta cada título (TSU, Licenciado, Especialización, Maestría, Doctorado) y en la tabla pública su fila muestra «También: …» con los títulos extra. |
 | B12 | Llenar todo con una **cédula ya registrada** y enviar | Aviso en rojo: «Ya existe un registro con esa cédula…». No se crea un duplicado. |
 | B13 | Enviar un registro nuevo y válido | Aviso verde «¡Tu censo fue exitoso!…» y el formulario queda limpio. |
+| B14 | Pulsar el campo **Universidad** | Despliega las universidades ya censadas para elegirlas; también deja escribir una nueva, que quedará como opción para los siguientes. |
 
 ### C. Panel de administración
 

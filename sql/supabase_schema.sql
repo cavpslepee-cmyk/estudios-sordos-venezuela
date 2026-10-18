@@ -286,10 +286,33 @@ as $$
   order by apellidos, nombres;
 $$;
 
+/* Sugerencias del campo "universidad" del censo: nombres ya registrados, sin
+   repetir los que solo se diferencian por mayúsculas o espacios. Solo expone
+   nombres de universidades, que ya son públicos en el desglose por universidad. */
+drop function if exists public.opciones_universidades();
+create function public.opciones_universidades()
+returns table (nombre text)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select distinct on (lower(btrim(t.u))) btrim(t.u) as nombre
+  from (
+    select universidad as u from censo_egresados
+    union all
+    select universidad from titulos_adicionales
+  ) t
+  where t.u is not null and btrim(t.u) <> ''
+  order by lower(btrim(t.u)), btrim(t.u);
+$$;
+
 revoke all on function public.resumen_censo() from public;
 revoke all on function public.nombres_publicos_egresados() from public;
+revoke all on function public.opciones_universidades() from public;
 grant execute on function public.resumen_censo() to anon, authenticated;
 grant execute on function public.nombres_publicos_egresados() to anon, authenticated;
+grant execute on function public.opciones_universidades() to anon, authenticated;
 
 -- ---------------------------------------------------------------------
 -- SEGURIDAD (Row Level Security)
