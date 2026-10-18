@@ -135,6 +135,27 @@ window.DATOS_DEMO = {
     }
   ],
 
+  videos_lsv: [
+    {
+      id: "demo-lsv-1",
+      titulo: "Aviso del seminario en Lengua de Señas Venezolana",
+      descripcion: "Video de ejemplo: el administrador publica aquí avisos e información del seminario traducidos a LSV.",
+      url: "",
+      activo: true,
+      orden: 1,
+      creado_el: "2026-10-18T10:00:00Z"
+    },
+    {
+      id: "demo-lsv-2",
+      titulo: "Cómo inscribirte en el seminario (paso a paso en LSV)",
+      descripcion: "Segundo video de ejemplo para mostrar que la sección admite varios videos.",
+      url: "",
+      activo: true,
+      orden: 2,
+      creado_el: "2026-10-18T10:00:00Z"
+    }
+  ],
+
   noticias: [
     {
       id: "demo-not-1",

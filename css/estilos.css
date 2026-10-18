@@ -1087,6 +1087,11 @@ td.acciones { white-space: nowrap; display: flex; gap: .4rem; flex-wrap: wrap; }
   place-items: center;
 }
 
+/* Videos con información en LSV (seminario) */
+.video-lsv { margin-bottom: 1.8rem; }
+.video-lsv h3 { margin: .7rem 0 .25rem; }
+.video-lsv p { margin: 0; color: var(--texto-suave); }
+
 /* ---------------- Seminario ---------------- */
 .apertura-seminario { text-align: center; }
 

@@ -324,8 +324,9 @@
   /* Envío masivo de novedades a los censados. El envío real lo hace la
      Edge Function "enviar-novedades" desde el Gmail del sitio, para que
      la contraseña de aplicación nunca llegue al navegador. Con pPruebaA
-     se envía solo a esa dirección, para probar sin molestar a nadie. */
-  async function enviarNovedades(asunto, cuerpo, pPruebaA) {
+     se envía solo a esa dirección, para probar sin molestar a nadie.
+     pAdjunto es opcional: { nombre, tipo, base64 } con una imagen. */
+  async function enviarNovedades(asunto, cuerpo, pPruebaA, pAdjunto) {
     if (!esSupabase) {
       var unicos = {};
       demoLeer("censo_egresados").forEach(function (f) {
@@ -339,7 +340,12 @@
       };
     }
     var res = await sb().functions.invoke("enviar-novedades", {
-      body: { asunto: asunto, cuerpo: cuerpo, prueba_a: pPruebaA || null }
+      body: {
+        asunto: asunto,
+        cuerpo: cuerpo,
+        prueba_a: pPruebaA || null,
+        adjunto: pAdjunto || null
+      }
     });
     if (res.error) {
       throw new Error(res.error.message || "No se pudo contactar la función de envío de correos.");
@@ -604,6 +610,51 @@
   }
 
   /* -------------------------------------------------------------------
+     VIDEOS EN LSV DEL SEMINARIO (información accesible para personas sordas)
+     ------------------------------------------------------------------- */
+  async function listarVideosLsv(incluirOcultos) {
+    if (!esSupabase) {
+      var datos = demoLeer("videos_lsv");
+      if (!incluirOcultos) datos = datos.filter(function (v) { return v.activo !== false; });
+      return datos.slice().sort(function (a, b) {
+        var oa = a.orden == null ? 999 : a.orden;
+        var ob = b.orden == null ? 999 : b.orden;
+        if (oa !== ob) return oa - ob;
+        return String(b.creado_el || "").localeCompare(String(a.creado_el || ""));
+      });
+    }
+    var q = sb().from("videos_lsv").select("*");
+    if (!incluirOcultos) q = q.eq("activo", true);
+    return fallo(await q.order("orden", { ascending: true }).order("creado_el", { ascending: false }));
+  }
+
+  async function guardarVideoLsv(registro) {
+    if (!esSupabase) {
+      if (registro.id) return demoActualizar("videos_lsv", registro.id, registro);
+      return demoInsertar("videos_lsv", registro);
+    }
+    var limpio = Object.assign({}, registro);
+    delete limpio.id;
+    delete limpio.creado_el;
+    if (registro.id) {
+      return fallo(await sb().from("videos_lsv").update(limpio).eq("id", registro.id).select().single());
+    }
+    return fallo(await sb().from("videos_lsv").insert(limpio).select().single());
+  }
+
+  async function eliminarVideoLsv(id) {
+    if (!esSupabase) return demoEliminar("videos_lsv", id);
+    fallo(await sb().from("videos_lsv").delete().eq("id", id));
+    return true;
+  }
+
+  /* Los archivos directos se guardan en el bucket público de noticias,
+     igual que los videos de las noticias: devuelve una URL pública. */
+  async function subirVideoLsv(archivo) {
+    return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "video/mp4");
+  }
+
+  /* -------------------------------------------------------------------
      ARCHIVOS EN SUPABASE STORAGE
      ------------------------------------------------------------------- */
   async function subirAlBucket(bucket, archivo, tipoPorDefecto) {
@@ -710,6 +761,11 @@
     opcionesUniversidades: opcionesUniversidades,
 
     registrarInscripcionSeminario: registrarInscripcionSeminario,
+
+    listarVideosLsv: listarVideosLsv,
+    guardarVideoLsv: guardarVideoLsv,
+    eliminarVideoLsv: eliminarVideoLsv,
+    subirVideoLsv: subirVideoLsv,
 
     subirPdf: subirPdf,
     subirImagenNoticia: subirImagenNoticia,

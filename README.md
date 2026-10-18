@@ -284,11 +284,31 @@ Configuración, una sola vez:
    propio correo en «Correo de prueba» y envíalo. Si te llega (revisa también la carpeta Enviados
    de tu Gmail), ya puedes enviar a todos.
 
+Puedes **adjuntar una imagen** (flyer, foto o aviso) en «Imagen adjunta»: PNG, JPG, GIF o WEBP de
+hasta 4 MB. Todas las personas la reciben junto con el mensaje.
+
 Notas: el mensaje se escribe en texto plano (los saltos de línea se respetan); los correos salen
 uno por uno desde tu Gmail, así que un envío a todos los censados puede tardar un minuto en
 completarse; si algún día superas los 500 destinatarios en un día, Gmail rechazará el excedente y
 podrás reenviar al día siguiente. Si la función no está desplegada o faltan los secretos, el panel
 lo dice con un mensaje claro.
+
+---
+
+### Videos en LSV del seminario (información accesible)
+La pestaña **Sitio** del panel permite publicar **videos traducidos a Lengua de Señas Venezolana**
+(avisos, anuncios, orientación del seminario). Aparecen en la sección «Videos con información en
+LSV» de `seminario.html`, para que la información llegue directamente en la lengua de la comunidad
+sorda.
+
+Cada video acepta **un enlace** (YouTube, Vimeo o `.mp4` directo) o **un archivo** `.mp4` subido al
+bucket público `noticias`. Se recomienda YouTube para videos largos: el plan gratuito de Supabase da
+~5 GB de transferencia al mes. Escribe siempre la descripción en español escrito: es la vía de
+lectura para quienes no pueden ver el video. Puedes ocultar/mostrar, reordenar y eliminar cada video.
+
+Configuración, una sola vez: en Supabase → **SQL Editor**, pega y ejecuta el contenido de
+`sql/videos-lsv.sql` (crea la tabla `videos_lsv` con lectura pública y escritura solo para el
+administrador).
 
 ---
 
@@ -361,6 +381,8 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C20 | En **Correos masivos**, enviar un mensaje con tu correo en «Correo de prueba» | Pide confirmación, avisa éxito y el mensaje te llega a tu bandeja (remitente el sitio). |
 | C21 | Enviar sin correo de prueba | Pide confirmación con el número de destinatarios y desde tu Gmail sale un correo individual a cada persona censada (tardan hasta un minuto en repartirse). |
 | C22 | En la pestaña **Sitio**, activar o desactivar la pestaña del seminario y guardar | Desactivada, el público no ve la pestaña «Seminario», ni el afiche de la portada, ni la planilla (solo un aviso de «en preparación»); con tu sesión iniciada tú los sigues viendo para probar. |
+| C23 | En **Correos masivos**, adjuntar una imagen y enviar a tu correo de prueba | La imagen viaja adjunta y te llega al correo junto con el mensaje. Una imagen mayor a 4 MB o que no sea PNG/JPG/GIF/WEBP se rechaza con un aviso claro. |
+| C24 | En la pestaña **Sitio**, publicar un video en LSV (enlace de YouTube o archivo `.mp4`) y guardarlo | Aparece en el listado del panel y se ve en la sección «Videos con información en LSV» de `seminario.html`. Ocultarlo lo quita de la página pública sin borrarlo. |
 
 ### D. En el teléfono
 
@@ -486,7 +508,10 @@ W_ESTUDIOSSORDOSVENEZUELA/
 │   ├── diccionario.js          Lógica del buscador de señas
 │   └── admin.js                Lógica del panel
 └── sql/
-    └── supabase_schema.sql     Esquema completo de la base de datos
+    ├── supabase_schema.sql     Esquema completo de la base de datos
+    ├── seminario.sql           Inscripciones y diapositivas del seminario
+    ├── videos-lsv.sql          Videos en LSV publicados por el administrador
+    └── unificar-universidades.sql  Unificación de grafías del censo (una corrida)
 ```
 
 ---

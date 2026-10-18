@@ -962,6 +962,34 @@
     $("formulario-correo").addEventListener("submit", enviarCorreoMasivo);
   }
 
+  var ADJUNTO_MAXIMO = 4 * 1024 * 1024; /* 4 MB: el cuerpo del Edge Function lleva el resto */
+
+  /* Lee la imagen seleccionada y la devuelve en base64 para el correo. */
+  function leerAdjuntoCorreo() {
+    return new Promise(function (resolver, rechazar) {
+      var archivo = $("correo-adjunto").files[0];
+      if (!archivo) { resolver(null); return; }
+      if (!/^image\/(png|jpeg|jpg|gif|webp)$/i.test(archivo.type)) {
+        rechazar(new Error("El adjunto debe ser una imagen PNG, JPG, GIF o WEBP."));
+        return;
+      }
+      if (archivo.size > ADJUNTO_MAXIMO) {
+        rechazar(new Error("La imagen pesa más de 4 MB. Redúcela antes de adjuntarla."));
+        return;
+      }
+      var lector = new FileReader();
+      lector.onload = function () {
+        resolver({
+          nombre: archivo.name,
+          tipo: archivo.type,
+          base64: String(lector.result).split(",")[1] || ""
+        });
+      };
+      lector.onerror = function () { rechazar(new Error("No se pudo leer la imagen seleccionada.")); };
+      lector.readAsDataURL(archivo);
+    });
+  }
+
   async function enviarCorreoMasivo(evento) {
     evento.preventDefault();
     var aviso = $("aviso-correos");
@@ -984,17 +1012,27 @@
       Util.aviso(aviso, "error", "No hay ninguna dirección válida a la cual enviar.");
       return;
     }
+
+    var adjunto = null;
+    try {
+      adjunto = await leerAdjuntoCorreo();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+      return;
+    }
+
     if (!window.confirm(
       prueba
-        ? "Se enviará SOLO a " + prueba + " como prueba. ¿Continuar?"
-        : "Se enviará un correo individual a cada una de las " + destinos + " direcciones censadas. ¿Continuar?"
+        ? "Se enviará SOLO a " + prueba + " como prueba" + (adjunto ? ", con la imagen adjunta" : "") + ". ¿Continuar?"
+        : "Se enviará un correo individual a cada una de las " + destinos + " direcciones censadas" +
+          (adjunto ? ", con la imagen adjunta" : "") + ". ¿Continuar?"
     )) return;
 
     var boton = $("boton-enviar-correo");
     boton.disabled = true;
     boton.textContent = "Enviando…";
     try {
-      var r = await window.DB.enviarNovedades(asunto, cuerpo, prueba || null);
+      var r = await window.DB.enviarNovedades(asunto, cuerpo, prueba || null, adjunto);
       var detalle = r.simulado
         ? " (simulado: en modo demostración no sale correo real)"
         : " (" + (r.enviados != null ? r.enviados : destinos) + " enviado(s)" +
@@ -1005,6 +1043,7 @@
       if (!prueba) {
         $("correo-asunto").value = "";
         $("correo-cuerpo").value = "";
+        $("correo-adjunto").value = "";
       }
     } catch (error) {
       Util.aviso(aviso, "error", error.message);
@@ -1019,7 +1058,7 @@
      ===================================================================== */
 
   async function cargarTodo() {
-    await Promise.all([cargarInvestigaciones(), cargarNoticias(), cargarVideos(), cargarSenias(), llenarAreasSenia()]);
+    await Promise.all([cargarInvestigaciones(), cargarNoticias(), cargarVideos(), cargarSenias(), llenarAreasSenia(), cargarVideosLsv()]);
     await cargarCenso();
   }
 
@@ -1047,6 +1086,175 @@
     });
   }
 
+  /* =====================================================================
+     VIDEOS EN LSV DEL SEMINARIO (pestaña Sitio)
+     ===================================================================== */
+
+  var urlVideoLsvActual = "";
+
+  function prepararVideosLsv() {
+    $("boton-nuevo-video-lsv").addEventListener("click", limpiarFormularioVideoLsv);
+    $("boton-cancelar-video-lsv").addEventListener("click", limpiarFormularioVideoLsv);
+    $("formulario-video-lsv").addEventListener("submit", guardarVideoLsv);
+  }
+
+  function limpiarFormularioVideoLsv() {
+    $("formulario-video-lsv").reset();
+    $("lsv-id").value = "";
+    $("lsv-activo").checked = true;
+    $("lsv-orden").value = "0";
+    urlVideoLsvActual = "";
+    $("ayuda-archivo-lsv").innerHTML =
+      "Opcional. Si subes un archivo, el enlace de abajo se ignora. Se guarda en el " +
+      "bucket público <code>noticias</code>. El plan gratuito de Supabase da ~5 GB de " +
+      "transferencia al mes: para videos largos o muchos videos conviene YouTube.";
+    $("titulo-formulario-video-lsv").textContent = "Publicar un video en LSV";
+    $("boton-guardar-video-lsv").textContent = "Publicar el video";
+    $("boton-cancelar-video-lsv").hidden = true;
+  }
+
+  function editarVideoLsv(video) {
+    limpiarFormularioVideoLsv();
+    $("lsv-id").value = video.id;
+    $("lsv-titulo").value = video.titulo || "";
+    $("lsv-descripcion").value = video.descripcion || "";
+    $("lsv-url").value = video.url || "";
+    $("lsv-orden").value = video.orden == null ? 0 : video.orden;
+    $("lsv-activo").checked = video.activo !== false;
+    urlVideoLsvActual = video.url || "";
+    $("ayuda-archivo-lsv").textContent =
+      "Este video ya tiene archivo o enlace. Solo se reemplazará si subes un archivo nuevo.";
+    $("titulo-formulario-video-lsv").textContent = "Editando: " + video.titulo;
+    $("boton-guardar-video-lsv").textContent = "Actualizar el video";
+    $("boton-cancelar-video-lsv").hidden = false;
+    window.scrollTo({ top: $("formulario-video-lsv").offsetTop - 120, behavior: "smooth" });
+  }
+
+  async function guardarVideoLsv(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-sitio");
+    Util.limpiarAviso(aviso);
+
+    var titulo = textoDe("titulo", $("formulario-video-lsv"));
+    var url = textoDe("url", $("formulario-video-lsv"));
+    var archivo = $("lsv-archivo-video").files[0];
+    if (!titulo) {
+      Util.aviso(aviso, "error", "El título del video es obligatorio.");
+      return;
+    }
+    if (!url && !archivo && !urlVideoLsvActual) {
+      Util.aviso(aviso, "error", "Sube un archivo de video o pega el enlace (YouTube, Vimeo o .mp4).");
+      return;
+    }
+
+    var boton = $("boton-guardar-video-lsv");
+    boton.disabled = true;
+    boton.textContent = "Guardando…";
+
+    try {
+      if (archivo) {
+        Util.aviso(aviso, "", "Subiendo el archivo de video…");
+        url = await window.DB.subirVideoLsv(archivo);
+      }
+
+      var registro = {
+        titulo: titulo,
+        descripcion: textoDe("descripcion", $("formulario-video-lsv")) || null,
+        url: url || urlVideoLsvActual,
+        activo: marcado("activo", $("formulario-video-lsv")),
+        orden: Number(textoDe("orden", $("formulario-video-lsv")) || 0)
+      };
+      var id = $("lsv-id").value;
+      if (id) registro.id = id;
+
+      await window.DB.guardarVideoLsv(registro);
+      Util.aviso(aviso, "exito", id ? "Video actualizado." : "Video publicado en la página del seminario.");
+      limpiarFormularioVideoLsv();
+      await cargarVideosLsv();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = $("lsv-id").value ? "Actualizar el video" : "Publicar el video";
+    }
+  }
+
+  async function alternarVideoLsv(video) {
+    var aviso = $("aviso-sitio");
+    try {
+      await window.DB.guardarVideoLsv({ id: video.id, activo: video.activo === false });
+      await cargarVideosLsv();
+      Util.aviso(aviso, "exito", video.activo === false
+        ? "Video visible de nuevo en la página del seminario."
+        : "Video ocultado de la página del seminario.");
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    }
+  }
+
+  async function eliminarVideoLsv(video) {
+    if (!window.confirm("¿Eliminar el video «" + video.titulo + "»?")) return;
+    var aviso = $("aviso-sitio");
+    try {
+      await window.DB.eliminarVideoLsv(video.id);
+      Util.aviso(aviso, "exito", "Video eliminado.");
+      await cargarVideosLsv();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    }
+  }
+
+  async function cargarVideosLsv() {
+    var zona = $("lista-videos-lsv-admin");
+    zona.innerHTML = '<p class="cargando">Cargando</p>';
+    try {
+      var lista = await window.DB.listarVideosLsv(true);
+      $("total-videos-lsv").textContent = lista.length + " video" + (lista.length === 1 ? "" : "s");
+
+      if (!lista.length) {
+        zona.innerHTML = window.Sitio.mensajeVacio("No hay videos en LSV publicados todavía.");
+        return;
+      }
+
+      var filas = lista.map(function (v) {
+        return "<tr>" +
+          "<td><strong>" + esc(v.titulo) + "</strong><br><span class=\"texto-suave texto-chico\">" + esc(v.descripcion || "") + "</span></td>" +
+          '<td class="texto-chico">' + (v.url
+            ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">' + esc(v.url) + "</a>"
+            : "—") + "</td>" +
+          "<td>" + (v.orden == null ? "—" : esc(v.orden)) + "</td>" +
+          "<td>" + (v.activo === false ? '<span class="insignia">Oculto</span>' : '<span class="insignia insignia-publicado">Visible</span>') + "</td>" +
+          '<td class="acciones">' +
+            '<button class="boton boton-chico boton-contorno" type="button" data-accion="editar" data-id="' + esc(v.id) + '">Editar</button>' +
+            '<button class="boton boton-chico boton-contorno" type="button" data-accion="alternar" data-id="' + esc(v.id) + '">' + (v.activo === false ? "Mostrar" : "Ocultar") + "</button>" +
+            '<button class="boton boton-chico boton-peligro" type="button" data-accion="eliminar" data-id="' + esc(v.id) + '">Eliminar</button>' +
+          "</td></tr>";
+      }).join("");
+
+      zona.innerHTML =
+        '<div class="tabla-envoltura"><table>' +
+          "<thead><tr><th scope=\"col\">Título</th><th scope=\"col\">Enlace</th>" +
+          '<th scope="col">Orden</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>' +
+          "<tbody>" + filas + "</tbody></table></div>";
+
+      var mapa = {};
+      lista.forEach(function (v) { mapa[v.id] = v; });
+
+      zona.querySelectorAll("button[data-accion]").forEach(function (boton) {
+        var video = mapa[boton.getAttribute("data-id")];
+        if (!video) return;
+        boton.addEventListener("click", function () {
+          var accion = boton.getAttribute("data-accion");
+          if (accion === "editar") editarVideoLsv(video);
+          if (accion === "alternar") alternarVideoLsv(video);
+          if (accion === "eliminar") eliminarVideoLsv(video);
+        });
+      });
+    } catch (error) {
+      zona.innerHTML = window.Sitio.mensajeError(error);
+    }
+  }
+
   function iniciar() {
     iniciarPestanyas();
     prepararFormularioInvestigacion();
@@ -1055,6 +1263,7 @@
     prepararFormularioSenia();
     prepararFormularioCorreo();
     prepararPanelSitio();
+    prepararVideosLsv();
     iniciarAcceso();
 
     $("buscador-censo").addEventListener("input", function () {

@@ -56,11 +56,41 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { asunto, cuerpo, prueba_a: pruebaA } = await req.json();
+    const {
+      asunto,
+      cuerpo,
+      prueba_a: pruebaA,
+      adjunto,
+    } = await req.json();
     if (!String(asunto ?? "").trim() || !String(cuerpo ?? "").trim()) {
       throw new Error(
         "El asunto y el cuerpo del correo no pueden quedar vacíos",
       );
+    }
+
+    /* Adjunto opcional: una imagen en base64 que llega desde el panel. */
+    let attachments: {
+      filename: string;
+      content: string;
+      contentType: string;
+      encoding: string;
+    }[] = [];
+    if (adjunto && String(adjunto.base64 ?? "").trim()) {
+      const tipo = String(adjunto.tipo ?? "");
+      if (!/^image\/(png|jpe?g|gif|webp)$/i.test(tipo)) {
+        throw new Error("El adjunto debe ser una imagen PNG, JPG, GIF o WEBP");
+      }
+      const base64 = String(adjunto.base64).replace(/^data:[^,]*,/, "");
+      if (base64.length > 6 * 1024 * 1024) {
+        throw new Error("La imagen adjunta es demasiado pesada (máximo 4 MB)");
+      }
+      attachments = [{
+        filename:
+          String(adjunto.nombre ?? "imagen.jpg").replace(/[^a-zA-Z0-9._-]/g, "_"),
+        content: base64,
+        contentType: tipo,
+        encoding: "base64",
+      }];
     }
 
     const { data: secretos } = await admin
@@ -121,6 +151,7 @@ Deno.serve(async (req) => {
           to: destino,
           subject: String(asunto),
           html,
+          attachments,
         });
         enviados++;
       } catch (_e) {

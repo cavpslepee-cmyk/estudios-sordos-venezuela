@@ -538,6 +538,16 @@
               <span class="mensaje-error" data-error-para="correo-cuerpo" hidden></span>
             </div>
             <div class="campo">
+              <label for="correo-adjunto">Imagen adjunta (opcional)</label>
+              <input type="file" id="correo-adjunto" name="correo-adjunto"
+                     accept="image/png,image/jpeg,image/gif,image/webp,.png,.jpg,.jpeg,.gif,.webp">
+              <span class="ayuda">
+                Una sola imagen (flyer, foto o aviso) de máximo 4 MB. Todas las personas
+                la reciben junto con el mensaje.
+              </span>
+              <span class="mensaje-error" data-error-para="correo-adjunto" hidden></span>
+            </div>
+            <div class="campo">
               <label for="correo-prueba">Correo de prueba (opcional)</label>
               <input type="email" id="correo-prueba" name="correo-prueba"
                      placeholder="Si lo escribes, el mensaje solo se envía a esta dirección">
@@ -570,6 +580,90 @@
           <div class="botonera">
             <button class="boton" type="button" id="boton-guardar-seminario">Guardar</button>
           </div>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2 id="titulo-formulario-video-lsv">Publicar un video en LSV</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-nuevo-video-lsv">
+              Limpiar el formulario
+            </button>
+          </div>
+          <p class="texto-suave texto-chico">
+            Avisos e información del seminario traducidos a Lengua de Señas Venezolana.
+            Aparecen en la sección «Videos con información en LSV» de la página del seminario.
+          </p>
+
+          <form id="formulario-video-lsv" novalidate>
+            <input type="hidden" id="lsv-id" name="id">
+
+            <div class="campo">
+              <label for="lsv-titulo">Título del video <span class="obligatorio">*</span></label>
+              <input type="text" id="lsv-titulo" name="titulo" required maxlength="180"
+                     placeholder="Ejemplo: Aviso importante sobre la fecha del seminario">
+            </div>
+
+            <div class="campo">
+              <label for="lsv-descripcion">Descripción</label>
+              <textarea id="lsv-descripcion" name="descripcion" maxlength="800"
+                        placeholder="Resumen del contenido del video, en español escrito."></textarea>
+              <span class="ayuda">
+                La descripción escrita es la vía de lectura para quienes no pueden ver el video:
+                escríbela siempre.
+              </span>
+            </div>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Archivo o enlace</legend>
+
+              <div class="campo">
+                <label for="lsv-archivo-video">Subir un archivo de video (.mp4)</label>
+                <input type="file" id="lsv-archivo-video" name="archivo_video" accept="video/mp4,.mp4">
+                <span class="ayuda" id="ayuda-archivo-lsv">
+                  Opcional. Si subes un archivo, el enlace de abajo se ignora. Se guarda en el
+                  bucket público <code>noticias</code>. El plan gratuito de Supabase da ~5 GB de
+                  transferencia al mes: para videos largos o muchos videos conviene YouTube.
+                </span>
+              </div>
+
+              <div class="campo">
+                <label for="lsv-url">O pega aquí el enlace del video</label>
+                <input type="url" id="lsv-url" name="url" maxlength="600"
+                       placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX">
+                <span class="ayuda">
+                  Se aceptan enlaces de YouTube, Vimeo o un archivo de video directo (.mp4).
+                  YouTube se convierte automáticamente al formato incrustable.
+                </span>
+              </div>
+            </fieldset>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="lsv-orden">Orden</label>
+                <input type="number" id="lsv-orden" name="orden" min="0" max="99" step="1" value="0">
+              </div>
+              <div class="campo">
+                <label for="lsv-activo">Visible en la página del seminario</label>
+                <div class="opcion" style="padding-top:.6rem">
+                  <input type="checkbox" id="lsv-activo" name="activo" checked>
+                  <span>Activo</span>
+                </div>
+              </div>
+            </div>
+
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-video-lsv">Publicar el video</button>
+              <button class="boton boton-contorno" type="button" id="boton-cancelar-video-lsv" hidden>Cancelar la edición</button>
+            </p>
+          </form>
+        </div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Videos en LSV publicados</h2>
+            <span class="texto-suave" id="total-videos-lsv"></span>
+          </div>
+          <div id="lista-videos-lsv-admin"><p class="cargando">Cargando</p></div>
         </div>
       </div>
     </section>

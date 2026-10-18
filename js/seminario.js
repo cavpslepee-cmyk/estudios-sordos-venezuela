@@ -178,7 +178,54 @@
     moduloPonente.hidden = !esPonente();
   }
 
+  /* ---------------- Videos con información en LSV ---------------- */
+
+  function bloqueReproductorLsv(url, titulo) {
+    var info = Util.normalizarUrlVideo(url);
+    var tituloSeguro = Util.esc(titulo || "Video en Lengua de Señas Venezolana");
+    if (!info) {
+      return '<div class="reproductor"><div class="reproductor-sin-video">' +
+        "<p>El administrador aún no ha cargado el archivo de este video.</p></div></div>";
+    }
+    if (info.tipo === "iframe") {
+      return '<div class="reproductor"><iframe src="' + Util.esc(info.url) + '" title="' + tituloSeguro + '" ' +
+        'allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" ' +
+        'allowfullscreen loading="lazy"></iframe></div>';
+    }
+    if (info.tipo === "video") {
+      return '<div class="reproductor"><video src="' + Util.esc(info.url) + '" controls preload="metadata"></video></div>';
+    }
+    return '<p><a class="boton boton-contorno" href="' + Util.esc(info.url) +
+      '" target="_blank" rel="noopener noreferrer">Ver el video</a></p>';
+  }
+
+  async function cargarVideosLsv() {
+    var zona = document.getElementById("lista-videos-lsv");
+    if (!zona) return;
+    var vacio = document.getElementById("videos-lsv-vacio");
+    try {
+      var videos = await window.DB.listarVideosLsv(false);
+      if (!videos.length) {
+        zona.innerHTML = "";
+        if (vacio) vacio.hidden = false;
+        return;
+      }
+      if (vacio) vacio.hidden = true;
+      zona.innerHTML = videos.map(function (v) {
+        return '<article class="video-lsv">' +
+          bloqueReproductorLsv(v.url, v.titulo) +
+          "<h3>" + Util.esc(v.titulo || "") + "</h3>" +
+          (v.descripcion ? "<p>" + Util.esc(v.descripcion) + "</p>" : "") +
+          "</article>";
+      }).join("");
+    } catch (e) {
+      zona.innerHTML = window.Sitio.mensajeError(e);
+    }
+  }
+
   function iniciar() {
+    cargarVideosLsv();
+
     formulario = document.getElementById("formulario-seminario");
     if (!formulario) return;
     aviso = document.getElementById("aviso-seminario");
