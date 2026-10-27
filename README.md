@@ -417,7 +417,7 @@ del navegador.
 ### Cambiar las fotos
 
 Reemplaza los archivos de la carpeta `img/` conservando exactamente los mismos nombres
-(`portada-universidad-lsv.jpg`, `profesionales-sordos.jpg` y `logo-estudios-sordos.jpg`)
+(`portada-universidad-lsv.jpeg`, `profesionales-sordos.jpg` y `logo-estudios-sordos.jpg`)
 y no hace falta tocar nada más. La primera es el fondo del encabezado de la portada, la
 segunda es la figura de la sección del censo y la tercera es el logo de la cabecera y del
 favicon. Si prefieres usar otras tuyas, cambia el nombre en `index.html` (las dos primeras)
@@ -491,7 +491,7 @@ W_ESTUDIOSSORDOSVENEZUELA/
 │   └── estilos.css             Todo el diseño del sitio
 ├── img/
 │   ├── logo-estudios-sordos.jpg    Logo de la cabecera y favicon
-│   ├── portada-universidad-lsv.jpg Fondo del encabezado de la portada
+│   ├── portada-universidad-lsv.jpeg Fondo del encabezado de la portada
 │   ├── profesionales-sordos.jpg    Figura de la sección del censo
 │   └── (seis fotos más)            Galería «La comunidad en imágenes» de la portada
 ├── pdf/
