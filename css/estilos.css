@@ -223,8 +223,9 @@ p { margin: 0 0 1em; }
 .hero-media {
   position: absolute;
   inset: 0;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: .42;
 }
 
