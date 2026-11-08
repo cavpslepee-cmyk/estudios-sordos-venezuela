@@ -61,26 +61,26 @@
     <div id="contenido-seminario" hidden>
 
     <section class="seccion apertura-seminario">
-      <p><span class="insignia insignia-pronto">¡Muy pronto!</span></p>
-      <h1>I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana</h1>
-      <p class="seminario-lema">«Sordedad, Ganancia Sorda e Innovación Didáctica»</p>
-      <p>
+      <p><span class="insignia insignia-pronto" id="sem-cont-insignia">¡Muy pronto!</span></p>
+      <h1 id="sem-cont-titulo">I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana</h1>
+      <p class="seminario-lema" id="sem-cont-lema">«Sordedad, Ganancia Sorda e Innovación Didáctica»</p>
+      <p id="sem-cont-modalidad">
         Modalidad híbrida: presencial en Caracas (aforo de 300 a 500 personas) y virtual,
         con transmisión en vivo por el canal de YouTube
         <a href="https://www.youtube.com/@ElprofesorSordoLepee" target="_blank" rel="noopener noreferrer">@ElprofesorSordoLepee</a>
         y accesibilidad en Sistema de Señas Internacional (SSI) cuando la audiencia lo requiera.
       </p>
-      <p>
+      <p id="sem-cont-portal">
         Este portal es el centro digital del seminario: aquí se centralizan la inscripción,
         la postulación de ponencias y, después del evento, las memorias y la certificación digital.
       </p>
       <figure class="flyer">
-        <img src="img/flyer-seminario-lsv.png"
+        <img id="sem-cont-flyer" src="img/flyer-seminario-lsv.png"
              alt="Afiche del I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana con sus cinco ejes temáticos, la modalidad híbrida y el portal web oficial"
              loading="lazy">
       </figure>
       <p>
-        <a class="boton" href="#inscripcion">Inscribirme en el seminario</a>
+        <a class="boton" href="#inscripcion" id="sem-cont-boton">Inscribirme en el seminario</a>
       </p>
     </section>
 
@@ -88,10 +88,10 @@
 
     <section class="seccion">
       <div class="encabezado-seccion">
-        <h2>Ejes temáticos y enfoque</h2>
-        <p>Cinco líneas de trabajo guían las ponencias, los módulos y las mesas del seminario.</p>
+        <h2 id="sem-cont-ejes-titulo">Ejes temáticos y enfoque</h2>
+        <p id="sem-cont-ejes-subtitulo">Cinco líneas de trabajo guían las ponencias, los módulos y las mesas del seminario.</p>
       </div>
-      <div class="rejilla">
+      <div class="rejilla" id="sem-cont-ejes-lista">
         <div class="tarjeta">
           <h3>Pedagogía de la LSV</h3>
           <p class="tarjeta-texto">La enseñanza de la Lengua de Señas Venezolana como disciplina con metodología propia, diseñada por y para la comunidad Sorda.</p>
@@ -117,15 +117,15 @@
 
     <section class="seccion">
       <div class="encabezado-seccion">
-        <h2>Comité organizador</h2>
-        <p>Una iniciativa concebida, diseñada y liderada por el equipo de Estudios de y para Sordos.</p>
+        <h2 id="sem-cont-comite-titulo">Comité organizador</h2>
+        <p id="sem-cont-comite-subtitulo">Una iniciativa concebida, diseñada y liderada por el equipo de Estudios de y para Sordos.</p>
       </div>
       <div class="tabla-envoltura">
         <table>
           <thead>
             <tr><th scope="col">Integrante</th><th scope="col">Función</th></tr>
           </thead>
-          <tbody>
+          <tbody id="sem-cont-comite-lista">
             <tr><td>Dr. Javier Ramírez González</td><td>Coordinador general</td></tr>
             <tr><td>Lcdo. Gil Escobar</td><td>Logística</td></tr>
             <tr><td>Lcda. Yoliber Bellorin</td><td>Publicidad y difusión</td></tr>
@@ -141,13 +141,13 @@
 
     <section class="seccion">
       <div class="encabezado-seccion">
-        <h2>Cómo postular tu ponencia o trabajo de investigación</h2>
-        <p>
+        <h2 id="sem-cont-post-titulo">Cómo postular tu ponencia o trabajo de investigación</h2>
+        <p id="sem-cont-post-subtitulo">
           La Comisión Académica y de Arbitraje evalúa todas las postulaciones recibidas por este
           portal. Estos son los pasos, desde la grabación del video hasta el dictamen.
         </p>
       </div>
-      <ol class="pasos">
+      <ol class="pasos" id="sem-cont-post-lista">
         <li>
           <strong>Inscríbete como ponente.</strong> Completa la
           <a href="#inscripcion">planilla de inscripción</a> y marca «Deseo postular un trabajo de
@@ -180,7 +180,7 @@
           inscribiste.
         </li>
       </ol>
-      <p class="texto-suave texto-chico">
+      <p class="texto-suave texto-chico" id="sem-cont-post-nota">
         Si participas únicamente como asistente, no necesitas los pasos 2 a 6:
         con completar la planilla de inscripción basta.
       </p>
@@ -224,7 +224,8 @@
         <div class="fila">
           <div class="campo">
             <label for="sem-documento">Cédula de identidad / pasaporte <span class="obligatorio" aria-hidden="true">*</span></label>
-            <input type="text" id="sem-documento" name="documento" required placeholder="V-12.345.678 o E-12345678">
+            <input type="text" id="sem-documento" name="documento" required placeholder="V-12345678 o E-12345678" autocomplete="off">
+            <span class="ayuda">Comienza con <strong>V-</strong> (venezolano) o <strong>E-</strong> (extranjero), seguido de solo números, sin puntos ni espacios.</span>
           </div>
           <div class="campo">
             <label for="sem-email">Correo electrónico <span class="obligatorio" aria-hidden="true">*</span></label>
@@ -327,9 +328,9 @@
 
     <section class="seccion">
       <div class="encabezado-seccion">
-        <h2>Organizaciones que apoyan el seminario</h2>
+        <h2 id="sem-cont-apoyos-titulo">Organizaciones que apoyan el seminario</h2>
       </div>
-      <div class="apoyos">
+      <div class="apoyos" id="sem-cont-apoyos-lista">
         <figure class="figura apoyo">
           <img src="img/iaet-logo.png"
                alt="Logotipo del IAET: las letras IAET en turquesa junto a un círculo formado por cuadros turquesas y verdes"

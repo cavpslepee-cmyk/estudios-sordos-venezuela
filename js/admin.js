@@ -937,6 +937,610 @@
   }
 
   /* =====================================================================
+     SEMINARIO: INSCRITOS, EXPORTACIÓN Y DIAPOSITIVAS DE PONENTES
+     ===================================================================== */
+
+  var seminarioEnMemoria = [];
+
+  /* Traduce los códigos guardados a etiquetas legibles para la tabla. */
+  var ETIQUETAS_SEMINARIO = {
+    condicion: {
+      PERSONA_SORDA: "Persona sorda",
+      PERSONA_OYENTE: "Persona oyente",
+      HIPOACUSICA_CODA_OTRA: "Hipoacúsica / CODA / otra"
+    },
+    perfil: {
+      EGRESADO_COMUNIDAD_APRENDIZAJE: "Egresado de comunidad de aprendizaje",
+      PROFESIONAL: "Profesional",
+      FACILITADOR_EMPIRICO: "Facilitador empírico",
+      ESTUDIANTE_UNIVERSITARIO: "Estudiante universitario",
+      REPRESENTANTE_ORGANIZACION: "Representante de organización",
+      OTRO: "Otro"
+    },
+    modalidad: { PRESENCIAL: "Presencial", VIRTUAL: "Virtual" },
+    accesibilidad: { LSV: "LSV", SSI: "SSI", SUBTITULADO: "Subtitulado" },
+    rol: { ASISTENTE: "Asistente", PONENTE: "Ponente" },
+    eje_tematico: {
+      DIDACTICA_L1_L2: "Didáctica y metodología de la LSV (L1 / L2)",
+      SORDEDAD_GANANCIA: "Sordedad (Deafhood), Ganancia Sorda (Deaf Gain) y pedagogía crítica",
+      MNM_SINTAXIS: "Marcadores no manuales, sintaxis espacial y gramática visual",
+      TECNOLOGIA_IA: "Tecnología, inteligencia artificial y creación de material didáctico",
+      SOCIOLINGUISTICA: "Sociolingüística, neologismos y registro formal en LSV"
+    }
+  };
+
+  function etiquetaSeminario(campo, codigo) {
+    var mapa = ETIQUETAS_SEMINARIO[campo] || {};
+    return mapa[codigo] || codigo || "";
+  }
+
+  function pintarListaSeminario(filtroTexto) {
+    var zona = $("lista-seminario");
+    var filtro = (filtroTexto || "").toLowerCase();
+
+    var lista = seminarioEnMemoria.filter(function (p) {
+      if (!filtro) return true;
+      return (p.nombres_apellidos + " " + p.documento + " " + p.email + " " +
+              (p.titulo_ponencia || "")).toLowerCase().indexOf(filtro) !== -1;
+    });
+
+    var ponentes = lista.filter(function (p) { return p.rol === "PONENTE"; }).length;
+    $("total-seminario").textContent = lista.length + " de " + seminarioEnMemoria.length +
+      " · " + ponentes + " ponente" + (ponentes === 1 ? "" : "s");
+
+    if (!lista.length) {
+      zona.innerHTML = window.Sitio.mensajeVacio("Ninguna inscripción coincide con la búsqueda.");
+      return;
+    }
+
+    var filas = lista.map(function (p) {
+      var esPonente = p.rol === "PONENTE";
+      var ponencia = esPonente
+        ? "<strong>" + esc(p.titulo_ponencia || "Sin título") + "</strong>" +
+          (p.eje_tematico ? '<br><span class="texto-chico texto-suave">' + esc(etiquetaSeminario("eje_tematico", p.eje_tematico)) + "</span>" : "") +
+          (p.enlace_video ? '<br><a class="texto-chico" href="' + esc(p.enlace_video) + '" target="_blank" rel="noopener noreferrer">Ver video en LSV</a>' : "")
+        : '<span class="texto-suave">—</span>';
+
+      var acciones =
+        (p.ruta_diapositivas
+          ? '<button class="boton boton-chico boton-contorno" type="button" data-accion="diapositivas" data-id="' + esc(p.id) + '">Diapositivas</button>'
+          : "") +
+        '<button class="boton boton-chico boton-contorno" type="button" data-accion="editar" data-id="' + esc(p.id) + '">Editar</button>' +
+        '<button class="boton boton-chico boton-peligro" type="button" data-accion="eliminar" data-id="' + esc(p.id) + '">Eliminar</button>';
+
+      return "<tr>" +
+        "<td><strong>" + esc(p.nombres_apellidos) + "</strong>" +
+          "<br><span class=\"texto-chico texto-suave\">" + esc(p.documento || "") + "</span>" +
+          (p.email ? '<br><span class="texto-chico texto-suave">' + esc(p.email) + "</span>" : "") +
+          (p.telefono ? '<br><span class="texto-chico texto-suave">' + esc(p.telefono) + "</span>" : "") + "</td>" +
+        "<td>" + esc(etiquetaSeminario("condicion", p.condicion)) +
+          "<br><span class=\"texto-chico texto-suave\">" + esc(etiquetaSeminario("perfil", p.perfil)) + "</span></td>" +
+        "<td>" + esc(etiquetaSeminario("modalidad", p.modalidad)) +
+          "<br><span class=\"texto-chico texto-suave\">" + esc(etiquetaSeminario("accesibilidad", p.accesibilidad)) + "</span></td>" +
+        "<td>" + (esPonente ? '<span class="insignia insignia-publicado">Ponente</span>' : '<span class="insignia">Asistente</span>') + "</td>" +
+        "<td>" + ponencia + "</td>" +
+        "<td>" + esc(p.ciudad || "") + (p.pais ? '<br><span class="texto-chico texto-suave">' + esc(p.pais) + "</span>" : "") + "</td>" +
+        "<td>" + esc(Util.formatearFecha ? Util.formatearFecha(p.creado_el) : (p.creado_el || "")) + "</td>" +
+        '<td class="acciones">' + acciones + "</td>" +
+        "</tr>";
+    }).join("");
+
+    zona.innerHTML =
+      '<div class="tabla-envoltura"><table>' +
+        "<thead><tr>" +
+          '<th scope="col">Persona</th><th scope="col">Condición y perfil</th>' +
+          '<th scope="col">Modalidad</th><th scope="col">Participa</th>' +
+          '<th scope="col">Ponencia</th><th scope="col">Ciudad</th>' +
+          '<th scope="col">Registrado</th><th scope="col">Acciones</th>' +
+        "</tr></thead><tbody>" + filas + "</tbody></table></div>";
+
+    zona.querySelectorAll("button[data-accion]").forEach(function (boton) {
+      var id = boton.getAttribute("data-id");
+      var persona = seminarioEnMemoria.filter(function (p) { return p.id === id; })[0];
+      if (!persona) return;
+      boton.addEventListener("click", function () {
+        var accion = boton.getAttribute("data-accion");
+        if (accion === "diapositivas") descargarDiapositiva(persona);
+        if (accion === "editar") editarInscripcion(persona);
+        if (accion === "eliminar") eliminarInscripcion(persona);
+      });
+    });
+  }
+
+  /* El bucket de ponencias es privado: pide un enlace firmado temporal y lo
+     abre en otra pestaña para descargar el archivo. */
+  async function descargarDiapositiva(persona) {
+    var aviso = $("aviso-seminario-admin");
+    Util.limpiarAviso(aviso);
+    if (!persona.ruta_diapositivas) {
+      Util.aviso(aviso, "error", "Esta persona no subió diapositivas.");
+      return;
+    }
+    try {
+      Util.aviso(aviso, "", "Generando el enlace de descarga…");
+      var url = await window.DB.obtenerEnlaceDiapositiva(persona.ruta_diapositivas);
+      if (!url) {
+        Util.aviso(aviso, "error",
+          "En modo demostración no hay archivo real que descargar.");
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+      Util.aviso(aviso, "exito", "Se abrió el archivo de " + persona.nombres_apellidos + " en otra pestaña.");
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    }
+  }
+
+  async function cargarInscripcionesSeminario() {
+    var zona = $("lista-seminario");
+    zona.innerHTML = '<p class="cargando">Cargando</p>';
+    try {
+      seminarioEnMemoria = await window.DB.listarInscripcionesSeminario();
+      pintarResumenSeminario();
+      pintarListaSeminario($("buscador-seminario").value.trim());
+    } catch (error) {
+      seminarioEnMemoria = [];
+      $("total-seminario").textContent = "";
+      $("resumen-seminario").innerHTML = "";
+      zona.innerHTML = window.Sitio.mensajeError(error);
+    }
+  }
+
+  /* Tarjetas con el total de inscritos, ponentes y asistentes. */
+  function pintarResumenSeminario() {
+    var zona = $("resumen-seminario");
+    if (!zona) return;
+    var total = seminarioEnMemoria.length;
+    var ponentes = seminarioEnMemoria.filter(function (p) { return p.rol === "PONENTE"; }).length;
+    var asistentes = total - ponentes;
+    zona.innerHTML =
+      window.Sitio.tarjeta(total, total === 1 ? "persona inscrita" : "personas inscritas") +
+      window.Sitio.tarjeta(ponentes, ponentes === 1 ? "ponente" : "ponentes") +
+      window.Sitio.tarjeta(asistentes, asistentes === 1 ? "asistente" : "asistentes");
+  }
+
+  /* Exporta todas las inscripciones a CSV (abre directo en Excel). */
+  function exportarSeminarioCsv() {
+    if (!seminarioEnMemoria.length) {
+      Util.aviso($("aviso-seminario-admin"), "error", "No hay inscripciones que exportar.");
+      return;
+    }
+
+    function celda(v) {
+      if (v === null || v === undefined || typeof v === "boolean") {
+        v = v === true ? "Sí" : (v === false ? "No" : "");
+      }
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }
+
+    var cabeceras = [
+      "Nombres y apellidos", "Documento", "Correo", "Teléfono", "País", "Ciudad",
+      "Condición", "Perfil", "Modalidad", "Accesibilidad", "Participa como",
+      "Título de la ponencia", "Eje temático", "Enlace del video",
+      "Ruta de diapositivas", "Registrado el"
+    ];
+    var claves = [
+      "nombres_apellidos", "documento", "email", "telefono", "pais", "ciudad",
+      "condicion", "perfil", "modalidad", "accesibilidad", "rol",
+      "titulo_ponencia", "eje_tematico", "enlace_video",
+      "ruta_diapositivas", "creado_el"
+    ];
+    /* Campos que salen con etiqueta legible en vez del código interno. */
+    var traducir = {
+      condicion: "condicion", perfil: "perfil", modalidad: "modalidad",
+      accesibilidad: "accesibilidad", rol: "rol", eje_tematico: "eje_tematico"
+    };
+
+    var lineas = [cabeceras.map(celda).join(",")];
+    seminarioEnMemoria.forEach(function (p) {
+      var fila = claves.map(function (k) {
+        return celda(traducir[k] ? etiquetaSeminario(traducir[k], p[k]) : p[k]);
+      });
+      lineas.push(fila.join(","));
+    });
+
+    var blob = new Blob(["\uFEFF" + lineas.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    var enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = "seminario-inscritos-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    window.setTimeout(function () { URL.revokeObjectURL(enlace.href); }, 1500);
+
+    Util.aviso($("aviso-seminario-admin"), "exito",
+      "Se descargó la lista con " + seminarioEnMemoria.length + " inscripciones.");
+  }
+
+  /* =====================================================================
+     SEMINARIO: EDITAR Y ELIMINAR INSCRIPCIONES
+     ===================================================================== */
+
+  function editarInscripcion(persona) {
+    $("insc-id").value = persona.id;
+    $("insc-nombres").value = persona.nombres_apellidos || "";
+    $("insc-documento").value = persona.documento || "";
+    $("insc-email").value = persona.email || "";
+    $("insc-telefono").value = persona.telefono || "";
+    $("insc-pais").value = persona.pais || "";
+    $("insc-ciudad").value = persona.ciudad || "";
+    $("insc-condicion").value = persona.condicion || "PERSONA_SORDA";
+    $("insc-perfil").value = persona.perfil || "PROFESIONAL";
+    $("insc-modalidad").value = persona.modalidad || "PRESENCIAL";
+    $("insc-accesibilidad").value = persona.accesibilidad || "LSV";
+    $("insc-rol").value = persona.rol || "ASISTENTE";
+    $("insc-eje").value = persona.eje_tematico || "";
+    $("insc-titulo-ponencia").value = persona.titulo_ponencia || "";
+    $("insc-video").value = persona.enlace_video || "";
+    $("titulo-editar-inscripcion").textContent =
+      "Editando: " + (persona.nombres_apellidos || "inscripción");
+    $("tarjeta-editar-inscripcion").hidden = false;
+    window.scrollTo({ top: $("tarjeta-editar-inscripcion").offsetTop - 120, behavior: "smooth" });
+    $("insc-nombres").focus();
+  }
+
+  function cancelarEdicionInscripcion() {
+    $("formulario-editar-inscripcion").reset();
+    $("insc-id").value = "";
+    $("tarjeta-editar-inscripcion").hidden = true;
+    Util.limpiarAviso($("aviso-seminario-admin"));
+  }
+
+  /* Mismo formato de cédula que exige la planilla pública: V- o E-, solo
+     números, sin puntos ni espacios. */
+  function validarDocumentoInscripcion(documento) {
+    if (!documento) return "Escribe la cédula con el formato V-12345678 o E-12345678.";
+    if (/[.\s]/.test(documento)) {
+      return "Escribe la cédula sin puntos ni espacios. Ejemplo: V-12345678 o E-12345678.";
+    }
+    if (!/^[VEve]-\d{5,9}$/.test(documento)) {
+      return "La cédula debe comenzar con V- (venezolano) o E- (extranjero), seguido de solo números. Ejemplo: V-12345678.";
+    }
+    return null;
+  }
+
+  async function guardarInscripcionEditada(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-seminario-admin");
+    Util.limpiarAviso(aviso);
+
+    var id = $("insc-id").value;
+    if (!id) return;
+
+    var nombres = Util.texto($("insc-nombres").value);
+    var documento = Util.texto($("insc-documento").value);
+    var email = Util.texto($("insc-email").value);
+    if (!nombres) {
+      Util.aviso(aviso, "error", "Escribe los nombres y apellidos.");
+      $("insc-nombres").focus();
+      return;
+    }
+    var errorDoc = validarDocumentoInscripcion(documento);
+    if (errorDoc) {
+      Util.aviso(aviso, "error", errorDoc);
+      $("insc-documento").focus();
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      Util.aviso(aviso, "error", "Escribe un correo electrónico válido.");
+      $("insc-email").focus();
+      return;
+    }
+
+    var rol = $("insc-rol").value;
+    var esPonente = rol === "PONENTE";
+    var cambios = {
+      nombres_apellidos: nombres,
+      documento: documento,
+      email: email,
+      telefono: Util.texto($("insc-telefono").value) || null,
+      pais: Util.texto($("insc-pais").value) || null,
+      ciudad: Util.texto($("insc-ciudad").value) || null,
+      condicion: $("insc-condicion").value,
+      perfil: $("insc-perfil").value,
+      modalidad: $("insc-modalidad").value,
+      accesibilidad: $("insc-accesibilidad").value,
+      rol: rol,
+      titulo_ponencia: esPonente ? (Util.texto($("insc-titulo-ponencia").value) || null) : null,
+      eje_tematico: esPonente ? ($("insc-eje").value || null) : null,
+      enlace_video: esPonente ? (Util.texto($("insc-video").value) || null) : null
+    };
+
+    var boton = $("boton-guardar-inscripcion");
+    boton.disabled = true;
+    boton.textContent = "Guardando…";
+    try {
+      await window.DB.actualizarInscripcionSeminario(id, cambios);
+      cancelarEdicionInscripcion();
+      await cargarInscripcionesSeminario();
+      Util.aviso(aviso, "exito", "Inscripción de " + nombres + " actualizada.");
+    } catch (error) {
+      var msg = /duplicate key|ux_seminario_documento/.test(error.message || "")
+        ? "Ya existe otra inscripción con esa cédula. Revisa el documento: no se permiten duplicados."
+        : error.message;
+      Util.aviso(aviso, "error", msg);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "Guardar cambios";
+    }
+  }
+
+  async function eliminarInscripcion(persona) {
+    if (!window.confirm(
+      "¿Eliminar la inscripción de «" + (persona.nombres_apellidos || "") + "» (" +
+      (persona.documento || "") + ")? Esta acción no se puede deshacer."
+    )) return;
+    var aviso = $("aviso-seminario-admin");
+    Util.limpiarAviso(aviso);
+    try {
+      await window.DB.eliminarInscripcionSeminario(persona.id);
+      if ($("insc-id").value === persona.id) cancelarEdicionInscripcion();
+      Util.aviso(aviso, "exito", "Inscripción eliminada.");
+      await cargarInscripcionesSeminario();
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    }
+  }
+
+  function prepararGestionInscripciones() {
+    $("formulario-editar-inscripcion").addEventListener("submit", guardarInscripcionEditada);
+    $("boton-cancelar-inscripcion").addEventListener("click", cancelarEdicionInscripcion);
+  }
+
+  /* =====================================================================
+     SEMINARIO: EDITOR DEL CONTENIDO DE LA PÁGINA PÚBLICA
+     ===================================================================== */
+
+  var contenidoSeminarioActual = null;
+
+  function valCont(id) { return Util.texto($(id).value); }
+  function ponerCont(id, valor) { $(id).value = valor == null ? "" : valor; }
+
+  /* --- Filas repetibles (ejes, comité, pasos, apoyos) --- */
+
+  function filaEje(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Título del eje</label>' +
+        '<input type="text" class="eje-titulo" maxlength="160" value="' + esc(item.titulo || "") + '"></div>' +
+      '<div class="campo"><label>Descripción del eje</label>' +
+        '<textarea class="eje-texto" rows="3" maxlength="1000">' + esc(item.texto || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaComite(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Integrante(s)</label>' +
+        '<input type="text" class="comite-integrante" maxlength="240" value="' + esc(item.integrante || "") + '"></div>' +
+      '<div class="campo"><label>Función</label>' +
+        '<input type="text" class="comite-funcion" maxlength="200" value="' + esc(item.funcion || "") + '"></div>' +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaPaso(html) {
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Paso (admite HTML: &lt;strong&gt;, &lt;a&gt;, &lt;br&gt;)</label>' +
+        '<textarea class="paso-texto" rows="3" maxlength="1200">' + esc(html || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaApoyo(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<input type="hidden" class="apoyo-url" value="' + esc(item.logo_url || "") + '">' +
+      '<div class="campo"><label>Logo de la organización (imagen)</label>' +
+        '<input type="file" class="apoyo-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">' +
+        '<img class="apoyo-preview" alt="Vista previa del logo" src="' + esc(item.logo_url || "") +
+          '" style="max-width:160px;margin-top:.5rem;display:block"></div>' +
+      '<div class="campo"><label>Descripción del logo (texto alternativo)</label>' +
+        '<input type="text" class="apoyo-alt" maxlength="300" value="' + esc(item.logo_alt || "") + '"></div>' +
+      '<div class="campo"><label>Texto de apoyo (admite HTML)</label>' +
+        '<textarea class="apoyo-caption" rows="2" maxlength="600">' + esc(item.caption || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    div.querySelector(".apoyo-archivo").addEventListener("change", function () {
+      if (this.files[0]) div.querySelector(".apoyo-preview").src = URL.createObjectURL(this.files[0]);
+    });
+    return div;
+  }
+
+  function pintarEditorEjes(items) {
+    var zona = $("editor-ejes-lista");
+    zona.innerHTML = "";
+    (items || []).forEach(function (it) { zona.appendChild(filaEje(it)); });
+  }
+  function pintarEditorComite(filas) {
+    var zona = $("editor-comite-lista");
+    zona.innerHTML = "";
+    (filas || []).forEach(function (it) { zona.appendChild(filaComite(it)); });
+  }
+  function pintarEditorPasos(pasos) {
+    var zona = $("editor-post-lista");
+    zona.innerHTML = "";
+    (pasos || []).forEach(function (p) { zona.appendChild(filaPaso(p)); });
+  }
+  function pintarEditorApoyos(items) {
+    var zona = $("editor-apoyos-lista");
+    zona.innerHTML = "";
+    (items || []).forEach(function (it) { zona.appendChild(filaApoyo(it)); });
+  }
+
+  function conectarQuitarFilas(idLista) {
+    $(idLista).addEventListener("click", function (evento) {
+      var objetivo = evento.target;
+      var boton = objetivo && objetivo.closest ? objetivo.closest(".editor-quitar") : null;
+      if (!boton) return;
+      var fila = boton.closest(".editor-fila");
+      if (fila && fila.parentNode) fila.parentNode.removeChild(fila);
+    });
+  }
+
+  /* --- Cargar el contenido guardado en el formulario --- */
+
+  async function cargarContenidoEditorSeminario() {
+    try {
+      contenidoSeminarioActual = await window.DB.obtenerContenidoSeminario();
+    } catch (error) {
+      contenidoSeminarioActual = window.SEMINARIO_CONTENIDO_DEFECTO || {};
+    }
+    volcarContenidoAlEditor(contenidoSeminarioActual);
+  }
+
+  function volcarContenidoAlEditor(c) {
+    c = c || {};
+    var a = c.apertura || {};
+    ponerCont("cont-insignia", a.insignia);
+    ponerCont("cont-titulo", a.titulo);
+    ponerCont("cont-lema", a.lema);
+    ponerCont("cont-modalidad", a.parrafo_modalidad);
+    ponerCont("cont-portal", a.parrafo_portal);
+    ponerCont("cont-flyer-alt", a.flyer_alt);
+    ponerCont("cont-boton", a.boton_texto);
+    $("cont-flyer-url").value = a.flyer_url || "";
+    $("cont-flyer-preview").src = a.flyer_url || "";
+    $("cont-flyer-archivo").value = "";
+
+    var ej = c.ejes || {};
+    ponerCont("cont-ejes-titulo", ej.titulo);
+    ponerCont("cont-ejes-subtitulo", ej.subtitulo);
+    pintarEditorEjes(ej.items);
+
+    var co = c.comite || {};
+    ponerCont("cont-comite-titulo", co.titulo);
+    ponerCont("cont-comite-subtitulo", co.subtitulo);
+    pintarEditorComite(co.filas);
+
+    var po = c.postulacion || {};
+    ponerCont("cont-post-titulo", po.titulo);
+    ponerCont("cont-post-subtitulo", po.subtitulo);
+    ponerCont("cont-post-nota", po.nota_asistente);
+    pintarEditorPasos(po.pasos);
+
+    var ap = c.apoyos || {};
+    ponerCont("cont-apoyos-titulo", ap.titulo);
+    pintarEditorApoyos(ap.items);
+  }
+
+  /* --- Leer el formulario y subir las imágenes nuevas --- */
+
+  async function recolectarContenidoSeminario(aviso) {
+    var apertura = {
+      insignia: valCont("cont-insignia"),
+      titulo: valCont("cont-titulo"),
+      lema: valCont("cont-lema"),
+      parrafo_modalidad: valCont("cont-modalidad"),
+      parrafo_portal: valCont("cont-portal"),
+      flyer_url: $("cont-flyer-url").value || "",
+      flyer_alt: valCont("cont-flyer-alt"),
+      boton_texto: valCont("cont-boton")
+    };
+    var archivoFlyer = $("cont-flyer-archivo").files[0];
+    if (archivoFlyer) {
+      Util.aviso(aviso, "", "Subiendo el afiche del seminario…");
+      apertura.flyer_url = await window.DB.subirImagenSeminario(archivoFlyer);
+    }
+
+    var ejes = { titulo: valCont("cont-ejes-titulo"), subtitulo: valCont("cont-ejes-subtitulo"), items: [] };
+    $("editor-ejes-lista").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var t = Util.texto(fila.querySelector(".eje-titulo").value);
+      var x = Util.texto(fila.querySelector(".eje-texto").value);
+      if (t || x) ejes.items.push({ titulo: t, texto: x });
+    });
+
+    var comite = { titulo: valCont("cont-comite-titulo"), subtitulo: valCont("cont-comite-subtitulo"), filas: [] };
+    $("editor-comite-lista").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var i = Util.texto(fila.querySelector(".comite-integrante").value);
+      var f = Util.texto(fila.querySelector(".comite-funcion").value);
+      if (i || f) comite.filas.push({ integrante: i, funcion: f });
+    });
+
+    var postulacion = {
+      titulo: valCont("cont-post-titulo"),
+      subtitulo: valCont("cont-post-subtitulo"),
+      pasos: [],
+      nota_asistente: valCont("cont-post-nota")
+    };
+    $("editor-post-lista").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var p = Util.texto(fila.querySelector(".paso-texto").value);
+      if (p) postulacion.pasos.push(p);
+    });
+
+    var apoyos = { titulo: valCont("cont-apoyos-titulo"), items: [] };
+    var filasApoyo = $("editor-apoyos-lista").querySelectorAll(".editor-fila");
+    for (var k = 0; k < filasApoyo.length; k++) {
+      var fila = filasApoyo[k];
+      var url = fila.querySelector(".apoyo-url").value || "";
+      var archivo = fila.querySelector(".apoyo-archivo").files[0];
+      if (archivo) {
+        Util.aviso(aviso, "", "Subiendo el logo de la organización…");
+        url = await window.DB.subirImagenSeminario(archivo);
+      }
+      var alt = Util.texto(fila.querySelector(".apoyo-alt").value);
+      var cap = Util.texto(fila.querySelector(".apoyo-caption").value);
+      if (url || alt || cap) apoyos.items.push({ logo_url: url, logo_alt: alt, caption: cap });
+    }
+
+    return { apertura: apertura, ejes: ejes, comite: comite, postulacion: postulacion, apoyos: apoyos };
+  }
+
+  async function guardarContenidoSeminarioAdmin(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-seminario-admin");
+    Util.limpiarAviso(aviso);
+    var boton = $("boton-guardar-contenido");
+    boton.disabled = true;
+    boton.textContent = "Guardando…";
+    try {
+      var contenido = await recolectarContenidoSeminario(aviso);
+      await window.DB.guardarContenidoSeminario(contenido);
+      contenidoSeminarioActual = contenido;
+      volcarContenidoAlEditor(contenido);
+      Util.aviso(aviso, "exito",
+        "Contenido del seminario publicado. Ya lo ve todo el público en la página del seminario.");
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "Guardar contenido";
+    }
+  }
+
+  function restaurarContenidoSeminario() {
+    if (!window.confirm(
+      "¿Cargar los textos e imágenes originales en el editor? Se reemplaza lo que tengas " +
+      "escrito ahora; pulsa «Guardar contenido» para publicarlos."
+    )) return;
+    contenidoSeminarioActual = JSON.parse(JSON.stringify(window.SEMINARIO_CONTENIDO_DEFECTO || {}));
+    volcarContenidoAlEditor(contenidoSeminarioActual);
+    Util.aviso($("aviso-seminario-admin"), "exito",
+      "Valores por defecto cargados en el editor. Pulsa «Guardar contenido» para publicarlos.");
+  }
+
+  function prepararEditorContenidoSeminario() {
+    $("boton-add-eje").addEventListener("click", function () { $("editor-ejes-lista").appendChild(filaEje({})); });
+    $("boton-add-comite").addEventListener("click", function () { $("editor-comite-lista").appendChild(filaComite({})); });
+    $("boton-add-paso").addEventListener("click", function () { $("editor-post-lista").appendChild(filaPaso("")); });
+    $("boton-add-apoyo").addEventListener("click", function () { $("editor-apoyos-lista").appendChild(filaApoyo({})); });
+    ["editor-ejes-lista", "editor-comite-lista", "editor-post-lista", "editor-apoyos-lista"].forEach(conectarQuitarFilas);
+    $("cont-flyer-archivo").addEventListener("change", function () {
+      if (this.files[0]) $("cont-flyer-preview").src = URL.createObjectURL(this.files[0]);
+    });
+    $("boton-restaurar-contenido").addEventListener("click", restaurarContenidoSeminario);
+    $("formulario-contenido-seminario").addEventListener("submit", guardarContenidoSeminarioAdmin);
+  }
+
+  /* =====================================================================
      CORREOS MASIVOS (Gmail del sitio vía Edge Function de Supabase)
      ===================================================================== */
 
@@ -1060,6 +1664,8 @@
   async function cargarTodo() {
     await Promise.all([cargarInvestigaciones(), cargarNoticias(), cargarVideos(), cargarSenias(), llenarAreasSenia(), cargarVideosLsv()]);
     await cargarCenso();
+    await cargarInscripcionesSeminario();
+    await cargarContenidoEditorSeminario();
   }
 
   function prepararPanelSitio() {
@@ -1270,6 +1876,13 @@
       pintarListaCenso(this.value.trim());
     });
     $("boton-exportar-censo").addEventListener("click", exportarCensoCsv);
+
+    $("buscador-seminario").addEventListener("input", function () {
+      pintarListaSeminario(this.value.trim());
+    });
+    $("boton-exportar-seminario").addEventListener("click", exportarSeminarioCsv);
+    prepararGestionInscripciones();
+    prepararEditorContenidoSeminario();
 
     window.DB.alCambiarSesion(function () { revisarSesion(); });
 

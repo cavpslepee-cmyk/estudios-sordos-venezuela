@@ -50,7 +50,15 @@
     var documento = texto("sem-documento");
     if (!documento) {
       marcarCampo("sem-documento");
-      return "Escribe tu cédula de identidad o pasaporte.";
+      return "Escribe tu cédula de identidad con el formato V-12345678 o E-12345678.";
+    }
+    if (/[.\s]/.test(documento)) {
+      marcarCampo("sem-documento");
+      return "Escribe la cédula sin puntos ni espacios. Ejemplo: V-12345678 o E-12345678.";
+    }
+    if (!/^[VEve]-\d{5,9}$/.test(documento)) {
+      marcarCampo("sem-documento");
+      return "La cédula debe comenzar con V- (venezolano) o E- (extranjero), seguido de solo números. Ejemplo: V-12345678.";
     }
     var email = texto("sem-email");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -150,6 +158,28 @@
 
     try {
       await window.DB.registrarInscripcionSeminario(datos, archivo);
+
+      /* Si postula una ponencia, enviamos el agradecimiento automático y el
+         aviso a la comisión. Nunca bloquea la inscripción: si el correo
+         falla, la postulación ya quedó guardada y se avisa aparte. */
+      var avisoCorreo = "";
+      if (datos.rol === "PONENTE") {
+        try {
+          await window.DB.enviarAvisoPostulacion({
+            nombres_apellidos: datos.nombres_apellidos,
+            email: datos.email,
+            documento: datos.documento,
+            titulo_ponencia: datos.titulo_ponencia,
+            eje_tematico: datos.eje_tematico
+          });
+          avisoCorreo = " Recibimos tu postulación y te enviamos un correo de confirmación. " +
+            "La comisión evaluadora la revisará y te comunicaremos oportunamente si fue seleccionada.";
+        } catch (errCorreo) {
+          avisoCorreo = " Recibimos tu postulación; la comisión evaluadora la revisará. " +
+            "(No pudimos enviar el correo de confirmación, pero tu postulación quedó registrada.)";
+        }
+      }
+
       formulario.reset();
       moduloPonente.hidden = true;
       limpiarErrores();
@@ -159,7 +189,8 @@
         "de Actualización Pedagógica en LSV. " +
         (datos.modalidad === "PRESENCIAL"
           ? "Presenta tu comprobante digital o cédula el día del evento en la mesa de acreditación."
-          : "Suscríbete y activa las notificaciones en nuestro canal de YouTube @ElprofesorSordoLepee.")
+          : "Suscríbete y activa las notificaciones en nuestro canal de YouTube @ElprofesorSordoLepee.") +
+        avisoCorreo
       );
       window.scrollTo({ top: aviso.offsetTop - 120, behavior: "smooth" });
     } catch (e) {
@@ -223,7 +254,88 @@
     }
   }
 
+  /* ---------------- Contenido editable de la página ---------------- */
+
+  /* Aplica el contenido guardado por el administrador (o los valores por
+     defecto). Los textos planos se escapan; los campos marcados como HTML
+     (párrafos de apertura, subtítulo y pasos de postulación, leyendas de
+     apoyos) se insertan tal cual, porque los redacta el propio admin. */
+  async function cargarContenidoSeminario() {
+    var c;
+    try {
+      c = await window.DB.obtenerContenidoSeminario();
+    } catch (e) {
+      c = window.SEMINARIO_CONTENIDO_DEFECTO || {};
+    }
+    if (!c) return;
+
+    function ponTexto(id, valor) {
+      var el = document.getElementById(id);
+      if (el && valor !== undefined && valor !== null) el.textContent = valor;
+    }
+    function ponHtml(id, valor) {
+      var el = document.getElementById(id);
+      if (el && valor !== undefined && valor !== null) el.innerHTML = valor;
+    }
+
+    var a = c.apertura || {};
+    ponTexto("sem-cont-insignia", a.insignia);
+    ponTexto("sem-cont-titulo", a.titulo);
+    ponTexto("sem-cont-lema", a.lema);
+    ponHtml("sem-cont-modalidad", a.parrafo_modalidad);
+    ponHtml("sem-cont-portal", a.parrafo_portal);
+    ponTexto("sem-cont-boton", a.boton_texto);
+    var flyer = document.getElementById("sem-cont-flyer");
+    if (flyer) {
+      if (a.flyer_url) flyer.src = a.flyer_url;
+      if (a.flyer_alt !== undefined && a.flyer_alt !== null) flyer.alt = a.flyer_alt;
+    }
+
+    var ej = c.ejes || {};
+    ponTexto("sem-cont-ejes-titulo", ej.titulo);
+    ponTexto("sem-cont-ejes-subtitulo", ej.subtitulo);
+    var ejLista = document.getElementById("sem-cont-ejes-lista");
+    if (ejLista && Array.isArray(ej.items)) {
+      ejLista.innerHTML = ej.items.map(function (it) {
+        return '<div class="tarjeta"><h3>' + Util.esc(it.titulo || "") + "</h3>" +
+          '<p class="tarjeta-texto">' + Util.esc(it.texto || "") + "</p></div>";
+      }).join("");
+    }
+
+    var co = c.comite || {};
+    ponTexto("sem-cont-comite-titulo", co.titulo);
+    ponTexto("sem-cont-comite-subtitulo", co.subtitulo);
+    var coLista = document.getElementById("sem-cont-comite-lista");
+    if (coLista && Array.isArray(co.filas)) {
+      coLista.innerHTML = co.filas.map(function (f) {
+        return "<tr><td>" + Util.esc(f.integrante || "") + "</td><td>" +
+          Util.esc(f.funcion || "") + "</td></tr>";
+      }).join("");
+    }
+
+    var po = c.postulacion || {};
+    ponTexto("sem-cont-post-titulo", po.titulo);
+    ponHtml("sem-cont-post-subtitulo", po.subtitulo);
+    var poLista = document.getElementById("sem-cont-post-lista");
+    if (poLista && Array.isArray(po.pasos)) {
+      poLista.innerHTML = po.pasos.map(function (p) { return "<li>" + p + "</li>"; }).join("");
+    }
+    ponTexto("sem-cont-post-nota", po.nota_asistente);
+
+    var ap = c.apoyos || {};
+    ponTexto("sem-cont-apoyos-titulo", ap.titulo);
+    var apLista = document.getElementById("sem-cont-apoyos-lista");
+    if (apLista && Array.isArray(ap.items)) {
+      apLista.innerHTML = ap.items.map(function (it) {
+        return '<figure class="figura apoyo">' +
+          '<img src="' + Util.esc(it.logo_url || "") + '" alt="' + Util.esc(it.logo_alt || "") + '" loading="lazy">' +
+          "<figcaption>" + (it.caption || "") + "</figcaption></figure>";
+      }).join("");
+    }
+  }
+
   function iniciar() {
+    cargarContenidoSeminario();
     cargarVideosLsv();
 
     formulario = document.getElementById("formulario-seminario");

@@ -312,6 +312,86 @@ administrador).
 
 ---
 
+### Panel del seminario: inscritos, exportación y correo automático
+La pestaña **Seminario** del panel lista **todas las personas inscritas** al seminario, con sus datos
+de contacto, condición, perfil, modalidad y accesibilidad. Quienes postularon una ponencia aparecen
+marcados como **Ponente**, con el título, el eje temático y el enlace de su video en LSV.
+
+- **Conteo a la vista:** tres tarjetas resumen muestran el **total de personas inscritas**, cuántas
+  son **ponentes** y cuántas **asistentes**. Se actualizan solas al registrar, editar o eliminar.
+- **Editar una inscripción:** el botón **Editar** de cada fila abre una planilla con todos los datos
+  (nombre, cédula, correo, teléfono, país, ciudad, condición, perfil, modalidad, accesibilidad, rol y,
+  si es ponente, título, eje y video). Guarda los cambios con **Guardar cambios** o descártalos con
+  **Cancelar**.
+- **Eliminar una inscripción:** el botón **Eliminar** pide confirmación y borra el registro. No se
+  puede deshacer.
+- **Cédula única y con formato:** tanto la planilla pública como la edición del admin exigen la cédula
+  con prefijo **V-** (venezolano) o **E-** (extranjero), seguida de solo números, **sin puntos ni
+  espacios** (ejemplo `V-12345678`). Si se escribe mal, aparece un mensaje que indica cómo corregirla.
+  No se permiten dos inscripciones con la misma cédula: el sistema normaliza mayúsculas, puntos y
+  espacios antes de comparar, y el índice único de la base lo respalda.
+- **Descargar todo en Excel (CSV):** el botón exporta la lista completa a un archivo `.csv` (con BOM,
+  para que Excel abra bien los acentos). Se abre directamente en Excel u otra hoja de cálculo.
+- **Descargar diapositivas:** las diapositivas de los ponentes viven en el bucket **privado**
+  `seminario-ponencias`. El botón **Diapositivas** de cada fila genera un **enlace firmado temporal**
+  (válido 1 hora) y abre el archivo en otra pestaña para descargarlo. Nadie más puede ver esos archivos.
+- **Buscador:** filtra por nombre, documento, correo o título de ponencia.
+
+**Correo automático al postular una ponencia.** Cuando alguien se inscribe como **Ponente**, el sitio
+dispara la *Edge Function* pública `aviso-postulacion`, que envía dos correos desde tu Gmail:
+
+1. Un **agradecimiento al postulante**: confirma que su postulación se registró y le explica que la
+   comisión evaluadora la revisará y le comunicará más adelante si fue seleccionada.
+2. Un **aviso interno a la comisión** (tu propio Gmail, `gmail_usuario`) con los datos de la nueva
+   postulación, para que la comisión la evalúe.
+
+El **dictamen** (seleccionada / no seleccionada) lo envías tú manualmente después, respondiendo al
+correo del postulante o desde la pestaña **Correos masivos**.
+
+Seguridad: la función es pública (la dispara el formulario público de `seminario.html`), pero
+**antes de enviar comprueba en la base** que existe una inscripción con ese documento y que efectivamente
+postula una ponencia; si no existe, no envía nada. El envío **nunca bloquea la inscripción**: si el
+correo falla, la postulación ya quedó guardada y el aviso en pantalla lo aclara.
+
+Configuración, una sola vez:
+
+1. Ejecuta `sql/seminario.sql` en el **SQL Editor** (crea la tabla `seminario_inscripciones`, su índice
+   único por documento, las políticas RLS y el bucket privado `seminario-ponencias`). Sin esto, la
+   pestaña **Seminario** no muestra inscritos.
+2. Despliega la Edge Function **`aviso-postulacion`** (igual que `enviar-novedades`): **Edge Functions →
+   Create a new function** → nombre `aviso-postulacion` → pega el contenido de
+   `supabase/functions/aviso-postulacion/index.ts` → **Deploy**. Reusa los mismos secretos de Gmail de
+   `secretos_sitio` (`gmail_usuario`, `gmail_clave_app`); no hace falta configurar nada nuevo.
+
+### Contenido editable de la página del seminario (sin tocar código)
+La misma pestaña **Seminario** incluye un editor para cambiar **todo el contenido** que ve el público
+en `seminario.html`, de manera autónoma:
+
+- **Apertura:** insignia superior, título principal, lema, párrafo de modalidad, párrafo del portal,
+  **afiche** (imagen que se sube desde el panel), su texto alternativo y el texto del botón de inscripción.
+- **Ejes temáticos:** título y subtítulo de la sección, más una lista de ejes (título + descripción) que
+  puedes **añadir o quitar** con los botones «Añadir eje» / «Quitar».
+- **Comité organizador:** título, subtítulo y filas de integrante(s) + función, añadibles y eliminables.
+- **Cómo postular una ponencia:** título, subtítulo, los pasos numerados y la nota para asistentes.
+- **Organizaciones que apoyan:** título y una lista de logos (imagen subida desde el panel) con su texto
+  alternativo y su pie de apoyo.
+
+Los campos marcados como **HTML** admiten etiquetas como `<strong>`, `<a href="…">` y `<br>`; el resto
+se muestra como texto plano. Las imágenes se suben al bucket público `noticias` de Supabase Storage
+(igual que las imágenes de las noticias). Pulsa **Guardar contenido** para publicar los cambios; el
+botón **Restaurar valores por defecto** vuelve a cargar los textos e imágenes originales en el editor
+(queda pendiente de guardar, no publica solo).
+
+No hace falta SQL nuevo: el contenido se guarda como un JSON en la tabla `configuracion_sitio`
+(clave `seminario_contenido`), que ya tiene lectura pública y escritura solo para el administrador.
+Si todavía no has guardado nada, la página muestra los valores por defecto de `js/datos-demo.js`
+(`SEMINARIO_CONTENIDO_DEFECTO`), que también sirven de fallback.
+
+> En **modo demostración** puedes editar y guardar todos los textos (se guardan en el navegador), pero
+> la subida de imágenes requiere Supabase conectado; el panel te lo avisa con un mensaje claro.
+
+---
+
 ## Guion de pruebas recomendado
 
 Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de cada una si pasó.
@@ -383,6 +463,14 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C22 | En la pestaña **Sitio**, activar o desactivar la pestaña del seminario y guardar | Desactivada, el público no ve la pestaña «Seminario», ni el afiche de la portada, ni la planilla (solo un aviso de «en preparación»); con tu sesión iniciada tú los sigues viendo para probar. |
 | C23 | En **Correos masivos**, adjuntar una imagen y enviar a tu correo de prueba | La imagen viaja adjunta y te llega al correo junto con el mensaje. Una imagen mayor a 4 MB o que no sea PNG/JPG/GIF/WEBP se rechaza con un aviso claro. |
 | C24 | En la pestaña **Sitio**, publicar un video en LSV (enlace de YouTube o archivo `.mp4`) y guardarlo | Aparece en el listado del panel y se ve en la sección «Videos con información en LSV» de `seminario.html`. Ocultarlo lo quita de la página pública sin borrarlo. |
+| C25 | En la pestaña **Seminario**, revisar la lista de inscritos y pulsar **Descargar todo en Excel (CSV)** | Se ven los inscritos con sus datos; los ponentes salen marcados y con su ponencia. El botón baja un `.csv` que Excel abre con los acentos correctos. |
+| C26 | En la pestaña **Seminario**, pulsar **Descargar diapositivas** en la fila de un ponente | Genera un enlace firmado temporal y abre el archivo (PDF/PPTX) en otra pestaña para descargarlo. |
+| C27 | Inscribirte como **Ponente** desde `seminario.html` (con `sql/seminario.sql` ejecutado y `aviso-postulacion` desplegada) | La inscripción se registra y llegan dos correos desde tu Gmail: el agradecimiento al postulante y el aviso interno a la comisión. Si el correo falla, la inscripción queda guardada y el aviso en pantalla lo aclara. |
+| C28 | En la pestaña **Seminario**, mirar las tarjetas de resumen | Muestran el total de personas inscritas, cuántas son ponentes y cuántas asistentes. |
+| C29 | Pulsar **Editar** en una fila, cambiar un dato y **Guardar cambios** | La planilla se abre con los datos de esa persona; al guardar, la lista y el conteo se actualizan. **Cancelar** cierra sin guardar. |
+| C30 | Pulsar **Eliminar** en una fila y confirmar | La inscripción desaparece de la lista y el conteo baja. Pide confirmación antes de borrar. |
+| C31 | En la planilla pública de `seminario.html`, escribir la cédula sin prefijo (`12345678`), con puntos (`V-12.345.678`) o con otra letra (`X-12345678`) | Aparece un mensaje que explica el formato correcto `V-12345678` o `E-12345678`, sin puntos ni espacios. Con el formato correcto, la inscripción procede. Lo mismo se exige al **editar** desde el panel. |
+| C32 | En el editor de **Contenido de la página del seminario**, cambiar el título o el lema, añadir/quitar un eje y pulsar **Guardar contenido** | Al abrir `seminario.html` se ven los textos nuevos y la lista de ejes actualizada. **Restaurar valores por defecto** vuelve a cargar los originales en el editor (sin publicar hasta que guardes). Subir un afiche o logo nuevo lo reemplaza (requiere Supabase conectado). |
 
 ### D. En el teléfono
 
@@ -507,6 +595,9 @@ W_ESTUDIOSSORDOSVENEZUELA/
 │   ├── censo.js                Lógica del formulario del censo
 │   ├── diccionario.js          Lógica del buscador de señas
 │   └── admin.js                Lógica del panel
+├── supabase/functions/
+│   ├── enviar-novedades/index.ts   Correo masivo a los censados (Gmail del sitio)
+│   └── aviso-postulacion/index.ts  Correo automático al postular una ponencia
 └── sql/
     ├── supabase_schema.sql     Esquema completo de la base de datos
     ├── seminario.sql           Inscripciones y diapositivas del seminario

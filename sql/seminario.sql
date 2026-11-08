@@ -30,9 +30,11 @@ create table if not exists public.seminario_inscripciones (
   creado_el         timestamptz not null default now()
 );
 
--- Una inscripción por persona, sin importar mayúsculas ni puntos.
-create unique index if not exists ux_seminario_documento
-  on public.seminario_inscripciones (lower(documento));
+-- Una inscripción por persona: la cédula se compara en mayúsculas y sin
+-- espacios ni puntos, igual que la normaliza el formulario antes de guardar.
+drop index if exists public.ux_seminario_documento;
+create unique index ux_seminario_documento
+  on public.seminario_inscripciones (upper(replace(replace(documento, ' ', ''), '.', '')));
 
 alter table public.seminario_inscripciones enable row level security;
 

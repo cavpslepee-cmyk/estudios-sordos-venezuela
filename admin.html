@@ -113,6 +113,10 @@
                 aria-controls="panel-censo" aria-selected="false" tabindex="-1" data-panel="panel-censo">
           Censo de egresados
         </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-seminario"
+                aria-controls="panel-seminario" aria-selected="false" tabindex="-1" data-panel="panel-seminario">
+          Seminario
+        </button>
         <button class="pestanya" type="button" role="tab" id="pestanya-correos"
                 aria-controls="panel-correos" aria-selected="false" tabindex="-1" data-panel="panel-correos">
           Correos masivos
@@ -506,6 +510,265 @@
             </div>
           </div>
           <div id="lista-censo"><p class="cargando">Cargando</p></div>
+        </div>
+      </div>
+
+      <!-- ---------- SEMINARIO ---------- -->
+      <div class="panel" id="panel-seminario" role="tabpanel" aria-labelledby="pestanya-seminario" hidden>
+        <div id="aviso-seminario-admin" class="aviso" hidden></div>
+
+        <!-- Editar una inscripción (se muestra al pulsar «Editar») -->
+        <div class="panel-tarjeta" id="tarjeta-editar-inscripcion" hidden>
+          <div class="panel-cabecera">
+            <h2 id="titulo-editar-inscripcion">Editar inscripción</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-cancelar-inscripcion">Cancelar</button>
+          </div>
+          <form id="formulario-editar-inscripcion" novalidate>
+            <input type="hidden" id="insc-id">
+            <div class="campo">
+              <label for="insc-nombres">Nombres y apellidos <span class="obligatorio">*</span></label>
+              <input type="text" id="insc-nombres" maxlength="160">
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="insc-documento">Cédula / pasaporte <span class="obligatorio">*</span></label>
+                <input type="text" id="insc-documento" placeholder="V-12345678 o E-12345678">
+                <span class="ayuda">Con prefijo V- o E-, solo números, sin puntos ni espacios.</span>
+              </div>
+              <div class="campo">
+                <label for="insc-email">Correo electrónico <span class="obligatorio">*</span></label>
+                <input type="email" id="insc-email" maxlength="160">
+              </div>
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="insc-telefono">Teléfono</label>
+                <input type="text" id="insc-telefono" maxlength="40">
+              </div>
+              <div class="campo">
+                <label for="insc-pais">País</label>
+                <input type="text" id="insc-pais" maxlength="80">
+              </div>
+              <div class="campo">
+                <label for="insc-ciudad">Ciudad</label>
+                <input type="text" id="insc-ciudad" maxlength="80">
+              </div>
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="insc-condicion">Condición</label>
+                <select id="insc-condicion">
+                  <option value="PERSONA_SORDA">Persona sorda</option>
+                  <option value="PERSONA_OYENTE">Persona oyente</option>
+                  <option value="HIPOACUSICA_CODA_OTRA">Hipoacúsica / CODA / otra</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="insc-perfil">Perfil</label>
+                <select id="insc-perfil">
+                  <option value="EGRESADO_COMUNIDAD_APRENDIZAJE">Egresado de comunidad de aprendizaje</option>
+                  <option value="PROFESIONAL">Profesional</option>
+                  <option value="FACILITADOR_EMPIRICO">Facilitador empírico</option>
+                  <option value="ESTUDIANTE_UNIVERSITARIO">Estudiante universitario</option>
+                  <option value="REPRESENTANTE_ORGANIZACION">Representante de organización</option>
+                  <option value="OTRO">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="insc-modalidad">Modalidad</label>
+                <select id="insc-modalidad">
+                  <option value="PRESENCIAL">Presencial</option>
+                  <option value="VIRTUAL">Virtual</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="insc-accesibilidad">Accesibilidad</label>
+                <select id="insc-accesibilidad">
+                  <option value="LSV">LSV</option>
+                  <option value="SSI">SSI</option>
+                  <option value="SUBTITULADO">Subtitulado</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="insc-rol">Participa como</label>
+                <select id="insc-rol">
+                  <option value="ASISTENTE">Asistente</option>
+                  <option value="PONENTE">Ponente</option>
+                </select>
+              </div>
+            </div>
+            <div class="campo">
+              <label for="insc-titulo-ponencia">Título de la ponencia</label>
+              <input type="text" id="insc-titulo-ponencia" maxlength="240">
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="insc-eje">Eje temático</label>
+                <select id="insc-eje">
+                  <option value="">— Sin eje —</option>
+                  <option value="DIDACTICA_L1_L2">Didáctica y metodología de la LSV (L1 / L2)</option>
+                  <option value="SORDEDAD_GANANCIA">Sordedad, Ganancia Sorda y pedagogía crítica</option>
+                  <option value="MNM_SINTAXIS">Marcadores no manuales, sintaxis espacial y gramática visual</option>
+                  <option value="TECNOLOGIA_IA">Tecnología, inteligencia artificial y material didáctico</option>
+                  <option value="SOCIOLINGUISTICA">Sociolingüística, neologismos y registro formal en LSV</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="insc-video">Enlace del video en LSV</label>
+                <input type="url" id="insc-video" maxlength="600" placeholder="https://…">
+              </div>
+            </div>
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-inscripcion">Guardar cambios</button>
+            </p>
+          </form>
+        </div>
+
+        <!-- Personas inscritas: conteo, exportación y lista -->
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Personas inscritas al seminario</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-exportar-seminario">
+              Descargar todo en Excel (CSV)
+            </button>
+          </div>
+          <div id="resumen-seminario" class="tarjetas-contador" style="margin-bottom:1.2rem"></div>
+          <p class="texto-suave texto-chico">
+            Lista completa de quienes se han registrado. Puedes <strong>editar</strong> los datos o
+            <strong>eliminar</strong> una inscripción con los botones de cada fila. Quienes postularon
+            una ponencia aparecen marcados como <strong>Ponente</strong> y, si subieron diapositivas,
+            puedes descargarlas. El archivo CSV se abre directamente en Excel. La cédula es única:
+            no se permiten inscripciones repetidas.
+          </p>
+          <div class="filtros">
+            <div class="campo-busqueda">
+              <label class="solo-lectores" for="buscador-seminario">Buscar en las inscripciones</label>
+              <input type="search" id="buscador-seminario" placeholder="Buscar por nombre, documento, correo o título de ponencia…">
+            </div>
+          </div>
+          <span class="texto-suave" id="total-seminario"></span>
+          <div id="lista-seminario"><p class="cargando">Cargando</p></div>
+        </div>
+
+        <!-- Editor del contenido de la página del seminario -->
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Contenido de la página del seminario</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-restaurar-contenido">
+              Restaurar valores por defecto
+            </button>
+          </div>
+          <p class="texto-suave texto-chico">
+            Cambia aquí los títulos, textos e imágenes que ve el público en <code>seminario.html</code>.
+            Los campos marcados como <strong>HTML</strong> admiten etiquetas como
+            <code>&lt;strong&gt;</code>, <code>&lt;a href="…"&gt;</code> y <code>&lt;br&gt;</code>;
+            el resto se muestra como texto plano. Las imágenes se suben desde aquí y se guardan en
+            Supabase. Pulsa <strong>Guardar contenido</strong> para publicar los cambios.
+          </p>
+
+          <form id="formulario-contenido-seminario" novalidate>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Apertura (encabezado y afiche)</legend>
+              <div class="campo">
+                <label for="cont-insignia">Insignia superior</label>
+                <input type="text" id="cont-insignia" maxlength="60" placeholder="¡Muy pronto!">
+              </div>
+              <div class="campo">
+                <label for="cont-titulo">Título principal</label>
+                <input type="text" id="cont-titulo" maxlength="240">
+              </div>
+              <div class="campo">
+                <label for="cont-lema">Lema</label>
+                <input type="text" id="cont-lema" maxlength="200">
+              </div>
+              <div class="campo">
+                <label for="cont-modalidad">Párrafo de modalidad (HTML)</label>
+                <textarea id="cont-modalidad" rows="4" maxlength="2000"></textarea>
+              </div>
+              <div class="campo">
+                <label for="cont-portal">Párrafo del portal (HTML)</label>
+                <textarea id="cont-portal" rows="3" maxlength="2000"></textarea>
+              </div>
+              <div class="campo">
+                <label for="cont-flyer-archivo">Afiche del seminario (imagen)</label>
+                <input type="file" id="cont-flyer-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">
+                <input type="hidden" id="cont-flyer-url">
+                <span class="ayuda">Sube una imagen para reemplazar el afiche actual. Si no subes ninguna, se conserva la existente.</span>
+                <img id="cont-flyer-preview" alt="Vista previa del afiche" style="max-width:240px;margin-top:.6rem;display:block">
+              </div>
+              <div class="campo">
+                <label for="cont-flyer-alt">Descripción del afiche (texto alternativo)</label>
+                <input type="text" id="cont-flyer-alt" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="cont-boton">Texto del botón de inscripción</label>
+                <input type="text" id="cont-boton" maxlength="80">
+              </div>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Ejes temáticos</legend>
+              <div class="campo">
+                <label for="cont-ejes-titulo">Título de la sección</label>
+                <input type="text" id="cont-ejes-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="cont-ejes-subtitulo">Subtítulo</label>
+                <input type="text" id="cont-ejes-subtitulo" maxlength="300">
+              </div>
+              <div id="editor-ejes-lista"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-eje">Añadir eje</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Comité organizador</legend>
+              <div class="campo">
+                <label for="cont-comite-titulo">Título de la sección</label>
+                <input type="text" id="cont-comite-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="cont-comite-subtitulo">Subtítulo</label>
+                <input type="text" id="cont-comite-subtitulo" maxlength="300">
+              </div>
+              <div id="editor-comite-lista"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-comite">Añadir integrante</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Cómo postular una ponencia</legend>
+              <div class="campo">
+                <label for="cont-post-titulo">Título de la sección</label>
+                <input type="text" id="cont-post-titulo" maxlength="200">
+              </div>
+              <div class="campo">
+                <label for="cont-post-subtitulo">Subtítulo (HTML)</label>
+                <textarea id="cont-post-subtitulo" rows="3" maxlength="1000"></textarea>
+              </div>
+              <div id="editor-post-lista"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-paso">Añadir paso</button>
+              <div class="campo">
+                <label for="cont-post-nota">Nota para asistentes</label>
+                <textarea id="cont-post-nota" rows="2" maxlength="500"></textarea>
+              </div>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Organizaciones que apoyan</legend>
+              <div class="campo">
+                <label for="cont-apoyos-titulo">Título de la sección</label>
+                <input type="text" id="cont-apoyos-titulo" maxlength="160">
+              </div>
+              <div id="editor-apoyos-lista"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-apoyo">Añadir organización</button>
+            </fieldset>
+
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-contenido">Guardar contenido</button>
+            </p>
+          </form>
         </div>
       </div>
 

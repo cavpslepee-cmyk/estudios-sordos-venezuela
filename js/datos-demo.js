@@ -156,6 +156,47 @@ window.DATOS_DEMO = {
     }
   ],
 
+  seminario_inscripciones: [
+    {
+      id: "demo-sem-1",
+      nombres_apellidos: "María Alejandra Pérez",
+      documento: "V12345678",
+      email: "maria.perez@ejemplo.com",
+      telefono: "0414-1234567",
+      pais: "Venezuela",
+      ciudad: "Caracas",
+      condicion: "PERSONA_SORDA",
+      perfil: "PROFESIONAL",
+      modalidad: "PRESENCIAL",
+      accesibilidad: "LSV",
+      rol: "PONENTE",
+      titulo_ponencia: "Didáctica de la LSV como primera lengua en el aula",
+      eje_tematico: "DIDACTICA_L1_L2",
+      enlace_video: "https://www.youtube.com/watch?v=DEMO0000001",
+      ruta_diapositivas: "ponencias/demo-diapositivas.pdf",
+      creado_el: "2026-10-20T14:30:00Z"
+    },
+    {
+      id: "demo-sem-2",
+      nombres_apellidos: "José Rafael Gómez",
+      documento: "V23456789",
+      email: "jose.gomez@ejemplo.com",
+      telefono: null,
+      pais: "Venezuela",
+      ciudad: "Maracaibo",
+      condicion: "PERSONA_OYENTE",
+      perfil: "ESTUDIANTE_UNIVERSITARIO",
+      modalidad: "VIRTUAL",
+      accesibilidad: "SUBTITULADO",
+      rol: "ASISTENTE",
+      titulo_ponencia: null,
+      eje_tematico: null,
+      enlace_video: null,
+      ruta_diapositivas: null,
+      creado_el: "2026-10-21T09:15:00Z"
+    }
+  ],
+
   noticias: [
     {
       id: "demo-not-1",
@@ -335,4 +376,74 @@ window.DATOS_DEMO = {
     { clave: "seminario_habilitado", valor: "no" },
     { clave: "texto_objetivo", valor: "Visibilizar los trabajos realizados por personas sordas a nivel de educación universitaria y determinar la cantidad de egresados en la actualidad." }
   ]
+};
+
+/* =====================================================================
+   CONTENIDO EDITABLE DE LA PÁGINA DEL SEMINARIO (valores por defecto)
+   =====================================================================
+   Es el texto e imágenes que aparecen en seminario.html. El administrador
+   puede cambiarlo todo desde el panel; lo guardado se almacena como JSON en
+   configuracion_sitio (clave "seminario_contenido"). Si no hay nada guardado,
+   la página usa estos valores. Los campos marcados como HTML admiten
+   etiquetas (<strong>, <a>, <br>); el resto se muestra como texto plano.
+   ===================================================================== */
+window.SEMINARIO_CONTENIDO_DEFECTO = {
+  apertura: {
+    insignia: "¡Muy pronto!",
+    titulo: "I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana",
+    lema: "«Sordedad, Ganancia Sorda e Innovación Didáctica»",
+    parrafo_modalidad: 'Modalidad híbrida: presencial en Caracas (aforo de 300 a 500 personas) y virtual, con transmisión en vivo por el canal de YouTube <a href="https://www.youtube.com/@ElprofesorSordoLepee" target="_blank" rel="noopener noreferrer">@ElprofesorSordoLepee</a> y accesibilidad en Sistema de Señas Internacional (SSI) cuando la audiencia lo requiera.',
+    parrafo_portal: "Este portal es el centro digital del seminario: aquí se centralizan la inscripción, la postulación de ponencias y, después del evento, las memorias y la certificación digital.",
+    flyer_url: "img/flyer-seminario-lsv.png",
+    flyer_alt: "Afiche del I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana con sus cinco ejes temáticos, la modalidad híbrida y el portal web oficial",
+    boton_texto: "Inscribirme en el seminario"
+  },
+  ejes: {
+    titulo: "Ejes temáticos y enfoque",
+    subtitulo: "Cinco líneas de trabajo guían las ponencias, los módulos y las mesas del seminario.",
+    items: [
+      { titulo: "Pedagogía de la LSV", texto: "La enseñanza de la Lengua de Señas Venezolana como disciplina con metodología propia, diseñada por y para la comunidad Sorda." },
+      { titulo: "Didáctica de la LSV (L1 y L2)", texto: "Estrategias diferenciadas para la adquisición natural en niños sordos (L1) y el aprendizaje en adultos oyentes o profesionales (L2)." },
+      { titulo: "El modelo lingüístico en la formación", texto: "El lugar de la gramática visual, los marcadores no manuales y la sintaxis espacial en la formación de formadores de LSV." },
+      { titulo: "Privación lingüística", texto: "El impacto de la privación lingüística en niños sordos dentro del sistema educativo y las respuestas pedagógicas posibles." },
+      { titulo: "Pensamiento Robinsoniano, Sordedad y Ganancia Sorda", texto: "«O inventamos o erramos»: la pedagogía crítica de Simón Rodríguez unida a la Sordedad (Deafhood) y a la Ganancia Sorda (Deaf Gain)." }
+    ]
+  },
+  comite: {
+    titulo: "Comité organizador",
+    subtitulo: "Una iniciativa concebida, diseñada y liderada por el equipo de Estudios de y para Sordos.",
+    filas: [
+      { integrante: "Dr. Javier Ramírez González", funcion: "Coordinador general" },
+      { integrante: "Lcdo. Gil Escobar", funcion: "Logística" },
+      { integrante: "Lcda. Yoliber Bellorin", funcion: "Publicidad y difusión" },
+      { integrante: "Lcda. Poema Rondón y Lcda. Morelbis Benavides", funcion: "Protocolo" },
+      { integrante: "Lcdo. Jesús Daniel Sánchez", funcion: "Apoyo tecnológico" },
+      { integrante: "Lcdo. Douglas Cubillán, Lcdo. Bryan Mejías, Lcdo. Eliam Boza y Lcda. María Piña", funcion: "Equipo de apoyo complementario" },
+      { integrante: "SENACOA", funcion: "Intérpretes de Lengua de Señas Venezolana" },
+      { integrante: "MSc. Iván Sanguino y MSc. Pablo Peñaloza", funcion: "Animación cultural en Cultura Sorda" }
+    ]
+  },
+  postulacion: {
+    titulo: "Cómo postular tu ponencia o trabajo de investigación",
+    subtitulo: "La Comisión Académica y de Arbitraje evalúa todas las postulaciones recibidas por este portal. Estos son los pasos, desde la grabación del video hasta el dictamen.",
+    pasos: [
+      '<strong>Inscríbete como ponente.</strong> Completa la <a href="#inscripcion">planilla de inscripción</a> y marca «Deseo postular un trabajo de investigación o ponencia»: se abrirá el módulo de postulación.',
+      '<strong>Graba tu video resumen en LSV (3 a 5 minutos).</strong> En alta resolución (MP4, 1080p), con buena iluminación frontal, fondo neutro que contraste con tu tono de piel y vestimenta sin patrones distractores. Presenta quién eres, el título de la investigación, el objetivo principal, la metodología y los resultados o aportes clave.',
+      '<strong>Sube el video y copia el enlace.</strong> Puedes resguardarlo en YouTube (enlace público u oculto), Google Drive o Vimeo; ese enlace es el que se pega en la planilla.',
+      '<strong>Prepara las diapositivas de soporte.</strong> Altamente visuales: diagramas, mapas conceptuales y videos integrados, con el texto escrito reducido a puntos clave. Formato 16:9, en PDF o PPTX, máximo 15 MB.',
+      '<strong>Elige el eje temático y envía.</strong> Selecciona a cuál de los cinco ejes del seminario postula tu trabajo, adjunta el enlace del video y las diapositivas, y pulsa «Enviar mi inscripción». Verás en pantalla la confirmación del envío exitoso.',
+      '<strong>Espera el dictamen por correo.</strong> La Comisión revisa la relevancia temática, la claridad y fluidez de la exposición en LSV, y la innovación o rigor de la investigación. El dictamen (aprobado o con observaciones) llega al correo con el que te inscribiste.'
+    ],
+    nota_asistente: "Si participas únicamente como asistente, no necesitas los pasos 2 a 6: con completar la planilla de inscripción basta."
+  },
+  apoyos: {
+    titulo: "Organizaciones que apoyan el seminario",
+    items: [
+      {
+        logo_url: "img/iaet-logo.png",
+        logo_alt: "Logotipo del IAET: las letras IAET en turquesa junto a un círculo formado por cuadros turquesas y verdes",
+        caption: "<strong>IAET.</strong> Organización que apoya esta página web y el I Seminario Nacional de Actualización Pedagógica en LSV."
+      }
+    ]
+  }
 };

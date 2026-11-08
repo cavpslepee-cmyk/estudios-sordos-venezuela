@@ -609,6 +609,74 @@
     return registro;
   }
 
+  /* Lista todas las inscripciones para el panel del administrador. */
+  async function listarInscripcionesSeminario() {
+    if (!esSupabase) {
+      return demoLeer("seminario_inscripciones").slice().sort(function (a, b) {
+        return String(b.creado_el || "").localeCompare(String(a.creado_el || ""));
+      });
+    }
+    return fallo(await sb().from("seminario_inscripciones").select("*")
+      .order("creado_el", { ascending: false }));
+  }
+
+  /* El bucket de ponencias es privado: el administrador necesita un enlace
+     firmado y temporal para descargar el archivo subido por el ponente. */
+  async function obtenerEnlaceDiapositiva(ruta) {
+    if (!ruta) return null;
+    if (!esSupabase) return null;
+    var res = await sb().storage.from(cfg.BUCKET_SEMINARIO).createSignedUrl(ruta, 3600);
+    if (res.error) throw new Error(res.error.message);
+    return res.data.signedUrl;
+  }
+
+  /* Correo automático tras registrar una postulación a ponencia. El envío lo
+     hace la Edge Function pública "aviso-postulacion": comprueba en la base
+     que el documento existe antes de enviar, para que nadie abuse del
+     endpoint. Agradece al postulante y avisa a la comisión evaluadora. */
+  async function enviarAvisoPostulacion(datos) {
+    if (!esSupabase) return { simulado: true };
+    var res = await sb().functions.invoke("aviso-postulacion", {
+      body: datos || {}
+    });
+    if (res.error) {
+      throw new Error(res.error.message || "No se pudo enviar el aviso de postulación.");
+    }
+    var datosRes = res.data || {};
+    if (datosRes.error) throw new Error(datosRes.error);
+    return datosRes;
+  }
+
+  /* Actualiza una inscripción desde el panel (solo administrador). Normaliza
+     el documento y rechaza duplicados, ignorando la propia fila editada. */
+  async function actualizarInscripcionSeminario(id, cambios) {
+    var registro = Object.assign({}, cambios);
+    if (registro.documento) {
+      registro.documento = String(registro.documento).toUpperCase().replace(/[\s.]/g, "");
+    }
+    if (!esSupabase) {
+      if (registro.documento) {
+        var repetido = demoLeer("seminario_inscripciones").some(function (f) {
+          return f.id !== id &&
+            String(f.documento || "").toUpperCase().replace(/[\s.]/g, "") === registro.documento;
+        });
+        if (repetido) {
+          throw new Error('duplicate key value violates unique constraint "ux_seminario_documento"');
+        }
+      }
+      return demoActualizar("seminario_inscripciones", id, registro);
+    }
+    delete registro.id;
+    delete registro.creado_el;
+    return fallo(await sb().from("seminario_inscripciones").update(registro).eq("id", id).select().single());
+  }
+
+  async function eliminarInscripcionSeminario(id) {
+    if (!esSupabase) return demoEliminar("seminario_inscripciones", id);
+    fallo(await sb().from("seminario_inscripciones").delete().eq("id", id));
+    return true;
+  }
+
   /* -------------------------------------------------------------------
      VIDEOS EN LSV DEL SEMINARIO (información accesible para personas sordas)
      ------------------------------------------------------------------- */
@@ -718,6 +786,63 @@
   }
 
   /* -------------------------------------------------------------------
+     CONTENIDO EDITABLE DE LA PÁGINA DEL SEMINARIO
+     ------------------------------------------------------------------- */
+  function clonarContenidoSeminario(obj) {
+    return JSON.parse(JSON.stringify(obj || {}));
+  }
+
+  /* Combina los valores por defecto con lo guardado: conserva la forma de
+     los defaults y rellena con lo que el administrador haya cambiado. Las
+     listas (ejes, comité, pasos, apoyos) se toman tal cual las guardó. */
+  function fusionarContenidoSeminario(base, extra) {
+    if (Array.isArray(base)) {
+      return Array.isArray(extra) ? extra : base.slice();
+    }
+    if (base && typeof base === "object") {
+      var salida = {};
+      Object.keys(base).forEach(function (k) {
+        var b = base[k];
+        var e = (extra && typeof extra === "object") ? extra[k] : undefined;
+        if (Array.isArray(b)) {
+          salida[k] = Array.isArray(e) ? e : b.slice();
+        } else if (b && typeof b === "object") {
+          salida[k] = fusionarContenidoSeminario(b, e || {});
+        } else {
+          salida[k] = (e === undefined || e === null) ? b : e;
+        }
+      });
+      return salida;
+    }
+    return (extra === undefined || extra === null) ? base : extra;
+  }
+
+  async function obtenerContenidoSeminario() {
+    var porDefecto = window.SEMINARIO_CONTENIDO_DEFECTO || {};
+    var crudo = null;
+    try {
+      var config = await obtenerConfiguracion();
+      crudo = config.seminario_contenido;
+    } catch (e) { crudo = null; }
+    if (!crudo) return clonarContenidoSeminario(porDefecto);
+    try {
+      return fusionarContenidoSeminario(porDefecto, JSON.parse(crudo));
+    } catch (e) {
+      return clonarContenidoSeminario(porDefecto);
+    }
+  }
+
+  async function guardarContenidoSeminario(obj) {
+    return guardarConfiguracion("seminario_contenido", JSON.stringify(obj || {}));
+  }
+
+  /* Las imágenes del seminario (afiche, logos) van al bucket público de
+     noticias, igual que las imágenes de las noticias. */
+  async function subirImagenSeminario(archivo) {
+    return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "image/png");
+  }
+
+  /* -------------------------------------------------------------------
      API PÚBLICA
      ------------------------------------------------------------------- */
   window.DB = {
@@ -761,6 +886,11 @@
     opcionesUniversidades: opcionesUniversidades,
 
     registrarInscripcionSeminario: registrarInscripcionSeminario,
+    listarInscripcionesSeminario: listarInscripcionesSeminario,
+    actualizarInscripcionSeminario: actualizarInscripcionSeminario,
+    eliminarInscripcionSeminario: eliminarInscripcionSeminario,
+    obtenerEnlaceDiapositiva: obtenerEnlaceDiapositiva,
+    enviarAvisoPostulacion: enviarAvisoPostulacion,
 
     listarVideosLsv: listarVideosLsv,
     guardarVideoLsv: guardarVideoLsv,
@@ -771,6 +901,10 @@
     subirImagenNoticia: subirImagenNoticia,
     subirVideoNoticia: subirVideoNoticia,
     obtenerConfiguracion: obtenerConfiguracion,
-    guardarConfiguracion: guardarConfiguracion
+    guardarConfiguracion: guardarConfiguracion,
+
+    obtenerContenidoSeminario: obtenerContenidoSeminario,
+    guardarContenidoSeminario: guardarContenidoSeminario,
+    subirImagenSeminario: subirImagenSeminario
   };
 })();
