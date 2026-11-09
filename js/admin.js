@@ -1086,20 +1086,36 @@
     }
   }
 
-  /* Tarjetas con el total de inscritos, ponentes y asistentes. */
+  /* Desglose de las inscripciones: lo comparten las tarjetas del panel y el
+     CSV para que ambos muestren siempre los mismos números. */
+  function desgloseSeminario() {
+    function contar(campo, codigo) {
+      return seminarioEnMemoria.filter(function (p) { return p[campo] === codigo; }).length;
+    }
+    var total = seminarioEnMemoria.length;
+    var ponentes = contar("rol", "PONENTE");
+    return [
+      { etiqueta: "Personas inscritas", singular: "persona inscrita", cantidad: total },
+      { etiqueta: "Presencial", cantidad: contar("modalidad", "PRESENCIAL") },
+      { etiqueta: "Virtual", cantidad: contar("modalidad", "VIRTUAL") },
+      { etiqueta: "Personas sordas", singular: "persona sorda", cantidad: contar("condicion", "PERSONA_SORDA") },
+      { etiqueta: "Personas oyentes", singular: "persona oyente", cantidad: contar("condicion", "PERSONA_OYENTE") },
+      { etiqueta: "Hipoacúsica / CODA / otra", cantidad: contar("condicion", "HIPOACUSICA_CODA_OTRA") },
+      { etiqueta: "Ponentes", singular: "ponente", cantidad: ponentes },
+      { etiqueta: "Asistentes", singular: "asistente", cantidad: total - ponentes }
+    ];
+  }
+
+  /* Tarjetas con el total y el desglose por modalidad, condición y rol. */
   function pintarResumenSeminario() {
     var zona = $("resumen-seminario");
     if (!zona) return;
-    var total = seminarioEnMemoria.length;
-    var ponentes = seminarioEnMemoria.filter(function (p) { return p.rol === "PONENTE"; }).length;
-    var asistentes = total - ponentes;
-    zona.innerHTML =
-      window.Sitio.tarjeta(total, total === 1 ? "persona inscrita" : "personas inscritas") +
-      window.Sitio.tarjeta(ponentes, ponentes === 1 ? "ponente" : "ponentes") +
-      window.Sitio.tarjeta(asistentes, asistentes === 1 ? "asistente" : "asistentes");
+    zona.innerHTML = desgloseSeminario().map(function (d) {
+      return window.Sitio.tarjeta(d.cantidad, d.cantidad === 1 && d.singular ? d.singular : d.etiqueta);
+    }).join("");
   }
 
-  /* Exporta todas las inscripciones a CSV (abre directo en Excel). */
+  /* Exporta el resumen y todas las inscripciones a CSV (abre directo en Excel). */
   function exportarSeminarioCsv() {
     if (!seminarioEnMemoria.length) {
       Util.aviso($("aviso-seminario-admin"), "error", "No hay inscripciones que exportar.");
@@ -1131,7 +1147,13 @@
       accesibilidad: "accesibilidad", rol: "rol", eje_tematico: "eje_tematico"
     };
 
-    var lineas = [cabeceras.map(celda).join(",")];
+    /* El archivo abre con el resumen: así se ve el conteo sin recorrer la lista. */
+    var lineas = [celda("Resumen de inscripciones") + "," + celda("Cantidad")];
+    desgloseSeminario().forEach(function (d) {
+      lineas.push(celda(d.etiqueta) + "," + celda(d.cantidad));
+    });
+    lineas.push("");
+    lineas.push(cabeceras.map(celda).join(","));
     seminarioEnMemoria.forEach(function (p) {
       var fila = claves.map(function (k) {
         return celda(traducir[k] ? etiquetaSeminario(traducir[k], p[k]) : p[k]);

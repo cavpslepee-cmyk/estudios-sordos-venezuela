@@ -317,8 +317,11 @@ La pestaña **Seminario** del panel lista **todas las personas inscritas** al se
 de contacto, condición, perfil, modalidad y accesibilidad. Quienes postularon una ponencia aparecen
 marcados como **Ponente**, con el título, el eje temático y el enlace de su video en LSV.
 
-- **Conteo a la vista:** tres tarjetas resumen muestran el **total de personas inscritas**, cuántas
-  son **ponentes** y cuántas **asistentes**. Se actualizan solas al registrar, editar o eliminar.
+- **Conteo a la vista:** ocho tarjetas resumen muestran el **total de personas inscritas**, cuántas
+  asisten **presencial** y cuántas **virtual**, cuántas son **personas sordas**, **personas oyentes** e
+  **hipoacúsica / CODA / otra**, y cuántas son **ponentes** y **asistentes**. Se actualizan solas al
+  registrar, editar o eliminar. Presencial + virtual, sordas + oyentes + otras, y ponentes + asistentes
+  suman siempre el total.
 - **Editar una inscripción:** el botón **Editar** de cada fila abre una planilla con todos los datos
   (nombre, cédula, correo, teléfono, país, ciudad, condición, perfil, modalidad, accesibilidad, rol y,
   si es ponente, título, eje y video). Guarda los cambios con **Guardar cambios** o descártalos con
@@ -330,8 +333,12 @@ marcados como **Ponente**, con el título, el eje temático y el enlace de su vi
   espacios** (ejemplo `V-12345678`). Si se escribe mal, aparece un mensaje que indica cómo corregirla.
   No se permiten dos inscripciones con la misma cédula: el sistema normaliza mayúsculas, puntos y
   espacios antes de comparar, y el índice único de la base lo respalda.
-- **Descargar todo en Excel (CSV):** el botón exporta la lista completa a un archivo `.csv` (con BOM,
-  para que Excel abra bien los acentos). Se abre directamente en Excel u otra hoja de cálculo.
+- **Descargar todo en Excel (CSV):** el botón exporta un archivo `.csv` (con BOM, para que Excel abra
+  bien los acentos) que **empieza con el mismo resumen de las tarjetas** —total, presencial, virtual,
+  sordas, oyentes, hipoacúsica / CODA / otra, ponentes y asistentes— en dos columnas (*Resumen de
+  inscripciones* / *Cantidad*). Después de una línea en blanco viene la lista completa con todos los
+  campos, y las condiciones y modalidades salen con su etiqueta legible, no con el código interno.
+  Se abre directamente en Excel u otra hoja de cálculo.
 - **Descargar diapositivas:** las diapositivas de los ponentes viven en el bucket **privado**
   `seminario-ponencias`. El botón **Diapositivas** de cada fila genera un **enlace firmado temporal**
   (válido 1 hora) y abre el archivo en otra pestaña para descargarlo. Nadie más puede ver esos archivos.
@@ -506,7 +513,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C25 | En la pestaña **Seminario**, revisar la lista de inscritos y pulsar **Descargar todo en Excel (CSV)** | Se ven los inscritos con sus datos; los ponentes salen marcados y con su ponencia. El botón baja un `.csv` que Excel abre con los acentos correctos. |
 | C26 | En la pestaña **Seminario**, pulsar **Descargar diapositivas** en la fila de un ponente | Genera un enlace firmado temporal y abre el archivo (PDF/PPTX) en otra pestaña para descargarlo. |
 | C27 | Inscribirte como **Ponente** desde `seminario.html` (con `sql/seminario.sql` ejecutado y `aviso-postulacion` desplegada) | La inscripción se registra y llegan dos correos desde tu Gmail: el agradecimiento al postulante y el aviso interno a la comisión. Si el correo falla, la inscripción queda guardada y el aviso en pantalla lo aclara. |
-| C28 | En la pestaña **Seminario**, mirar las tarjetas de resumen | Muestran el total de personas inscritas, cuántas son ponentes y cuántas asistentes. |
+| C28 | En la pestaña **Seminario**, mirar las tarjetas de resumen | Son ocho: total de personas inscritas, presencial, virtual, personas sordas, personas oyentes, hipoacúsica / CODA / otra, ponentes y asistentes. Cada desglose suma el total. |
 | C29 | Pulsar **Editar** en una fila, cambiar un dato y **Guardar cambios** | La planilla se abre con los datos de esa persona; al guardar, la lista y el conteo se actualizan. **Cancelar** cierra sin guardar. |
 | C30 | Pulsar **Eliminar** en una fila y confirmar | La inscripción desaparece de la lista y el conteo baja. Pide confirmación antes de borrar. |
 | C31 | En la planilla pública de `seminario.html`, escribir la cédula sin prefijo (`12345678`), con puntos (`V-12.345.678`) o con otra letra (`X-12345678`) | Aparece un mensaje que explica el formato correcto `V-12345678` o `E-12345678`, sin puntos ni espacios. Con el formato correcto, la inscripción procede. Lo mismo se exige al **editar** desde el panel. |
@@ -514,6 +521,7 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C33 | En la pestaña **Inicio**, cambiar el título de la portada o el objetivo y pulsar **Guardar contenido** | Al abrir `index.html` se ven los textos nuevos. **Restaurar valores por defecto** recarga los originales en el editor (sin publicar hasta que guardes). |
 | C34 | En **Inicio**, añadir/quitar una imagen de la galería, un botón del hero o una tarjeta de «Sobre este sitio», y guardar | La portada muestra la lista actualizada; las leyendas de «Sobre este sitio» y apoyos conservan sus etiquetas HTML (`<strong>`, `<a>`). Subir una imagen nueva la reemplaza (requiere Supabase conectado). |
 | C35 | En **Inicio**, subir una imagen de portada nueva y guardar | La imagen de fondo del hero cambia en `index.html`. En modo demostración el panel avisa que la subida requiere Supabase, pero los textos sí se guardan. |
+| C36 | En la pestaña **Seminario**, pulsar **Descargar todo en Excel (CSV)** y abrir el archivo | Las primeras filas traen el resumen con los mismos números de las tarjetas (presencial, virtual, sordas, oyentes, otras, ponentes, asistentes); tras una línea en blanco aparece la lista completa con los acentos correctos. |
 
 ### D. En el teléfono
 
