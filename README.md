@@ -390,6 +390,46 @@ Si todavía no has guardado nada, la página muestra los valores por defecto de 
 > En **modo demostración** puedes editar y guardar todos los textos (se guardan en el navegador), pero
 > la subida de imágenes requiere Supabase conectado; el panel te lo avisa con un mensaje claro.
 
+### Contenido editable de la página de inicio (sin tocar código)
+La pestaña **Inicio** del panel incluye un editor para cambiar **todo el contenido fijo** de la
+portada (`index.html`) y actualizarlo a diario, de manera autónoma:
+
+- **Portada (hero):** título principal, texto de presentación, **imagen de fondo** (se sube desde el
+  panel) y una lista de **botones de acción** (texto + enlace) que puedes añadir o quitar. El primer
+  botón se muestra resaltado y los siguientes en contorno blanco, como el diseño original.
+- **Anuncio del seminario:** insignia, título, texto, **afiche** (imagen subida desde el panel) con su
+  texto alternativo, y el botón con su enlace. Este bloque solo se ve cuando la pestaña Seminario está
+  activada (pestaña **Sitio**).
+- **Objetivo del sitio:** título y una lista de **párrafos** añadibles y eliminables.
+- **Títulos de las secciones automáticas:** los encabezados y subtítulos de «Investigaciones
+  destacadas», «Últimas noticias», «Censo» y «Egresados que autorizaron aparecer».
+- **Censo:** la **imagen** de la sección (subida desde el panel) con su texto alternativo y leyenda,
+  más las **tarjetas de invitación** (título, texto y botón con enlace), añadibles y eliminables.
+- **Galería «La comunidad en imágenes»:** título, subtítulo y una lista de imágenes (subidas desde el
+  panel) con su texto alternativo y leyenda.
+- **Sobre este sitio:** título y tarjetas (título, foto opcional subida desde el panel, y texto).
+- **Organizaciones que apoyan:** título, subtítulo y una lista de logos (subidos desde el panel) con
+  su texto alternativo y pie de apoyo.
+- **Pie de página:** descripción del sitio, texto de contacto y correo de recepción de trabajos.
+
+Los campos marcados como **HTML** (el texto de las tarjetas de «Sobre este sitio» y los pies de apoyo)
+admiten etiquetas como `<strong>`, `<a href="…">` y `<br>`; el resto se muestra como texto plano. Las
+imágenes se suben al bucket público `noticias` de Supabase Storage. Pulsa **Guardar contenido** para
+publicar los cambios; **Restaurar valores por defecto** vuelve a cargar los textos e imágenes
+originales en el editor (queda pendiente de guardar, no publica solo).
+
+Las secciones que **se llenan solas** no se editan aquí: los videos de portada, las investigaciones
+destacadas, las últimas noticias, los totales del censo, el listado de egresados que autorizaron
+aparecer y los contadores se gestionan en sus propias pestañas o se calculan desde la base de datos.
+
+No hace falta SQL nuevo: el contenido se guarda como un JSON en la tabla `configuracion_sitio`
+(clave `inicio_contenido`), que ya tiene lectura pública y escritura solo para el administrador.
+Si todavía no has guardado nada, la portada muestra los valores por defecto de `js/datos-demo.js`
+(`INICIO_CONTENIDO_DEFECTO`), que también sirven de fallback.
+
+> En **modo demostración** puedes editar y guardar todos los textos (se guardan en el navegador), pero
+> la subida de imágenes requiere Supabase conectado; el panel te lo avisa con un mensaje claro.
+
 ---
 
 ## Guion de pruebas recomendado
@@ -471,6 +511,9 @@ Haz estas pruebas en orden, antes de compartir la dirección. Anota al lado de c
 | C30 | Pulsar **Eliminar** en una fila y confirmar | La inscripción desaparece de la lista y el conteo baja. Pide confirmación antes de borrar. |
 | C31 | En la planilla pública de `seminario.html`, escribir la cédula sin prefijo (`12345678`), con puntos (`V-12.345.678`) o con otra letra (`X-12345678`) | Aparece un mensaje que explica el formato correcto `V-12345678` o `E-12345678`, sin puntos ni espacios. Con el formato correcto, la inscripción procede. Lo mismo se exige al **editar** desde el panel. |
 | C32 | En el editor de **Contenido de la página del seminario**, cambiar el título o el lema, añadir/quitar un eje y pulsar **Guardar contenido** | Al abrir `seminario.html` se ven los textos nuevos y la lista de ejes actualizada. **Restaurar valores por defecto** vuelve a cargar los originales en el editor (sin publicar hasta que guardes). Subir un afiche o logo nuevo lo reemplaza (requiere Supabase conectado). |
+| C33 | En la pestaña **Inicio**, cambiar el título de la portada o el objetivo y pulsar **Guardar contenido** | Al abrir `index.html` se ven los textos nuevos. **Restaurar valores por defecto** recarga los originales en el editor (sin publicar hasta que guardes). |
+| C34 | En **Inicio**, añadir/quitar una imagen de la galería, un botón del hero o una tarjeta de «Sobre este sitio», y guardar | La portada muestra la lista actualizada; las leyendas de «Sobre este sitio» y apoyos conservan sus etiquetas HTML (`<strong>`, `<a>`). Subir una imagen nueva la reemplaza (requiere Supabase conectado). |
+| C35 | En **Inicio**, subir una imagen de portada nueva y guardar | La imagen de fondo del hero cambia en `index.html`. En modo demostración el panel avisa que la subida requiere Supabase, pero los textos sí se guardan. |
 
 ### D. En el teléfono
 
@@ -511,11 +554,20 @@ segunda es la figura de la sección del censo y la tercera es el logo de la cabe
 favicon. Si prefieres usar otras tuyas, cambia el nombre en `index.html` (las dos primeras)
 o en las seis páginas `.html` (el logo y el favicon).
 
+> Las imágenes de la portada (fondo del hero, figura del censo, galería, «Sobre este sitio» y logos
+> de apoyo) también puedes **subirlas desde la pestaña Inicio** del panel, sin renombrar archivos ni
+> tocar código: se guardan en Supabase Storage y la portada las toma de ahí.
+
 ### Cambiar los textos fijos
 
-- El objetivo del sitio y la descripción de las secciones están en cada archivo `.html`.
+- **En la portada (`index.html`)** ya no hace falta tocar código: el objetivo, los títulos de las
+  secciones, la galería, «Sobre este sitio», los apoyos y el pie se editan desde la pestaña **Inicio**
+  del panel (ver «Contenido editable de la página de inicio»). Lo mismo aplica a `seminario.html`
+  desde la pestaña **Seminario**.
+- En las **demás páginas** (`.html`), los textos fijos siguen estando en cada archivo.
 - El correo de recepción está en `js/config.js` (`CORREO_RECEPCION`) y escrito también en
-  `enviar-trabajo.html` y en el pie de página de todas las páginas.
+  `enviar-trabajo.html` y en el pie de página de todas las páginas. El de la portada puede
+  actualizarse además desde la pestaña **Inicio**.
 - Las categorías y los estados de Venezuela están en `js/config.js`. Si cambias las categorías,
   debes cambiarlas también en el archivo SQL (son un tipo enumerado de la base de datos).
 

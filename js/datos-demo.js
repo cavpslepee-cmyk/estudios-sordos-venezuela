@@ -447,3 +447,150 @@ window.SEMINARIO_CONTENIDO_DEFECTO = {
     ]
   }
 };
+
+/* =====================================================================
+   CONTENIDO EDITABLE DE LA PÁGINA DE INICIO (index.html)
+   ---------------------------------------------------------------------
+   Valores por defecto del editor de portada del panel. El administrador
+   los cambia desde la pestaña «Inicio»; se guardan como JSON en
+   configuracion_sitio (clave inicio_contenido). Los campos de texto plano
+   se escapan al renderizar; los marcados como HTML admiten etiquetas
+   (<strong>, <a>, <br>). Sirven también de fallback si no hay nada guardado.
+   ===================================================================== */
+window.INICIO_CONTENIDO_DEFECTO = {
+  hero: {
+    titulo: "La investigación hecha por personas sordas también se publica",
+    subtitulo: "Repositorio abierto de trabajos de investigación en educación, lingüística, deporte, área social, cultural, comunitaria, política, arte y biografías de personas sordas destacadas. Información útil para personas sordas y oyentes.",
+    imagen_url: "img/portada-universidad-lsv.jpeg",
+    botones: [
+      { texto: "Ver las investigaciones", url: "investigaciones.html" },
+      { texto: "Registrarme en el censo", url: "censo.html" },
+      { texto: "Enviar mi trabajo en PDF", url: "enviar-trabajo.html" }
+    ]
+  },
+  objetivo: {
+    titulo: "Objetivo de Estudios Sordos de Venezuela",
+    parrafos: [
+      "Visibilizar los trabajos realizados por personas sordas a nivel de educación universitaria y determinar la cantidad de egresados en la actualidad.",
+      "Cada trabajo de investigación publicado aquí beneficia tanto a la comunidad sorda como a las personas oyentes que necesitan información confiable sobre lengua de señas venezolana, educación de personas sordas, accesibilidad y vida comunitaria. El censo permite que la cifra real de profesionales sordos egresados deje de ser invisible: crece sola cada vez que alguien completa el formulario."
+    ]
+  },
+  secciones: {
+    investigaciones_titulo: "Investigaciones destacadas",
+    investigaciones_subtitulo: "Trabajos seleccionados por su aporte a la comunidad sorda venezolana.",
+    noticias_titulo: "Últimas noticias",
+    noticias_subtitulo: "Novedades para la comunidad sorda, en texto escrito y con video o imagen cuando corresponde.",
+    censo_titulo: "Censo de profesionales sordos egresados",
+    censo_subtitulo: "Registro abierto y permanente. Los datos personales no se publican: solo se muestran los totales.",
+    egresados_titulo: "Profesionales sordos que autorizaron aparecer aquí",
+    egresados_subtitulo: "Solo se listan quienes marcaron la casilla de autorización en el censo."
+  },
+  censo_figura: {
+    imagen_url: "img/profesionales-sordos.jpg",
+    imagen_alt: "Una mujer y un hombre conversan en lengua de señas venezolana frente a cámaras y luces durante una grabación en estudio",
+    caption: "Grabación de contenidos en lengua de señas venezolana: así se documentan las señas del diccionario de este sitio."
+  },
+  censo_tarjetas: [
+    {
+      titulo: "¿Eres una persona sorda egresada de la universidad?",
+      texto: "Regístrate en el censo. Toma menos de cinco minutos y ayuda a que la comunidad conozca cuántos profesionales sordos hay en Venezuela y en qué áreas se desempeñan.",
+      boton_texto: "Completar el formulario",
+      boton_url: "censo.html"
+    },
+    {
+      titulo: "¿Tienes un trabajo de investigación?",
+      texto: "Envía tu investigación en PDF para su revisión y publicación. Se aceptan trabajos en educación, lingüística, deporte, área social, cultural, comunitaria, política, arte y biografías de personas sordas destacadas.",
+      boton_texto: "Cómo enviarlo",
+      boton_url: "enviar-trabajo.html"
+    }
+  ],
+  galeria: {
+    titulo: "La comunidad en imágenes",
+    subtitulo: "Defensas, seminarios, grabaciones y encuentros que sostienen este proyecto.",
+    items: [
+      {
+        imagen_url: "img/javier-ramirez-defensa.jpg",
+        imagen_alt: "El Dr. Javier Ramírez González, con gafas e implante coclear, revisa páginas impresas de un trabajo de grado sentado ante una mesa con computadoras",
+        caption: "El Dr. Javier Ramírez González, creador de este sitio, en una defensa de trabajo de grado."
+      },
+      {
+        imagen_url: "img/primeros-doctores-sordos.jpg",
+        imagen_alt: "Una mujer y un hombre se comunican en lengua de señas frente a frente bajo una luz de estudio",
+        caption: "Yuliana Carreño y Javier Ramírez, primeros doctores sordos de Venezuela."
+      },
+      {
+        imagen_url: "img/myriam-anzola-tarima.jpg",
+        imagen_alt: "Un hombre señea en tarima junto a una mujer de camisa blanca, bajo un arco de globos azules",
+        caption: "La Dra. Myriam Anzola en calidad de ponente en seminario nacional de las Comunidades de Aprendizaje LSV y Cultura Sorda de la UNESR, Caracas, lugar Asociación de Sordos Caracas."
+      },
+      {
+        imagen_url: "img/seminario-nacional-grupo.jpg",
+        imagen_alt: "Un grupo de quince personas posa sonriendo bajo un arco de globos azules y dorados",
+        caption: "Participantes de un seminario nacional de la comunidad sorda."
+      },
+      {
+        imagen_url: "img/seminario-ponencia-senas.jpg",
+        imagen_alt: "Un hombre señea de pie frente a una pantalla proyectada con diapositivas sobre inteligencia artificial",
+        caption: "Ponencia en lengua de señas en un seminario del IAET."
+      },
+      {
+        imagen_url: "img/exposicion-privacion-linguistica.jpg",
+        imagen_alt: "Un hombre señea en tarima junto a una diapositiva que compara sordos sin privación lingüística con sordos con privación lingüística",
+        caption: "Exposición de una investigación sobre privación lingüística en la persona sorda."
+      }
+    ]
+  },
+  sobre: {
+    titulo: "Sobre este sitio",
+    tarjetas: [
+      {
+        titulo: "Autoría",
+        imagen_url: "img/autor-javier-ramirez.jpg",
+        imagen_alt: "El Dr. Javier Ramírez González, autor de este sitio, señea con ambos brazos extendidos frente a un fondo gris",
+        texto: "Estudios Sordos de Venezuela es una página creada por el <strong>Dr. Javier Ramírez González</strong>, investigador en educación de personas sordas y en lingüística de la Lengua de Señas Venezolana."
+      },
+      {
+        titulo: "Acceso libre",
+        imagen_url: "",
+        imagen_alt: "",
+        texto: "La web es abierta: todo el contenido es de lectura pública y no requiere registro ni pago para consultar las investigaciones o el diccionario de señas."
+      },
+      {
+        titulo: "Fuente de referencia",
+        imagen_url: "",
+        imagen_alt: "",
+        texto: 'Este proyecto toma como referencia el trabajo de difusión de <a href="https://www.cultura-sorda.org/" target="_blank" rel="noopener noreferrer">cultura-sorda.org</a>, portal internacional de estudios sordos.'
+      }
+    ]
+  },
+  apoyos: {
+    titulo: "Organizaciones que apoyan este sitio",
+    subtitulo: "Colectivos de personas sordas que respaldan y enriquecen este proyecto.",
+    items: [
+      {
+        logo_url: "img/iaet-logo.png",
+        logo_alt: "Logotipo del IAET: las letras IAET en turquesa junto a un círculo formado por cuadros turquesas y verdes",
+        caption: "<strong>IAET.</strong> Organización que apoya esta página web y el I Seminario Nacional de Actualización Pedagógica en LSV."
+      },
+      {
+        logo_url: "img/instructores-lsv-venezuela.jpg",
+        logo_alt: "Logotipo de Instructores LSV Venezuela: dos manos señando dentro de un círculo con los colores de la bandera venezolana",
+        caption: "<strong>Instructores LSV Venezuela.</strong> Grupo de personas sordas instructoras de Lengua de Señas Venezolana que apoya esta página web."
+      }
+    ]
+  },
+  seminario_teaser: {
+    insignia: "¡Muy pronto!",
+    titulo: "I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana",
+    texto: "«Sordedad, Ganancia Sorda e Innovación Didáctica» · Modalidad híbrida: presencial en Caracas y en vivo por YouTube, con accesibilidad en Sistema de Señas Internacional (SSI).",
+    flyer_url: "img/flyer-seminario-lsv.png",
+    flyer_alt: "Afiche del I Seminario Nacional de Actualización Pedagógica en Lengua de Señas Venezolana con sus cinco ejes temáticos, la modalidad híbrida y el portal web oficial",
+    boton_texto: "Ver el programa e inscribirme",
+    boton_url: "seminario.html"
+  },
+  pie: {
+    descripcion: "Espacio abierto para visibilizar la producción académica de las personas sordas venezolanas y para contar cuántas han egresado de la educación universitaria.",
+    contacto_texto: "Recepción de trabajos en PDF:",
+    contacto_correo: "cavpslepee@gmail.com"
+  }
+};

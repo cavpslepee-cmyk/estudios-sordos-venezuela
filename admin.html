@@ -117,6 +117,10 @@
                 aria-controls="panel-seminario" aria-selected="false" tabindex="-1" data-panel="panel-seminario">
           Seminario
         </button>
+        <button class="pestanya" type="button" role="tab" id="pestanya-inicio"
+                aria-controls="panel-inicio" aria-selected="false" tabindex="-1" data-panel="panel-inicio">
+          Inicio
+        </button>
         <button class="pestanya" type="button" role="tab" id="pestanya-correos"
                 aria-controls="panel-correos" aria-selected="false" tabindex="-1" data-panel="panel-correos">
           Correos masivos
@@ -767,6 +771,215 @@
 
             <p>
               <button class="boton" type="submit" id="boton-guardar-contenido">Guardar contenido</button>
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <!-- ---------- INICIO (PORTADA) ---------- -->
+      <div class="panel" id="panel-inicio" role="tabpanel" aria-labelledby="pestanya-inicio" hidden>
+        <div id="aviso-inicio-admin" class="aviso" hidden></div>
+
+        <div class="panel-tarjeta">
+          <div class="panel-cabecera">
+            <h2>Contenido de la página de inicio</h2>
+            <button class="boton boton-contorno boton-chico" type="button" id="boton-restaurar-contenido-inicio">
+              Restaurar valores por defecto
+            </button>
+          </div>
+          <p class="texto-suave texto-chico">
+            Cambia aquí los títulos, textos e imágenes que ve el público en la portada
+            (<code>index.html</code>). Los campos marcados como <strong>HTML</strong> admiten etiquetas
+            como <code>&lt;strong&gt;</code>, <code>&lt;a href="…"&gt;</code> y <code>&lt;br&gt;</code>;
+            el resto se muestra como texto plano. Las imágenes se suben desde aquí y se guardan en
+            Supabase. Las secciones que se llenan solas (videos, investigaciones destacadas, noticias,
+            totales del censo y listado de egresados) no se editan aquí: se gestionan en sus propias
+            pestañas. Pulsa <strong>Guardar contenido</strong> para publicar los cambios.
+          </p>
+
+          <form id="formulario-contenido-inicio" novalidate>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Portada (hero): título, texto e imagen de fondo</legend>
+              <div class="campo">
+                <label for="ini-hero-titulo">Título principal</label>
+                <input type="text" id="ini-hero-titulo" maxlength="240">
+              </div>
+              <div class="campo">
+                <label for="ini-hero-subtitulo">Texto de presentación</label>
+                <textarea id="ini-hero-subtitulo" rows="4" maxlength="1200"></textarea>
+              </div>
+              <div class="campo">
+                <label for="ini-hero-imagen-archivo">Imagen de fondo (imagen)</label>
+                <input type="file" id="ini-hero-imagen-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">
+                <input type="hidden" id="ini-hero-imagen-url">
+                <span class="ayuda">Sube una imagen para reemplazar la portada actual. Si no subes ninguna, se conserva la existente.</span>
+                <img id="ini-hero-imagen-preview" alt="Vista previa de la imagen de portada" style="max-width:240px;margin-top:.6rem;display:block">
+              </div>
+              <div id="editor-ini-hero-botones"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-hero-boton">Añadir botón</button>
+              <span class="ayuda">El primer botón se muestra resaltado; los siguientes, en contorno blanco.</span>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Anuncio del seminario en la portada</legend>
+              <p class="texto-suave texto-chico">
+                Este bloque solo se ve cuando la pestaña Seminario está activada (pestaña «Sitio»).
+              </p>
+              <div class="campo">
+                <label for="ini-sem-insignia">Insignia superior</label>
+                <input type="text" id="ini-sem-insignia" maxlength="60" placeholder="¡Muy pronto!">
+              </div>
+              <div class="campo">
+                <label for="ini-sem-titulo">Título del anuncio</label>
+                <input type="text" id="ini-sem-titulo" maxlength="240">
+              </div>
+              <div class="campo">
+                <label for="ini-sem-texto">Texto del anuncio</label>
+                <textarea id="ini-sem-texto" rows="3" maxlength="800"></textarea>
+              </div>
+              <div class="campo">
+                <label for="ini-sem-flyer-archivo">Afiche (imagen)</label>
+                <input type="file" id="ini-sem-flyer-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">
+                <input type="hidden" id="ini-sem-flyer-url">
+                <img id="ini-sem-flyer-preview" alt="Vista previa del afiche" style="max-width:240px;margin-top:.6rem;display:block">
+              </div>
+              <div class="campo">
+                <label for="ini-sem-flyer-alt">Descripción del afiche (texto alternativo)</label>
+                <input type="text" id="ini-sem-flyer-alt" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="ini-sem-boton-texto">Texto del botón</label>
+                <input type="text" id="ini-sem-boton-texto" maxlength="80">
+              </div>
+              <div class="campo">
+                <label for="ini-sem-boton-url">Enlace del botón</label>
+                <input type="text" id="ini-sem-boton-url" maxlength="300" placeholder="seminario.html">
+              </div>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Objetivo del sitio</legend>
+              <div class="campo">
+                <label for="ini-objetivo-titulo">Título de la sección</label>
+                <input type="text" id="ini-objetivo-titulo" maxlength="160">
+              </div>
+              <div id="editor-ini-objetivo-parrafos"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-objetivo-parrafo">Añadir párrafo</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Títulos de las secciones automáticas</legend>
+              <div class="campo">
+                <label for="ini-sec-investigaciones-titulo">Investigaciones destacadas — título</label>
+                <input type="text" id="ini-sec-investigaciones-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-investigaciones-subtitulo">Investigaciones destacadas — subtítulo</label>
+                <input type="text" id="ini-sec-investigaciones-subtitulo" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-noticias-titulo">Últimas noticias — título</label>
+                <input type="text" id="ini-sec-noticias-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-noticias-subtitulo">Últimas noticias — subtítulo</label>
+                <input type="text" id="ini-sec-noticias-subtitulo" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-censo-titulo">Censo — título</label>
+                <input type="text" id="ini-sec-censo-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-censo-subtitulo">Censo — subtítulo</label>
+                <input type="text" id="ini-sec-censo-subtitulo" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-egresados-titulo">Egresados que autorizaron aparecer — título</label>
+                <input type="text" id="ini-sec-egresados-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-sec-egresados-subtitulo">Egresados que autorizaron aparecer — subtítulo</label>
+                <input type="text" id="ini-sec-egresados-subtitulo" maxlength="300">
+              </div>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Censo: imagen y tarjetas de invitación</legend>
+              <div class="campo">
+                <label for="ini-censo-imagen-archivo">Imagen de la sección (imagen)</label>
+                <input type="file" id="ini-censo-imagen-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">
+                <input type="hidden" id="ini-censo-imagen-url">
+                <img id="ini-censo-imagen-preview" alt="Vista previa de la imagen del censo" style="max-width:240px;margin-top:.6rem;display:block">
+              </div>
+              <div class="campo">
+                <label for="ini-censo-imagen-alt">Descripción de la imagen (texto alternativo)</label>
+                <input type="text" id="ini-censo-imagen-alt" maxlength="300">
+              </div>
+              <div class="campo">
+                <label for="ini-censo-caption">Leyenda de la imagen</label>
+                <textarea id="ini-censo-caption" rows="2" maxlength="500"></textarea>
+              </div>
+              <div id="editor-ini-censo-tarjetas"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-censo-tarjeta">Añadir tarjeta</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Galería: la comunidad en imágenes</legend>
+              <div class="campo">
+                <label for="ini-galeria-titulo">Título de la sección</label>
+                <input type="text" id="ini-galeria-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-galeria-subtitulo">Subtítulo</label>
+                <input type="text" id="ini-galeria-subtitulo" maxlength="300">
+              </div>
+              <div id="editor-ini-galeria"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-galeria">Añadir imagen</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Sobre este sitio</legend>
+              <div class="campo">
+                <label for="ini-sobre-titulo">Título de la sección</label>
+                <input type="text" id="ini-sobre-titulo" maxlength="160">
+              </div>
+              <div id="editor-ini-sobre"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-sobre">Añadir tarjeta</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Organizaciones que apoyan</legend>
+              <div class="campo">
+                <label for="ini-apoyos-titulo">Título de la sección</label>
+                <input type="text" id="ini-apoyos-titulo" maxlength="160">
+              </div>
+              <div class="campo">
+                <label for="ini-apoyos-subtitulo">Subtítulo</label>
+                <input type="text" id="ini-apoyos-subtitulo" maxlength="300">
+              </div>
+              <div id="editor-ini-apoyos"></div>
+              <button class="boton boton-contorno boton-chico" type="button" id="boton-add-ini-apoyo">Añadir organización</button>
+            </fieldset>
+
+            <fieldset class="conjunto-opciones">
+              <legend>Pie de página</legend>
+              <div class="campo">
+                <label for="ini-pie-descripcion">Descripción del sitio</label>
+                <textarea id="ini-pie-descripcion" rows="3" maxlength="600"></textarea>
+              </div>
+              <div class="campo">
+                <label for="ini-pie-contacto-texto">Texto de contacto</label>
+                <input type="text" id="ini-pie-contacto-texto" maxlength="160" placeholder="Recepción de trabajos en PDF:">
+              </div>
+              <div class="campo">
+                <label for="ini-pie-contacto-correo">Correo de contacto</label>
+                <input type="text" id="ini-pie-contacto-correo" maxlength="160" placeholder="cavpslepee@gmail.com">
+              </div>
+            </fieldset>
+
+            <p>
+              <button class="boton" type="submit" id="boton-guardar-contenido-inicio">Guardar contenido</button>
             </p>
           </form>
         </div>

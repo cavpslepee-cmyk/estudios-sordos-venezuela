@@ -786,16 +786,18 @@
   }
 
   /* -------------------------------------------------------------------
-     CONTENIDO EDITABLE DE LA PÁGINA DEL SEMINARIO
+     CONTENIDO EDITABLE DE LAS PÁGINAS (SEMINARIO E INICIO)
+     Helpers genéricos de clonado y fusión reutilizados por ambas páginas.
      ------------------------------------------------------------------- */
-  function clonarContenidoSeminario(obj) {
+  function clonarContenido(obj) {
     return JSON.parse(JSON.stringify(obj || {}));
   }
 
   /* Combina los valores por defecto con lo guardado: conserva la forma de
      los defaults y rellena con lo que el administrador haya cambiado. Las
-     listas (ejes, comité, pasos, apoyos) se toman tal cual las guardó. */
-  function fusionarContenidoSeminario(base, extra) {
+     listas (ejes, comité, botones, tarjetas, galería…) se toman tal cual
+     las guardó el administrador. */
+  function fusionarContenido(base, extra) {
     if (Array.isArray(base)) {
       return Array.isArray(extra) ? extra : base.slice();
     }
@@ -807,7 +809,7 @@
         if (Array.isArray(b)) {
           salida[k] = Array.isArray(e) ? e : b.slice();
         } else if (b && typeof b === "object") {
-          salida[k] = fusionarContenidoSeminario(b, e || {});
+          salida[k] = fusionarContenido(b, e || {});
         } else {
           salida[k] = (e === undefined || e === null) ? b : e;
         }
@@ -824,11 +826,11 @@
       var config = await obtenerConfiguracion();
       crudo = config.seminario_contenido;
     } catch (e) { crudo = null; }
-    if (!crudo) return clonarContenidoSeminario(porDefecto);
+    if (!crudo) return clonarContenido(porDefecto);
     try {
-      return fusionarContenidoSeminario(porDefecto, JSON.parse(crudo));
+      return fusionarContenido(porDefecto, JSON.parse(crudo));
     } catch (e) {
-      return clonarContenidoSeminario(porDefecto);
+      return clonarContenido(porDefecto);
     }
   }
 
@@ -839,6 +841,36 @@
   /* Las imágenes del seminario (afiche, logos) van al bucket público de
      noticias, igual que las imágenes de las noticias. */
   async function subirImagenSeminario(archivo) {
+    return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "image/png");
+  }
+
+  /* -------------------------------------------------------------------
+     CONTENIDO EDITABLE DE LA PÁGINA DE INICIO
+     Mismo patrón que el seminario: JSON en configuracion_sitio bajo la
+     clave "inicio_contenido". Sin tabla nueva ni SQL adicional.
+     ------------------------------------------------------------------- */
+  async function obtenerContenidoInicio() {
+    var porDefecto = window.INICIO_CONTENIDO_DEFECTO || {};
+    var crudo = null;
+    try {
+      var config = await obtenerConfiguracion();
+      crudo = config.inicio_contenido;
+    } catch (e) { crudo = null; }
+    if (!crudo) return clonarContenido(porDefecto);
+    try {
+      return fusionarContenido(porDefecto, JSON.parse(crudo));
+    } catch (e) {
+      return clonarContenido(porDefecto);
+    }
+  }
+
+  async function guardarContenidoInicio(obj) {
+    return guardarConfiguracion("inicio_contenido", JSON.stringify(obj || {}));
+  }
+
+  /* Las imágenes del inicio (portada, galería, logos) van al mismo bucket
+     público de noticias que las del seminario. */
+  async function subirImagenInicio(archivo) {
     return subirAlBucket(cfg.BUCKET_NOTICIAS, archivo, "image/png");
   }
 
@@ -905,6 +937,10 @@
 
     obtenerContenidoSeminario: obtenerContenidoSeminario,
     guardarContenidoSeminario: guardarContenidoSeminario,
-    subirImagenSeminario: subirImagenSeminario
+    subirImagenSeminario: subirImagenSeminario,
+
+    obtenerContenidoInicio: obtenerContenidoInicio,
+    guardarContenidoInicio: guardarContenidoInicio,
+    subirImagenInicio: subirImagenInicio
   };
 })();

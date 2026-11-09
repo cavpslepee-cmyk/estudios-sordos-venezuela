@@ -1541,6 +1541,371 @@
   }
 
   /* =====================================================================
+     INICIO: EDITOR DEL CONTENIDO DE LA PORTADA (index.html)
+     ===================================================================== */
+
+  var contenidoInicioActual = null;
+
+  /* Sube la imagen solo si el administrador eligió un archivo nuevo; si no,
+     conserva la URL ya guardada. Reutilizado por la portada, el afiche, la
+     imagen del censo y cada fila de galería, "sobre" y apoyos. */
+  async function imagenInicio(archivoInput, urlInput, aviso, mensaje) {
+    var archivo = archivoInput.files[0];
+    if (!archivo) return urlInput.value || "";
+    Util.aviso(aviso, "", mensaje);
+    return await window.DB.subirImagenInicio(archivo);
+  }
+
+  /* --- Filas repetibles --- */
+
+  function filaIniHeroBoton(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Texto del botón</label>' +
+        '<input type="text" class="ini-hero-boton-texto" maxlength="80" value="' + esc(item.texto || "") + '"></div>' +
+      '<div class="campo"><label>Enlace del botón</label>' +
+        '<input type="text" class="ini-hero-boton-url" maxlength="300" value="' + esc(item.url || "") + '"></div>' +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaIniObjetivoParrafo(texto) {
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Párrafo</label>' +
+        '<textarea class="ini-objetivo-parrafo" rows="3" maxlength="1200">' + esc(texto || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaIniCensoTarjeta(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Título de la tarjeta</label>' +
+        '<input type="text" class="ini-censo-titulo" maxlength="160" value="' + esc(item.titulo || "") + '"></div>' +
+      '<div class="campo"><label>Texto de la tarjeta</label>' +
+        '<textarea class="ini-censo-texto" rows="3" maxlength="800">' + esc(item.texto || "") + "</textarea></div>" +
+      '<div class="campo"><label>Texto del botón</label>' +
+        '<input type="text" class="ini-censo-boton-texto" maxlength="80" value="' + esc(item.boton_texto || "") + '"></div>' +
+      '<div class="campo"><label>Enlace del botón</label>' +
+        '<input type="text" class="ini-censo-boton-url" maxlength="300" value="' + esc(item.boton_url || "") + '"></div>' +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    return div;
+  }
+
+  function filaIniGaleria(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<input type="hidden" class="ini-galeria-url" value="' + esc(item.imagen_url || "") + '">' +
+      '<div class="campo"><label>Imagen (imagen)</label>' +
+        '<input type="file" class="ini-galeria-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">' +
+        '<img class="ini-galeria-preview" alt="Vista previa de la imagen" src="' + esc(item.imagen_url || "") +
+          '" style="max-width:160px;margin-top:.5rem;display:block"></div>' +
+      '<div class="campo"><label>Descripción de la imagen (texto alternativo)</label>' +
+        '<input type="text" class="ini-galeria-alt" maxlength="300" value="' + esc(item.imagen_alt || "") + '"></div>' +
+      '<div class="campo"><label>Leyenda de la imagen</label>' +
+        '<textarea class="ini-galeria-caption" rows="2" maxlength="500">' + esc(item.caption || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    div.querySelector(".ini-galeria-archivo").addEventListener("change", function () {
+      if (this.files[0]) div.querySelector(".ini-galeria-preview").src = URL.createObjectURL(this.files[0]);
+    });
+    return div;
+  }
+
+  function filaIniSobre(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<div class="campo"><label>Título de la tarjeta</label>' +
+        '<input type="text" class="ini-sobre-titulo" maxlength="160" value="' + esc(item.titulo || "") + '"></div>' +
+      '<input type="hidden" class="ini-sobre-url" value="' + esc(item.imagen_url || "") + '">' +
+      '<div class="campo"><label>Foto (imagen, opcional)</label>' +
+        '<input type="file" class="ini-sobre-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">' +
+        '<img class="ini-sobre-preview" alt="Vista previa de la foto" src="' + esc(item.imagen_url || "") +
+          '" style="max-width:160px;margin-top:.5rem;display:block"></div>' +
+      '<div class="campo"><label>Descripción de la foto (texto alternativo)</label>' +
+        '<input type="text" class="ini-sobre-alt" maxlength="300" value="' + esc(item.imagen_alt || "") + '"></div>' +
+      '<div class="campo"><label>Texto de la tarjeta (admite HTML)</label>' +
+        '<textarea class="ini-sobre-texto" rows="3" maxlength="1000">' + esc(item.texto || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    div.querySelector(".ini-sobre-archivo").addEventListener("change", function () {
+      if (this.files[0]) div.querySelector(".ini-sobre-preview").src = URL.createObjectURL(this.files[0]);
+    });
+    return div;
+  }
+
+  function filaIniApoyo(item) {
+    item = item || {};
+    var div = document.createElement("div");
+    div.className = "editor-fila";
+    div.innerHTML =
+      '<input type="hidden" class="ini-apoyo-url" value="' + esc(item.logo_url || "") + '">' +
+      '<div class="campo"><label>Logo de la organización (imagen)</label>' +
+        '<input type="file" class="ini-apoyo-archivo" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp">' +
+        '<img class="ini-apoyo-preview" alt="Vista previa del logo" src="' + esc(item.logo_url || "") +
+          '" style="max-width:160px;margin-top:.5rem;display:block"></div>' +
+      '<div class="campo"><label>Descripción del logo (texto alternativo)</label>' +
+        '<input type="text" class="ini-apoyo-alt" maxlength="300" value="' + esc(item.logo_alt || "") + '"></div>' +
+      '<div class="campo"><label>Texto de apoyo (admite HTML)</label>' +
+        '<textarea class="ini-apoyo-caption" rows="2" maxlength="600">' + esc(item.caption || "") + "</textarea></div>" +
+      '<button class="boton boton-chico boton-peligro editor-quitar" type="button">Quitar</button>';
+    div.querySelector(".ini-apoyo-archivo").addEventListener("change", function () {
+      if (this.files[0]) div.querySelector(".ini-apoyo-preview").src = URL.createObjectURL(this.files[0]);
+    });
+    return div;
+  }
+
+  function pintarListaInicio(idLista, items, fila) {
+    var zona = $(idLista);
+    zona.innerHTML = "";
+    (items || []).forEach(function (it) { zona.appendChild(fila(it)); });
+  }
+
+  /* --- Cargar el contenido guardado en el formulario --- */
+
+  async function cargarContenidoEditorInicio() {
+    try {
+      contenidoInicioActual = await window.DB.obtenerContenidoInicio();
+    } catch (error) {
+      contenidoInicioActual = window.INICIO_CONTENIDO_DEFECTO || {};
+    }
+    volcarContenidoInicioAlEditor(contenidoInicioActual);
+  }
+
+  function volcarContenidoInicioAlEditor(c) {
+    c = c || {};
+
+    var h = c.hero || {};
+    ponerCont("ini-hero-titulo", h.titulo);
+    ponerCont("ini-hero-subtitulo", h.subtitulo);
+    $("ini-hero-imagen-url").value = h.imagen_url || "";
+    $("ini-hero-imagen-preview").src = h.imagen_url || "";
+    $("ini-hero-imagen-archivo").value = "";
+    pintarListaInicio("editor-ini-hero-botones", h.botones, filaIniHeroBoton);
+
+    var st = c.seminario_teaser || {};
+    ponerCont("ini-sem-insignia", st.insignia);
+    ponerCont("ini-sem-titulo", st.titulo);
+    ponerCont("ini-sem-texto", st.texto);
+    ponerCont("ini-sem-flyer-alt", st.flyer_alt);
+    ponerCont("ini-sem-boton-texto", st.boton_texto);
+    ponerCont("ini-sem-boton-url", st.boton_url);
+    $("ini-sem-flyer-url").value = st.flyer_url || "";
+    $("ini-sem-flyer-preview").src = st.flyer_url || "";
+    $("ini-sem-flyer-archivo").value = "";
+
+    var ob = c.objetivo || {};
+    ponerCont("ini-objetivo-titulo", ob.titulo);
+    pintarListaInicio("editor-ini-objetivo-parrafos", ob.parrafos, filaIniObjetivoParrafo);
+
+    var s = c.secciones || {};
+    ponerCont("ini-sec-investigaciones-titulo", s.investigaciones_titulo);
+    ponerCont("ini-sec-investigaciones-subtitulo", s.investigaciones_subtitulo);
+    ponerCont("ini-sec-noticias-titulo", s.noticias_titulo);
+    ponerCont("ini-sec-noticias-subtitulo", s.noticias_subtitulo);
+    ponerCont("ini-sec-censo-titulo", s.censo_titulo);
+    ponerCont("ini-sec-censo-subtitulo", s.censo_subtitulo);
+    ponerCont("ini-sec-egresados-titulo", s.egresados_titulo);
+    ponerCont("ini-sec-egresados-subtitulo", s.egresados_subtitulo);
+
+    var cf = c.censo_figura || {};
+    ponerCont("ini-censo-imagen-alt", cf.imagen_alt);
+    ponerCont("ini-censo-caption", cf.caption);
+    $("ini-censo-imagen-url").value = cf.imagen_url || "";
+    $("ini-censo-imagen-preview").src = cf.imagen_url || "";
+    $("ini-censo-imagen-archivo").value = "";
+    pintarListaInicio("editor-ini-censo-tarjetas", c.censo_tarjetas, filaIniCensoTarjeta);
+
+    var g = c.galeria || {};
+    ponerCont("ini-galeria-titulo", g.titulo);
+    ponerCont("ini-galeria-subtitulo", g.subtitulo);
+    pintarListaInicio("editor-ini-galeria", g.items, filaIniGaleria);
+
+    var so = c.sobre || {};
+    ponerCont("ini-sobre-titulo", so.titulo);
+    pintarListaInicio("editor-ini-sobre", so.tarjetas, filaIniSobre);
+
+    var ap = c.apoyos || {};
+    ponerCont("ini-apoyos-titulo", ap.titulo);
+    ponerCont("ini-apoyos-subtitulo", ap.subtitulo);
+    pintarListaInicio("editor-ini-apoyos", ap.items, filaIniApoyo);
+
+    var pie = c.pie || {};
+    ponerCont("ini-pie-descripcion", pie.descripcion);
+    ponerCont("ini-pie-contacto-texto", pie.contacto_texto);
+    ponerCont("ini-pie-contacto-correo", pie.contacto_correo);
+  }
+
+  /* --- Leer el formulario y subir las imágenes nuevas --- */
+
+  async function recolectarContenidoInicio(aviso) {
+    var hero = {
+      titulo: valCont("ini-hero-titulo"),
+      subtitulo: valCont("ini-hero-subtitulo"),
+      imagen_url: await imagenInicio($("ini-hero-imagen-archivo"), $("ini-hero-imagen-url"), aviso, "Subiendo la imagen de portada…"),
+      botones: []
+    };
+    $("editor-ini-hero-botones").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var t = Util.texto(fila.querySelector(".ini-hero-boton-texto").value);
+      var u = Util.texto(fila.querySelector(".ini-hero-boton-url").value);
+      if (t || u) hero.botones.push({ texto: t, url: u });
+    });
+
+    var teaser = {
+      insignia: valCont("ini-sem-insignia"),
+      titulo: valCont("ini-sem-titulo"),
+      texto: valCont("ini-sem-texto"),
+      flyer_url: await imagenInicio($("ini-sem-flyer-archivo"), $("ini-sem-flyer-url"), aviso, "Subiendo el afiche del seminario…"),
+      flyer_alt: valCont("ini-sem-flyer-alt"),
+      boton_texto: valCont("ini-sem-boton-texto"),
+      boton_url: valCont("ini-sem-boton-url")
+    };
+
+    var objetivo = { titulo: valCont("ini-objetivo-titulo"), parrafos: [] };
+    $("editor-ini-objetivo-parrafos").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var p = Util.texto(fila.querySelector(".ini-objetivo-parrafo").value);
+      if (p) objetivo.parrafos.push(p);
+    });
+
+    var secciones = {
+      investigaciones_titulo: valCont("ini-sec-investigaciones-titulo"),
+      investigaciones_subtitulo: valCont("ini-sec-investigaciones-subtitulo"),
+      noticias_titulo: valCont("ini-sec-noticias-titulo"),
+      noticias_subtitulo: valCont("ini-sec-noticias-subtitulo"),
+      censo_titulo: valCont("ini-sec-censo-titulo"),
+      censo_subtitulo: valCont("ini-sec-censo-subtitulo"),
+      egresados_titulo: valCont("ini-sec-egresados-titulo"),
+      egresados_subtitulo: valCont("ini-sec-egresados-subtitulo")
+    };
+
+    var censoFigura = {
+      imagen_url: await imagenInicio($("ini-censo-imagen-archivo"), $("ini-censo-imagen-url"), aviso, "Subiendo la imagen del censo…"),
+      imagen_alt: valCont("ini-censo-imagen-alt"),
+      caption: valCont("ini-censo-caption")
+    };
+
+    var censoTarjetas = [];
+    $("editor-ini-censo-tarjetas").querySelectorAll(".editor-fila").forEach(function (fila) {
+      var t = Util.texto(fila.querySelector(".ini-censo-titulo").value);
+      var x = Util.texto(fila.querySelector(".ini-censo-texto").value);
+      var bt = Util.texto(fila.querySelector(".ini-censo-boton-texto").value);
+      var bu = Util.texto(fila.querySelector(".ini-censo-boton-url").value);
+      if (t || x || bt || bu) censoTarjetas.push({ titulo: t, texto: x, boton_texto: bt, boton_url: bu });
+    });
+
+    var galeria = { titulo: valCont("ini-galeria-titulo"), subtitulo: valCont("ini-galeria-subtitulo"), items: [] };
+    var filasGaleria = $("editor-ini-galeria").querySelectorAll(".editor-fila");
+    for (var a = 0; a < filasGaleria.length; a++) {
+      var fg = filasGaleria[a];
+      var gUrl = await imagenInicio(fg.querySelector(".ini-galeria-archivo"), fg.querySelector(".ini-galeria-url"), aviso, "Subiendo una imagen de la galería…");
+      var gAlt = Util.texto(fg.querySelector(".ini-galeria-alt").value);
+      var gCap = Util.texto(fg.querySelector(".ini-galeria-caption").value);
+      if (gUrl || gAlt || gCap) galeria.items.push({ imagen_url: gUrl, imagen_alt: gAlt, caption: gCap });
+    }
+
+    var sobre = { titulo: valCont("ini-sobre-titulo"), tarjetas: [] };
+    var filasSobre = $("editor-ini-sobre").querySelectorAll(".editor-fila");
+    for (var b = 0; b < filasSobre.length; b++) {
+      var fs = filasSobre[b];
+      var sTit = Util.texto(fs.querySelector(".ini-sobre-titulo").value);
+      var sUrl = await imagenInicio(fs.querySelector(".ini-sobre-archivo"), fs.querySelector(".ini-sobre-url"), aviso, "Subiendo una foto de «Sobre este sitio»…");
+      var sAlt = Util.texto(fs.querySelector(".ini-sobre-alt").value);
+      var sTex = Util.texto(fs.querySelector(".ini-sobre-texto").value);
+      if (sTit || sUrl || sTex) sobre.tarjetas.push({ titulo: sTit, imagen_url: sUrl, imagen_alt: sAlt, texto: sTex });
+    }
+
+    var apoyos = { titulo: valCont("ini-apoyos-titulo"), subtitulo: valCont("ini-apoyos-subtitulo"), items: [] };
+    var filasApoyo = $("editor-ini-apoyos").querySelectorAll(".editor-fila");
+    for (var k = 0; k < filasApoyo.length; k++) {
+      var fa = filasApoyo[k];
+      var aUrl = await imagenInicio(fa.querySelector(".ini-apoyo-archivo"), fa.querySelector(".ini-apoyo-url"), aviso, "Subiendo el logo de la organización…");
+      var aAlt = Util.texto(fa.querySelector(".ini-apoyo-alt").value);
+      var aCap = Util.texto(fa.querySelector(".ini-apoyo-caption").value);
+      if (aUrl || aAlt || aCap) apoyos.items.push({ logo_url: aUrl, logo_alt: aAlt, caption: aCap });
+    }
+
+    var pie = {
+      descripcion: valCont("ini-pie-descripcion"),
+      contacto_texto: valCont("ini-pie-contacto-texto"),
+      contacto_correo: valCont("ini-pie-contacto-correo")
+    };
+
+    return {
+      hero: hero,
+      seminario_teaser: teaser,
+      objetivo: objetivo,
+      secciones: secciones,
+      censo_figura: censoFigura,
+      censo_tarjetas: censoTarjetas,
+      galeria: galeria,
+      sobre: sobre,
+      apoyos: apoyos,
+      pie: pie
+    };
+  }
+
+  async function guardarContenidoInicioAdmin(evento) {
+    evento.preventDefault();
+    var aviso = $("aviso-inicio-admin");
+    Util.limpiarAviso(aviso);
+    var boton = $("boton-guardar-contenido-inicio");
+    boton.disabled = true;
+    boton.textContent = "Guardando…";
+    try {
+      var contenido = await recolectarContenidoInicio(aviso);
+      await window.DB.guardarContenidoInicio(contenido);
+      contenidoInicioActual = contenido;
+      volcarContenidoInicioAlEditor(contenido);
+      Util.aviso(aviso, "exito",
+        "Contenido de la portada publicado. Ya lo ve todo el público en la página de inicio.");
+    } catch (error) {
+      Util.aviso(aviso, "error", error.message);
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "Guardar contenido";
+    }
+  }
+
+  function restaurarContenidoInicio() {
+    if (!window.confirm(
+      "¿Cargar los textos e imágenes originales de la portada en el editor? Se reemplaza lo que " +
+      "tengas escrito ahora; pulsa «Guardar contenido» para publicarlos."
+    )) return;
+    contenidoInicioActual = JSON.parse(JSON.stringify(window.INICIO_CONTENIDO_DEFECTO || {}));
+    volcarContenidoInicioAlEditor(contenidoInicioActual);
+    Util.aviso($("aviso-inicio-admin"), "exito",
+      "Valores por defecto cargados en el editor. Pulsa «Guardar contenido» para publicarlos.");
+  }
+
+  function prepararEditorContenidoInicio() {
+    $("boton-add-ini-hero-boton").addEventListener("click", function () { $("editor-ini-hero-botones").appendChild(filaIniHeroBoton({})); });
+    $("boton-add-ini-objetivo-parrafo").addEventListener("click", function () { $("editor-ini-objetivo-parrafos").appendChild(filaIniObjetivoParrafo("")); });
+    $("boton-add-ini-censo-tarjeta").addEventListener("click", function () { $("editor-ini-censo-tarjetas").appendChild(filaIniCensoTarjeta({})); });
+    $("boton-add-ini-galeria").addEventListener("click", function () { $("editor-ini-galeria").appendChild(filaIniGaleria({})); });
+    $("boton-add-ini-sobre").addEventListener("click", function () { $("editor-ini-sobre").appendChild(filaIniSobre({})); });
+    $("boton-add-ini-apoyo").addEventListener("click", function () { $("editor-ini-apoyos").appendChild(filaIniApoyo({})); });
+    ["editor-ini-hero-botones", "editor-ini-objetivo-parrafos", "editor-ini-censo-tarjetas",
+     "editor-ini-galeria", "editor-ini-sobre", "editor-ini-apoyos"].forEach(conectarQuitarFilas);
+    [["ini-hero-imagen-archivo", "ini-hero-imagen-preview"],
+     ["ini-sem-flyer-archivo", "ini-sem-flyer-preview"],
+     ["ini-censo-imagen-archivo", "ini-censo-imagen-preview"]].forEach(function (par) {
+      $(par[0]).addEventListener("change", function () {
+        if (this.files[0]) $(par[1]).src = URL.createObjectURL(this.files[0]);
+      });
+    });
+    $("boton-restaurar-contenido-inicio").addEventListener("click", restaurarContenidoInicio);
+    $("formulario-contenido-inicio").addEventListener("submit", guardarContenidoInicioAdmin);
+  }
+
+  /* =====================================================================
      CORREOS MASIVOS (Gmail del sitio vía Edge Function de Supabase)
      ===================================================================== */
 
@@ -1666,6 +2031,7 @@
     await cargarCenso();
     await cargarInscripcionesSeminario();
     await cargarContenidoEditorSeminario();
+    await cargarContenidoEditorInicio();
   }
 
   function prepararPanelSitio() {
@@ -1883,6 +2249,7 @@
     $("boton-exportar-seminario").addEventListener("click", exportarSeminarioCsv);
     prepararGestionInscripciones();
     prepararEditorContenidoSeminario();
+    prepararEditorContenidoInicio();
 
     window.DB.alCambiarSesion(function () { revisarSesion(); });
 
